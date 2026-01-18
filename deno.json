@@ -1,0 +1,29 @@
+{
+  "name": "@dx/alpine-app",
+  "version": "0.0.1",
+  "license": "MIT",
+  "tasks": {
+    "check": "deno fmt --check && deno lint",
+    "run": "deno run --allow-net --allow-read --allow-env ./src/app.ts",
+    "update": "deno outdated --update --latest"
+  },
+  "imports": {
+    "@deno/dom": "jsr:@b-fuze/deno-dom@^0.1.56",
+    "@oak/oak": "jsr:@oak/oak@17.2.0",
+    "@std/dotenv": "jsr:@std/dotenv@0.225.6",
+    "@std/encoding": "jsr:@std/encoding@1.0.10",
+    "@std/fmt": "jsr:@std/fmt@1.0.8",
+    "@std/log": "jsr:@std/log@0.224.14",
+    "@std/path": "jsr:@std/path@1.1.4"
+  },
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 240,
+    "indentWidth": 2,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+  }
+}

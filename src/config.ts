@@ -11,8 +11,7 @@ export class RuntimeConfig implements IRuntimeConfig {
   public readonly production: boolean;
 
   constructor(input: Partial<AlpineAppRuntimeConfig> | undefined) {
-    // Whitelist only the keys we allow from the outside.
-    const raw = (input && typeof input === 'object') ? (input as Record<string, unknown>) : {};
+    const raw = (input && typeof input === 'object') ? input : {};
 
     this.dev = Boolean(raw.dev);
     this.production = !this.dev;

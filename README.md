@@ -42,7 +42,7 @@ await app.run();
 
 Place your HTML/CSS/JS files in the static directory (default: `./static`):
 
-```
+```shell
 your-project/
 ├── static/
 │   ├── index.html
@@ -55,6 +55,7 @@ your-project/
 ```
 
 Access files at:
+
 - `http://localhost:3000/` → `static/index.html`
 - `http://localhost:3000/pages/about` → `static/pages/about/index.html`
 - `http://localhost:3000/styles.css` → `static/styles.css`
@@ -112,7 +113,7 @@ Enable `dev: true` for:
 ## Endpoints
 
 | Path | Description |
-|------|-------------|
+| ------ | ------------- |
 | `GET /` | Serves `index.html` from static root |
 | `GET /:path*` | Serves static files or `index.html` from subdirectories |
 | `GET /alpinejs.mjs` | Alpine.js vendor proxy (esm.sh, cached in memory) |
@@ -123,11 +124,13 @@ Enable `dev: true` for:
 ## Security Features
 
 ### Bot Shield
+
 - Blocks common exploit paths (`/vendor`, `/.env`, `/wp-admin`, etc.)
 - Blocks dangerous file extensions (`.php`, `.env`, `.sql`, etc.)
 - Per-IP rate limiting (180 requests/minute)
 
 ### Security Headers (Production)
+
 - `Content-Security-Policy` (Alpine-compatible: allows `'unsafe-eval'`)
 - `Strict-Transport-Security` (HSTS, production only)
 - `X-Content-Type-Options: nosniff`
@@ -136,6 +139,7 @@ Enable `dev: true` for:
 - `Cross-Origin-Opener-Policy: same-origin`
 
 ### Path Traversal Protection
+
 - Static file paths must stay within `staticFilesPath` (enforced at config parsing)
 - URL path traversal attempts (`..`, `\`, null bytes) are blocked
 
@@ -182,6 +186,7 @@ In dev mode, the server auto-injects the hot-reload script before `</head>`.
 ## Architecture
 
 Built on [Oak](https://jsr.io/@oak/oak) with middleware for:
+
 1. **Logger** – Colored request logs
 2. **Timing** – `X-Response-Time` + `Server-Timing` headers
 3. **Security Headers** – CSP, HSTS, etc.

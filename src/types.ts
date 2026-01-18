@@ -1,6 +1,10 @@
 import type { ListenOptions } from '@oak/oak';
 
-export type Dictionary<T> = { [key: string]: T };
+export type Vendor = {
+  url: string;
+  type: string;
+  content?: string;
+}
 
 export type OakModuleConfig = {
   listenOptions?: ListenOptions;
@@ -14,6 +18,7 @@ export type AlpineAppRuntimeConfig = {
 
 export interface IRuntimeConfig extends AlpineAppRuntimeConfig {
   production: boolean;
+  vendors: Record<string, Vendor>;
 }
 
 export type AlpineAppConfig = {

@@ -6,12 +6,12 @@
   "search.exclude": {
     "**/deno.lock": true
   },
-    "cSpell.allowCompoundWords": true,
+  "cSpell.allowCompoundWords": true,
   "cSpell.ignoreRegExpList": [
     "/0x[0-9A-F]+/g"
   ],
   "cSpell.ignorePaths": [
     ".vscode",
     ".git"
-  ],
+  ]
 }

@@ -4,6 +4,7 @@ import { join } from '@std/path';
 import { DOMParser } from '@deno/dom';
 
 import type { AlpineAppState } from '../types.ts';
+import { updaterFilename } from '../services/updater.service.ts';
 
 const router: Router<AlpineAppState> = new Router<AlpineAppState>();
 const domParser = new DOMParser();
@@ -34,7 +35,7 @@ const injectUpdater = (html: string): string | null => {
   const element: HTMLDocument | null = domParser.parseFromString(html, 'text/html');
   if (element) {
     const script: Element = element.createElement('script');
-    script.setAttribute('src', 'updater.js');
+    script.setAttribute('src', updaterFilename);
     script.setAttribute('defer', '');
 
     element.head.appendChild(script);

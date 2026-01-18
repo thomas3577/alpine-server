@@ -13,5 +13,8 @@
   "cSpell.ignorePaths": [
     ".vscode",
     ".git"
+  ],
+  "cSpell.words": [
+    "alpinejs"
   ]
 }

@@ -10,6 +10,7 @@ interface IVendor {
 
 const alpinejsVersion = '3.15.4';
 
+// TODO thu: Move to config.ts
 const vendorMap: Dictionary<IVendor> = {
   '/alpinejs.mjs': {
     url: `https://esm.sh/alpinejs@${alpinejsVersion}/es2024/alpinejs.mjs`,

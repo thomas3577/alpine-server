@@ -9,6 +9,7 @@ export type OakModuleConfig = {
 export type AlpineAppRuntimeConfig = {
   dev: boolean;
   staticFilesPath: string;
+  staticExtensions: string[];
 };
 
 export interface IRuntimeConfig extends AlpineAppRuntimeConfig {

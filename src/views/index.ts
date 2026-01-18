@@ -1,8 +1,8 @@
 import type { Element, HTMLDocument } from '@deno/dom';
-
 import { Router } from '@oak/oak';
 import { join } from '@std/path';
 import { DOMParser } from '@deno/dom';
+
 import type { AlpineAppState } from '../types.ts';
 
 const router: Router<AlpineAppState> = new Router<AlpineAppState>();
@@ -11,6 +11,7 @@ const domParser = new DOMParser();
 const isPathTraversalAttempt = (path: string): boolean => {
   // Oak params are already decoded; reject any attempt to escape the static root.
   const segments = path.split('/');
+
   return segments.includes('..') || path.includes('\\') || path.includes('\0');
 };
 

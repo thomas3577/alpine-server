@@ -8,12 +8,9 @@ import { timing } from './middleware/timing.ts';
 import { securityHeaders } from './middleware/security-headers.ts';
 import { staticFileWatch } from './services/watch.service.ts';
 import { vendor } from './middleware/vendor.ts';
-
 import { RuntimeConfig } from './config.ts';
-
 import { router as updaterRouter } from './services/updater.service.ts';
 import { router as sseRouter } from './services/sse.service.ts';
-
 import view from './views/index.ts';
 
 import type { AlpineAppConfig, AlpineAppState } from './types.ts';

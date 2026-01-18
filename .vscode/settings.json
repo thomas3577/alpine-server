@@ -1,0 +1,17 @@
+{
+  "deno.enable": true,
+  "deno.config": "./deno.json",
+  "deno.internalDebug": true,
+  "editor.defaultFormatter": "denoland.vscode-deno",
+  "search.exclude": {
+    "**/deno.lock": true
+  },
+    "cSpell.allowCompoundWords": true,
+  "cSpell.ignoreRegExpList": [
+    "/0x[0-9A-F]+/g"
+  ],
+  "cSpell.ignorePaths": [
+    ".vscode",
+    ".git"
+  ],
+}

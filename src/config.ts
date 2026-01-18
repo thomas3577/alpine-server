@@ -3,7 +3,7 @@ import { resolveStaticFilesPath } from './utils.ts';
 
 import type { AlpineAppRuntimeConfig, IRuntimeConfig, Vendor } from './types.ts';
 
-const defaultStaticFilesPath = join(Deno.cwd(), 'static');
+const defaultStaticFilesPath = join(Deno.cwd(), 'public');
 
 const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt'];
 

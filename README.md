@@ -40,11 +40,11 @@ await app.run();
 
 ### Directory Structure
 
-Place your HTML/CSS/JS files in the static directory (default: `./static`):
+Place your HTML/CSS/JS files in the static directory (default: `./public`):
 
 ```shell
 your-project/
-├── static/
+├── public/
 │   ├── index.html
 │   ├── styles.css
 │   ├── app.js
@@ -56,9 +56,9 @@ your-project/
 
 Access files at:
 
-- `http://localhost:3000/` → `static/index.html`
-- `http://localhost:3000/pages/about` → `static/pages/about/index.html`
-- `http://localhost:3000/styles.css` → `static/styles.css`
+- `http://localhost:3000/` → `public/index.html`
+- `http://localhost:3000/pages/about` → `public/pages/about/index.html`
+- `http://localhost:3000/styles.css` → `public/styles.css`
 
 ## Configuration
 
@@ -80,7 +80,7 @@ type AlpineAppConfig = {
 ### Default Values
 
 - **`dev`**: `false` (production mode)
-- **`staticFilesPath`**: `./static` (resolved against `Deno.cwd()`)
+- **`staticFilesPath`**: `./public` (resolved against `Deno.cwd()`)
 - **`staticExtensions`**: `['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']`
 - **`listenOptions`**: Oak defaults (port `8000`)
 

@@ -67,8 +67,8 @@ Access files at:
 ```typescript
 type AlpineAppConfig = {
   app?: {
-    dev?: boolean;              // Enable dev mode (hot reload, verbose errors)
-    staticFilesPath?: string;   // Path to static files (relative or absolute, must be inside cwd)
+    dev?: boolean; // Enable dev mode (hot reload, verbose errors)
+    staticFilesPath?: string; // Path to static files (relative or absolute, must be inside cwd)
     staticExtensions?: string[]; // Allowed file extensions
   };
   oak?: {
@@ -112,14 +112,14 @@ Enable `dev: true` for:
 
 ## Endpoints
 
-| Path | Description |
-| ------ | ------------- |
-| `GET /` | Serves `index.html` from static root |
-| `GET /:path*` | Serves static files or `index.html` from subdirectories |
-| `GET /alpinejs.mjs` | Alpine.js vendor proxy (esm.sh, cached in memory) |
-| `GET /alpinejs.mjs.map` | Source map for Alpine.js |
-| `GET /sse` | Server-Sent Events endpoint for hot reload (dev mode) |
-| `GET /updater.js` | Hot reload client script (dev mode, localhost only) |
+| Path                    | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `GET /`                 | Serves `index.html` from static root                    |
+| `GET /:path*`           | Serves static files or `index.html` from subdirectories |
+| `GET /alpinejs.mjs`     | Alpine.js vendor proxy (esm.sh, cached in memory)       |
+| `GET /alpinejs.mjs.map` | Source map for Alpine.js                                |
+| `GET /sse`              | Server-Sent Events endpoint for hot reload (dev mode)   |
+| `GET /updater.js`       | Hot reload client script (dev mode, localhost only)     |
 
 ## Security Features
 
@@ -167,17 +167,17 @@ deno task update
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>My Alpine App</title>
-  <script type="module" src="/alpinejs.mjs"></script>
-</head>
-<body>
-  <div x-data="{ count: 0 }">
-    <button @click="count++">Increment</button>
-    <span x-text="count"></span>
-  </div>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <title>My Alpine App</title>
+    <script type="module" src="/alpinejs.mjs"></script>
+  </head>
+  <body>
+    <div x-data="{ count: 0 }">
+      <button @click="count++">Increment</button>
+      <span x-text="count"></span>
+    </div>
+  </body>
 </html>
 ```
 

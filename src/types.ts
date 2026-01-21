@@ -4,7 +4,7 @@ export type Vendor = {
   url: string;
   type: string;
   content?: string;
-}
+};
 
 export type OakModuleConfig = {
   listenOptions?: ListenOptions;

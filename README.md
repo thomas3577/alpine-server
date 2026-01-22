@@ -5,6 +5,8 @@
 [![ci](https://github.com/thomas3577/alpine-app/actions/workflows/deno.yml/badge.svg)](https://github.com/thomas3577/alpine-app/actions/workflows/deno.yml)
 [![Built with the Deno Standard Library](https://raw.githubusercontent.com/denoland/deno_std/main/badge.svg)](https://deno.land/std)
 
+> ⚠️ **EXPERIMENTAL**: This library is in early development and highly experimental. APIs may change without notice. Not recommended for production use.
+
 A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
 
 ## Features
@@ -51,7 +53,7 @@ Add custom middleware using the `use()` method. Middleware runs after system mid
 import { AlpineApp } from '@dx/alpine-app';
 
 const app = new AlpineApp({
-  oak: { listenOptions: { port: 3000 } }
+  oak: { listenOptions: { port: 3000 } },
 });
 
 // Add custom middleware
@@ -83,7 +85,7 @@ import { AlpineApp } from '@dx/alpine-app';
 import { Router } from '@oak/oak';
 
 const app = new AlpineApp({
-  oak: { listenOptions: { port: 3000 } }
+  oak: { listenOptions: { port: 3000 } },
 });
 
 // Create a router with API endpoints
@@ -284,6 +286,7 @@ In dev mode, the server auto-injects the hot-reload script before `</head>`.
 Registers custom middleware that runs after system middlewares but before routes.
 
 **Parameters:**
+
 - `middleware` – Oak middleware function `(ctx, next) => Promise<void>`
 
 **Returns:** `this` (chainable)
@@ -293,6 +296,7 @@ Registers custom middleware that runs after system middlewares but before routes
 Appends an Oak Router to the application. Routes are registered after middlewares but before internal routes.
 
 **Parameters:**
+
 - `router` – Oak `Router` instance
 
 **Returns:** `this` (chainable)

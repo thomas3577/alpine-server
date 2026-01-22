@@ -60,9 +60,10 @@ Deno.test('vendor', async (t) => {
     const ctx = createMockContext('/other.js', vendors);
     let nextCalled = false;
 
-    await vendor(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await vendor(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
     assertEquals(ctx.response.body, null);

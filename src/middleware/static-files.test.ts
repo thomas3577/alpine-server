@@ -27,9 +27,10 @@ Deno.test('staticFiles', async (t) => {
     const ctx = createMockContext('/api/data', ['.html', '.css', '.js']);
     let nextCalled = false;
 
-    await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await staticFiles(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
   });
@@ -38,9 +39,10 @@ Deno.test('staticFiles', async (t) => {
     const ctx = createMockContext('/', ['.html', '.css', '.js']);
     let nextCalled = false;
 
-    await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await staticFiles(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
   });
@@ -50,9 +52,10 @@ Deno.test('staticFiles', async (t) => {
     let nextCalled = false;
 
     try {
-      await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
+      await staticFiles(ctx, async () =>
+        await Promise.resolve().then(() => {
+          nextCalled = true;
+        }));
     } catch (_err) {
       // File not found is expected, ignore
     }
@@ -65,9 +68,10 @@ Deno.test('staticFiles', async (t) => {
     let nextCalled = false;
 
     try {
-      await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
+      await staticFiles(ctx, async () =>
+        await Promise.resolve().then(() => {
+          nextCalled = true;
+        }));
     } catch (_err) {
       // File not found is expected, ignore
     }
@@ -80,9 +84,10 @@ Deno.test('staticFiles', async (t) => {
     let nextCalled = false;
 
     try {
-      await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
+      await staticFiles(ctx, async () =>
+        await Promise.resolve().then(() => {
+          nextCalled = true;
+        }));
     } catch (_err) {
       // File not found is expected, ignore
     }
@@ -95,9 +100,10 @@ Deno.test('staticFiles', async (t) => {
     let nextCalled = false;
 
     try {
-      await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
+      await staticFiles(ctx, async () =>
+        await Promise.resolve().then(() => {
+          nextCalled = true;
+        }));
     } catch (_err) {
       // File not found is expected, ignore
     }
@@ -109,9 +115,10 @@ Deno.test('staticFiles', async (t) => {
     const ctx = createMockContext('/image.png', ['.html', '.css', '.js']);
     let nextCalled = false;
 
-    await staticFiles(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await staticFiles(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
   });

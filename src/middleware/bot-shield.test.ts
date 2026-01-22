@@ -26,9 +26,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
     assertEquals(ctx.response.status, 200);
@@ -38,9 +39,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/vendor/test.js');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, false);
     assertEquals(ctx.response.status, 404);
@@ -52,9 +54,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/cgi-bin/script');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, false);
     assertEquals(ctx.response.status, 404);
@@ -64,9 +67,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/.env');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, false);
     assertEquals(ctx.response.status, 404);
@@ -76,9 +80,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/wp-admin/');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, false);
     assertEquals(ctx.response.status, 404);
@@ -88,9 +93,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/index.php');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, false);
     assertEquals(ctx.response.status, 404);
@@ -100,9 +106,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/backup.sql');
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, false);
     assertEquals(ctx.response.status, 404);
@@ -112,9 +119,10 @@ Deno.test('botShield', async (t) => {
     const ctx = createMockContext('/', { 'x-forwarded-for': '192.168.1.1, 10.0.0.1' });
     let nextCalled = false;
 
-    await botShield(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await botShield(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
   });

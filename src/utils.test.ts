@@ -26,16 +26,24 @@ Deno.test('resolveStaticFilesPath', async (t) => {
 
   await t.step('should throw for absolute paths outside cwd', () => {
     const outsidePath = path.resolve(cwd, '..');
-    assertThrows(() => {
-      resolveStaticFilesPath(outsidePath, defaultRoot);
-    }, Error, `staticFilesPath must stay within cwd`);
+    assertThrows(
+      () => {
+        resolveStaticFilesPath(outsidePath, defaultRoot);
+      },
+      Error,
+      `staticFilesPath must stay within cwd`,
+    );
   });
 
   await t.step('should throw for relative paths that resolve outside cwd', () => {
     const outsideRelativePath = '../';
-    assertThrows(() => {
-      resolveStaticFilesPath(outsideRelativePath, defaultRoot);
-    }, Error, `staticFilesPath must stay within cwd`);
+    assertThrows(
+      () => {
+        resolveStaticFilesPath(outsideRelativePath, defaultRoot);
+      },
+      Error,
+      `staticFilesPath must stay within cwd`,
+    );
   });
 
   await t.step('should handle nested paths correctly', () => {

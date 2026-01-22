@@ -39,9 +39,10 @@ Deno.test('errorHandler', async (t) => {
     const ctx = createMockContext(false, false);
     let nextCalled = false;
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      nextCalled = true;
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        nextCalled = true;
+      }));
 
     assertEquals(nextCalled, true);
     assertEquals(ctx.response.status, 200);
@@ -50,9 +51,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle HTTP errors with JSON response', async () => {
     const ctx = createMockContext(true, false);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw createHttpError(404, 'Resource not found');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw createHttpError(404, 'Resource not found');
+      }));
 
     assertEquals(ctx.response.status, 404);
     assertEquals(ctx.response.type, 'json');
@@ -66,9 +68,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle HTTP errors with JSON response in dev mode', async () => {
     const ctx = createMockContext(true, true);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw createHttpError(500, 'Server error');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw createHttpError(500, 'Server error');
+      }));
 
     assertEquals(ctx.response.status, 500);
     assertEquals(ctx.response.type, 'json');
@@ -81,9 +84,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle HTTP errors with text response', async () => {
     const ctx = createMockContext(false, false);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw createHttpError(403, 'Forbidden');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw createHttpError(403, 'Forbidden');
+      }));
 
     assertEquals(ctx.response.status, 403);
     assertEquals(ctx.response.type, 'text/plain');
@@ -93,9 +97,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle HTTP errors with text response in dev mode', async () => {
     const ctx = createMockContext(false, true);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw createHttpError(400, 'Bad Request');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw createHttpError(400, 'Bad Request');
+      }));
 
     assertEquals(ctx.response.status, 400);
     assertEquals(ctx.response.type, 'text/plain');
@@ -106,9 +111,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle Deno.errors.NotFound', async () => {
     const ctx = createMockContext(false, false);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw new Deno.errors.NotFound('File not found');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw new Deno.errors.NotFound('File not found');
+      }));
 
     assertEquals(ctx.response.status, 404);
     assertEquals(ctx.response.type, 'text/plain');
@@ -118,9 +124,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle generic errors in production', async () => {
     const ctx = createMockContext(false, false);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw new Error('Something went wrong');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw new Error('Something went wrong');
+      }));
 
     assertEquals(ctx.response.status, 500);
     assertEquals(ctx.response.type, 'text/plain');
@@ -130,9 +137,10 @@ Deno.test('errorHandler', async (t) => {
   await t.step('should handle generic errors in dev mode', async () => {
     const ctx = createMockContext(false, true);
 
-    await errorHandler(ctx, async () => await Promise.resolve().then(() => {
-      throw new Error('Something went wrong');
-    }));
+    await errorHandler(ctx, async () =>
+      await Promise.resolve().then(() => {
+        throw new Error('Something went wrong');
+      }));
 
     assertEquals(ctx.response.status, 500);
     assertEquals(ctx.response.type, 'text/plain');

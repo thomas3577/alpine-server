@@ -1,5 +1,5 @@
 {
-  "name": "@dx/alpine-app",
+  "name": "@dx/alpine-server",
   "version": "0.1.0",
   "license": "MIT",
   "tasks": {

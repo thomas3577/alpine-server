@@ -1,8 +1,8 @@
-# @dx/alpine-app
+# @dx/alpine-server
 
-[![JSR Version](https://jsr.io/badges/@dx/alpine-app)](https://jsr.io/@dx/alpine-app)
-[![JSR Score](https://jsr.io/badges/@dx/alpine-app/score)](https://jsr.io/@dx/alpine-app/score)
-[![ci](https://github.com/thomas3577/alpine-app/actions/workflows/deno.yml/badge.svg)](https://github.com/thomas3577/alpine-app/actions/workflows/deno.yml)
+[![JSR Version](https://jsr.io/badges/@dx/alpine-server)](https://jsr.io/@dx/alpine-server)
+[![JSR Score](https://jsr.io/badges/@dx/alpine-server/score)](https://jsr.io/@dx/alpine-server/score)
+[![ci](https://github.com/thomas3577/alpine-server/actions/workflows/deno.yml/badge.svg)](https://github.com/thomas3577/alpine-server/actions/workflows/deno.yml)
 [![Built with the Deno Standard Library](https://raw.githubusercontent.com/denoland/deno_std/main/badge.svg)](https://deno.land/std)
 
 > ⚠️ **EXPERIMENTAL**: This library is in early development and highly experimental. APIs may change without notice. Not recommended for production use.
@@ -22,7 +22,7 @@ A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js
 ## Installation
 
 ```bash
-deno add jsr:@dx/alpine-app
+deno add jsr:@dx/alpine-server
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ deno add jsr:@dx/alpine-app
 ### Basic Setup
 
 ```typescript
-import { AlpineApp } from '@dx/alpine-app';
+import { AlpineApp } from '@dx/alpine-server';
 
 const app = new AlpineApp({
   app: {
@@ -50,7 +50,7 @@ await app.run();
 Add custom middleware using the `use()` method. Middleware runs after system middlewares (logging, security) but before routes:
 
 ```typescript
-import { AlpineApp } from '@dx/alpine-app';
+import { AlpineApp } from '@dx/alpine-server';
 
 const app = new AlpineApp({
   oak: { listenOptions: { port: 3000 } },
@@ -81,7 +81,7 @@ await app.run();
 Add custom routes using the `append()` method with an Oak Router:
 
 ```typescript
-import { AlpineApp } from '@dx/alpine-app';
+import { AlpineApp } from '@dx/alpine-server';
 import { Router } from '@oak/oak';
 
 const app = new AlpineApp({
@@ -109,7 +109,7 @@ await app.run();
 ### Combining Middleware and Routes
 
 ```typescript
-import { AlpineApp } from '@dx/alpine-app';
+import { AlpineApp } from '@dx/alpine-server';
 import { Router } from '@oak/oak';
 
 const app = new AlpineApp({

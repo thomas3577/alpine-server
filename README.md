@@ -1,5 +1,10 @@
 # @dx/alpine-app
 
+[![JSR Version](https://jsr.io/badges/@dx/alpine-app)](https://jsr.io/@dx/alpine-app)
+[![JSR Score](https://jsr.io/badges/@dx/alpine-app/score)](https://jsr.io/@dx/alpine-app/score)
+[![ci](https://github.com/thomas3577/alpine-app/actions/workflows/deno.yml/badge.svg)](https://github.com/thomas3577/alpine-app/actions/workflows/deno.yml)
+[![Built with the Deno Standard Library](https://raw.githubusercontent.com/denoland/deno_std/main/badge.svg)](https://deno.land/std)
+
 A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
 
 ## Features
@@ -34,6 +39,95 @@ const app = new AlpineApp({
     listenOptions: { port: 3000 },
   },
 });
+
+await app.run();
+```
+
+### Custom Middleware
+
+Add custom middleware using the `use()` method. Middleware runs after system middlewares (logging, security) but before routes:
+
+```typescript
+import { AlpineApp } from '@dx/alpine-app';
+
+const app = new AlpineApp({
+  oak: { listenOptions: { port: 3000 } }
+});
+
+// Add custom middleware
+app.use(async (ctx, next) => {
+  console.log(`Processing: ${ctx.request.url.pathname}`);
+  await next();
+});
+
+// Add authentication middleware
+app.use(async (ctx, next) => {
+  const token = ctx.request.headers.get('Authorization');
+  if (!token && ctx.request.url.pathname.startsWith('/api/')) {
+    ctx.response.status = 401;
+    ctx.response.body = { error: 'Unauthorized' };
+    return;
+  }
+  await next();
+});
+
+await app.run();
+```
+
+### Custom Routes
+
+Add custom routes using the `append()` method with an Oak Router:
+
+```typescript
+import { AlpineApp } from '@dx/alpine-app';
+import { Router } from '@oak/oak';
+
+const app = new AlpineApp({
+  oak: { listenOptions: { port: 3000 } }
+});
+
+// Create a router with API endpoints
+const apiRouter = new Router();
+
+apiRouter.get('/api/users', (ctx) => {
+  ctx.response.body = { users: ['Alice', 'Bob'] };
+});
+
+apiRouter.post('/api/users', async (ctx) => {
+  const body = await ctx.request.body.json();
+  ctx.response.body = { message: 'User created', user: body };
+});
+
+// Append the router to the app
+app.append(apiRouter);
+
+await app.run();
+```
+
+### Combining Middleware and Routes
+
+```typescript
+import { AlpineApp } from '@dx/alpine-app';
+import { Router } from '@oak/oak';
+
+const app = new AlpineApp({
+  app: { dev: true, staticFilesPath: './public' },
+  oak: { listenOptions: { port: 3000 } },
+});
+
+// Add logging middleware
+app.use(async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  console.log(`${ctx.request.method} ${ctx.request.url.pathname} - ${Date.now() - start}ms`);
+});
+
+// Add API routes
+const router = new Router();
+router.get('/api/health', (ctx) => {
+  ctx.response.body = { status: 'ok', timestamp: Date.now() };
+});
+app.append(router);
 
 await app.run();
 ```
@@ -183,20 +277,50 @@ deno task update
 
 In dev mode, the server auto-injects the hot-reload script before `</head>`.
 
+## API Reference
+
+### `app.use(middleware)`
+
+Registers custom middleware that runs after system middlewares but before routes.
+
+**Parameters:**
+- `middleware` – Oak middleware function `(ctx, next) => Promise<void>`
+
+**Returns:** `this` (chainable)
+
+### `app.append(router)`
+
+Appends an Oak Router to the application. Routes are registered after middlewares but before internal routes.
+
+**Parameters:**
+- `router` – Oak `Router` instance
+
+**Returns:** `this` (chainable)
+
+### `app.run()`
+
+Starts the application server. Can only be called once per instance.
+
+**Returns:** `Promise<void>`
+
+**Throws:** `Error` if the application is already running
+
 ## Architecture
 
-Built on [Oak](https://jsr.io/@oak/oak) with middleware for:
+Built on [Oak](https://jsr.io/@oak/oak) with middleware pipeline:
 
-1. **Logger** – Colored request logs
-2. **Timing** – `X-Response-Time` + `Server-Timing` headers
-3. **Security Headers** – CSP, HSTS, etc.
-4. **Error Handler** – JSON/text error responses (verbose in dev)
+1. **Error Handler** – JSON/text error responses (verbose in dev)
+2. **Logger** – Colored request logs
+3. **Timing** – `X-Response-Time` + `Server-Timing` headers
+4. **Security Headers** – CSP, HSTS, etc.
 5. **Bot Shield** – Rate limiting + exploit blocking
 6. **Vendor Proxy** – Alpine.js CDN with caching
-7. **Updater** – Hot reload client (dev)
-8. **Static Files** – Serves files by extension
-9. **SSE** – Hot reload event stream (dev)
-10. **View Router** – Catch-all for `index.html` routing
+7. **User Middlewares** – Custom middleware added via `use()`
+8. **User Routes** – Custom routes added via `append()`
+9. **Updater** – Hot reload client (dev)
+10. **Static Files** – Serves files by extension
+11. **SSE** – Hot reload event stream (dev)
+12. **View Router** – Catch-all for `index.html` routing
 
 ## License
 

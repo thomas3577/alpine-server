@@ -20,6 +20,12 @@ Deno.test('AlpineApp', async (t) => {
     assertEquals(typeof alpineApp.run, 'function');
   });
 
+  await t.step('should construct without config', () => {
+    const alpineApp = new AlpineApp();
+    assertExists(alpineApp);
+    assertEquals(typeof alpineApp.run, 'function');
+  });
+
   await t.step('should construct with minimal config', () => {
     const alpineApp = new AlpineApp({});
     assertExists(alpineApp);

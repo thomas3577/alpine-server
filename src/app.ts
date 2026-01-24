@@ -41,9 +41,9 @@ export class AlpineApp {
    *
    * @param config - Configuration for the application and Oak server
    */
-  constructor(config: AlpineAppConfig) {
+  constructor(config?: AlpineAppConfig) {
     this.#app = new Application<AlpineAppState>();
-    this.#config = config;
+    this.#config = config ?? {};
   }
 
   /**

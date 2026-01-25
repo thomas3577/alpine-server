@@ -96,4 +96,13 @@ Deno.test('securityHeaders', async (t) => {
     const csp = ctx.response.headers.get('Content-Security-Policy');
     assertEquals(typeof csp, 'string');
   });
+
+  await t.step('should not override existing CSP', async () => {
+    const ctx = createMockContext(false, 'text/html');
+    ctx.response.headers.set('Content-Security-Policy', "default-src 'self' https://esm.sh");
+
+    await securityHeaders(ctx, async () => {});
+
+    assertEquals(ctx.response.headers.get('Content-Security-Policy'), "default-src 'self' https://esm.sh");
+  });
 });

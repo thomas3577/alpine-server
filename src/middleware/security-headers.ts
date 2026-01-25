@@ -35,8 +35,9 @@ export const securityHeaders = async (context: Context<AlpineAppState>, next: ()
     headers.set('Strict-Transport-Security', 'max-age=31536000');
   }
 
-  const contentType = headers.get('content-type') ?? '';
-  if (contentType.toLowerCase().includes('text/html')) {
+  const contentType = (headers.get('content-type') ?? '').toLowerCase();
+  const hasCsp = headers.get('Content-Security-Policy') !== null;
+  if (!hasCsp && contentType.includes('text/html')) {
     headers.set('Content-Security-Policy', buildCspHeaderValue());
   }
 };

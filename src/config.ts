@@ -9,11 +9,11 @@ const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg
 
 const defaultVendors: Record<string, Vendor> = {
   '/alpinejs.mjs': {
-    url: `https://esm.sh/alpinejs@3.15.4/es2024/alpinejs.mjs`,
+    url: `https://esm.sh/alpinejs@3.15.5/es2024/alpinejs.mjs`,
     type: 'application/javascript; charset=utf-8;',
   },
   '/alpinejs.mjs.map': {
-    url: `https://esm.sh/alpinejs@3.15.4/es2024/alpinejs.mjs.map`,
+    url: `https://esm.sh/alpinejs@3.15.5/es2024/alpinejs.mjs.map`,
     type: 'application/json; charset=utf-8;',
   },
 };

@@ -7,13 +7,16 @@ const defaultStaticFilesPath = join(Deno.cwd(), 'public');
 
 const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt'];
 
+const alpinejsVersion = '3.15.6';
+const alpinejsCdnBase = `https://esm.sh/alpinejs@${alpinejsVersion}/es2024`;
+
 const defaultVendors: Record<string, Vendor> = {
   '/alpinejs.mjs': {
-    url: `https://esm.sh/alpinejs@3.15.5/es2024/alpinejs.mjs`,
+    url: `${alpinejsCdnBase}/alpinejs.mjs`,
     type: 'application/javascript; charset=utf-8;',
   },
   '/alpinejs.mjs.map': {
-    url: `https://esm.sh/alpinejs@3.15.5/es2024/alpinejs.mjs.map`,
+    url: `${alpinejsCdnBase}/alpinejs.mjs.map`,
     type: 'application/json; charset=utf-8;',
   },
 };

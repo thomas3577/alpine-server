@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { timing } from './timing.ts';
 import type { Context } from '@oak/oak';
+import { timing } from './timing.ts';
 
 const createMockContext = (): Context => {
   const headers = new Map<string, string>();

@@ -13,7 +13,7 @@ A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js
 - 🚀 **Static File Serving** – Configurable root directory with extension filtering
 - 🔄 **Hot Reload** – Automatic browser refresh via SSE when files change (dev mode)
 - 🛡️ **Security Hardening** – CSP, HSTS, bot/exploit blocking, rate limiting
-- 📦 **Vendor CDN Proxy** – Serve Alpine.js from esm.sh with in-memory caching
+- 📦 **Vendor CDN Proxy** – Configurable CDN resources with in-memory caching (Alpine.js included by default)
 - ⚡ **Performance** – Response timing headers, Server-Timing API
 - 🎯 **Alpine.js Ready** – Auto-injects updater script in dev, CSP configured for Alpine
 - 📝 **Request Logging** – Colored console logs with timing info
@@ -164,6 +164,7 @@ type AlpineAppConfig = {
     dev?: boolean; // Enable dev mode (hot reload, verbose errors)
     staticFilesPath?: string; // Path to static files (relative or absolute, must be inside cwd)
     staticExtensions?: string[]; // Allowed file extensions
+    vendors?: Record<string, string>; // Custom vendor CDN mappings (filename -> URL)
   };
   oak?: {
     listenOptions?: ListenOptions; // Oak server listen options (port, hostname, etc.)
@@ -176,6 +177,7 @@ type AlpineAppConfig = {
 - **`dev`**: `false` (production mode)
 - **`staticFilesPath`**: `./public` (resolved against `Deno.cwd()`)
 - **`staticExtensions`**: `['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']`
+- **`vendors`**: Alpine.js from esm.sh (can be extended or overridden)
 - **`listenOptions`**: Oak defaults (port `8000`)
 
 ### Example: Production Config
@@ -196,6 +198,32 @@ const app = new AlpineApp({
 });
 ```
 
+### Example: Custom Vendors
+
+Add additional CDN resources or override defaults:
+
+```typescript
+const app = new AlpineApp({
+  app: {
+    vendors: {
+      // Add HTMX
+      'htmx.js': 'https://unpkg.com/htmx.org@1.9.10',
+      // Add Petite Vue
+      'petite-vue.js': 'https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.es.js',
+      // Override default Alpine.js version
+      '/alpinejs.mjs': 'https://esm.sh/alpinejs@3.14.0/es2024/alpinejs.mjs',
+    },
+  },
+});
+```
+
+Access vendors at `/vendor/:filename`:
+
+```html
+<script type="module" src="/vendor/alpinejs.mjs"></script>
+<script src="/vendor/htmx.js"></script>
+```
+
 ## Development Mode
 
 Enable `dev: true` for:
@@ -206,12 +234,11 @@ Enable `dev: true` for:
 
 ## Endpoints
 
-| Path                    | Description                                             |
-| ----------------------- | ------------------------------------------------------- |
-| `GET /`                 | Serves `index.html` from static root                    |
-| `GET /:path*`           | Serves static files or `index.html` from subdirectories |
-| `GET /alpinejs.mjs`     | Alpine.js vendor proxy (esm.sh, cached in memory)       |
-| `GET /alpinejs.mjs.map` | Source map for Alpine.js                                |
+| Path                       | Description                                             |
+| -------------------------- | ------------------------------------------------------- |
+| `GET /`                    | Serves `index.html` from static root                    |
+| `GET /:path*`              | Serves static files or `index.html` from subdirectories |
+| `GET /vendor/:filename`    | Vendor CDN proxy with whitelist (cached in memory)      |
 
 ## Example HTML with Alpine.js
 
@@ -221,7 +248,7 @@ Enable `dev: true` for:
   <head>
     <meta charset="UTF-8">
     <title>My Alpine App</title>
-    <script type="module" src="/alpinejs.mjs"></script>
+    <script type="module" src="/vendor/alpinejs.mjs"></script>
   </head>
   <body>
     <div x-data="{ count: 0 }">

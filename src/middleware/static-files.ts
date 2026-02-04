@@ -1,8 +1,6 @@
 import type { Context } from '@oak/oak';
-
 import { send } from '@oak/oak';
 import { extname } from '@std/path';
-
 import type { AlpineAppState } from '../types.ts';
 
 export const staticFiles = async (ctx: Context<AlpineAppState>, next: () => Promise<unknown>): Promise<void> => {

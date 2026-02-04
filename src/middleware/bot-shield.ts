@@ -1,7 +1,6 @@
 import type { Context } from '@oak/oak';
 
 const blockedPathPatterns: RegExp[] = [
-  /^\/vendor(\/|$)/i,
   /^\/cgi-bin(\/|$)/i,
   /^\/\.env(\.|$)/i,
   /^\/\.git(\/|$)/i,

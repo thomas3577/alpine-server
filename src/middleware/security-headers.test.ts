@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { securityHeaders } from './security-headers.ts';
 import type { Context } from '@oak/oak';
+import { securityHeaders } from './security-headers.ts';
 import type { AlpineAppState } from '../types.ts';
 
 const createMockContext = (dev: boolean, contentType?: string): Context<AlpineAppState> => {

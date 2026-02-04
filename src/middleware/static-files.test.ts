@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { staticFiles } from './static-files.ts';
 import type { Context } from '@oak/oak';
+import { staticFiles } from './static-files.ts';
 import type { AlpineAppState } from '../types.ts';
 
 const createMockContext = (pathname: string, staticExtensions: string[]): Context<AlpineAppState> => {

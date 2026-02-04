@@ -4,7 +4,7 @@ import { join } from '@std/path';
 import { DOMParser } from '@deno/dom';
 
 import type { AlpineAppState } from '../types.ts';
-import { updaterFilename } from '../services/updater.service.ts';
+import { updaterFilename } from '../config.ts';
 
 const router: Router<AlpineAppState> = new Router<AlpineAppState>();
 const domParser = new DOMParser();
@@ -74,4 +74,4 @@ router.get('/:site*', async (ctx) => {
   }
 });
 
-export default router;
+export { router };

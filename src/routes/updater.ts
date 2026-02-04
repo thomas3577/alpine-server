@@ -4,9 +4,9 @@ import type { AlpineAppState } from '../types.ts';
 
 const updater = `const sse = new EventSource('/sse'); sse.onopen = () => sse.addEventListener('reload', () => location.reload());`;
 const updateDummy = ';';
-const router: Router<AlpineAppState> = new Router<AlpineAppState>();
+const router: Router<AlpineAppState> = new Router<AlpineAppState>({ prefix: `/${updaterFilename}` });
 
-router.get(`/${updaterFilename}`, (ctx) => {
+router.get('/', (ctx) => {
   const { hostname } = ctx.request.url;
 
   ctx.response.headers.append('content-type', 'application/javascript; charset=utf-8');

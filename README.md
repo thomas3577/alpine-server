@@ -143,9 +143,8 @@ your-project/
 │   ├── index.html
 │   ├── styles.css
 │   ├── app.js
-│   └── pages/
-│       └── about/
-│           └── index.html
+│   └── about/
+│       └── index.html
 └── main.ts
 ```
 
@@ -213,49 +212,6 @@ Enable `dev: true` for:
 | `GET /:path*`           | Serves static files or `index.html` from subdirectories |
 | `GET /alpinejs.mjs`     | Alpine.js vendor proxy (esm.sh, cached in memory)       |
 | `GET /alpinejs.mjs.map` | Source map for Alpine.js                                |
-| `GET /sse`              | Server-Sent Events endpoint for hot reload (dev mode)   |
-| `GET /updater.js`       | Hot reload client script (dev mode, localhost only)     |
-
-## Security Features
-
-### Bot Shield
-
-- Blocks common exploit paths (`/vendor`, `/.env`, `/wp-admin`, etc.)
-- Blocks dangerous file extensions (`.php`, `.env`, `.sql`, etc.)
-- Per-IP rate limiting (180 requests/minute)
-
-### Security Headers (Production)
-
-- `Content-Security-Policy` (Alpine-compatible: allows `'unsafe-eval'`)
-- `Strict-Transport-Security` (HSTS, production only)
-- `X-Content-Type-Options: nosniff`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `Cross-Origin-Resource-Policy: same-origin`
-- `Cross-Origin-Opener-Policy: same-origin`
-
-### Path Traversal Protection
-
-- Static file paths must stay within `staticFilesPath` (enforced at config parsing)
-- URL path traversal attempts (`..`, `\`, null bytes) are blocked
-
-## Running Tasks
-
-```bash
-# Run the app
-deno task run
-
-# Format & lint
-deno task check
-
-# Update dependencies
-deno task update
-```
-
-## Permissions Required
-
-- `--allow-net` – HTTP server + vendor CDN fetches
-- `--allow-read` – Static file serving + file watching
-- `--allow-env` – Optional (for environment-based config)
 
 ## Example HTML with Alpine.js
 
@@ -276,59 +232,10 @@ deno task update
 </html>
 ```
 
-In dev mode, the server auto-injects the hot-reload script before `</head>`.
-
-## API Reference
-
-### `app.use(middleware)`
-
-Registers custom middleware that runs after system middlewares but before routes.
-
-**Parameters:**
-
-- `middleware` – Oak middleware function `(ctx, next) => Promise<void>`
-
-**Returns:** `this` (chainable)
-
-### `app.append(router)`
-
-Appends an Oak Router to the application. Routes are registered after middlewares but before internal routes.
-
-**Parameters:**
-
-- `router` – Oak `Router` instance
-
-**Returns:** `this` (chainable)
-
-### `app.run()`
-
-Starts the application server. Can only be called once per instance.
-
-**Returns:** `Promise<void>`
-
-**Throws:** `Error` if the application is already running
-
-## Architecture
-
-Built on [Oak](https://jsr.io/@oak/oak) with middleware pipeline:
-
-1. **Error Handler** – JSON/text error responses (verbose in dev)
-2. **Logger** – Colored request logs
-3. **Timing** – `X-Response-Time` + `Server-Timing` headers
-4. **Security Headers** – CSP, HSTS, etc.
-5. **Bot Shield** – Rate limiting + exploit blocking
-6. **Vendor Proxy** – Alpine.js CDN with caching
-7. **User Middlewares** – Custom middleware added via `use()`
-8. **User Routes** – Custom routes added via `append()`
-9. **Updater** – Hot reload client (dev)
-10. **Static Files** – Serves files by extension
-11. **SSE** – Hot reload event stream (dev)
-12. **View Router** – Catch-all for `index.html` routing
-
 ## License
 
 MIT
 
 ## Contributing
 
-Contributions welcome! Please ensure `deno task check` passes before submitting PRs.
+Contributions welcome!

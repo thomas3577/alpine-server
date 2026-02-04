@@ -6,7 +6,7 @@ import { service } from '../services/sse.ts';
 
 const router = new Router({ prefix: '/sse' });
 
-router.get('', async (context: Context) => {
+router.get('/', async (context: Context) => {
   context.assert(context.request.accepts('text/event-stream'), Status.UnsupportedMediaType);
 
   const connection: string = context.request.ip;

@@ -8,7 +8,7 @@ router.get('/:filename', async (ctx) => {
   const filename = ctx.params.filename;
 
   // Check whitelist
-  const cdnPath = ctx.state.config.vendors[filename];
+  const cdnPath = ctx.state.config.vendors[filename] ?? ctx.state.config.vendors[`/${filename}`];
   if (!cdnPath) {
     ctx.throw(404, 'Resource not found in whitelist');
   }

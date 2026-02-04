@@ -51,32 +51,32 @@ Deno.test('RuntimeConfig', async (t) => {
 
   await t.step('should use default vendors when no vendors provided', () => {
     const config = new RuntimeConfig({});
-    assertEquals(config.vendors['/alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs');
-    assertEquals(config.vendors['/alpinejs.mjs.map'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map');
+    assertEquals(config.vendors['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs');
+    assertEquals(config.vendors['alpinejs.mjs.map'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map');
   });
 
   await t.step('should merge custom vendors with default vendors', () => {
     const config = new RuntimeConfig({
       vendors: {
-        '/htmx.js': 'https://unpkg.com/htmx.org@1.9.10',
+        'htmx.js': 'https://unpkg.com/htmx.org@1.9.10',
       },
     });
 
     // Should have both default and custom vendors
-    assertEquals(config.vendors['/alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs');
-    assertEquals(config.vendors['/htmx.js'], 'https://unpkg.com/htmx.org@1.9.10');
+    assertEquals(config.vendors['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs');
+    assertEquals(config.vendors['htmx.js'], 'https://unpkg.com/htmx.org@1.9.10');
   });
 
   await t.step('should allow overriding default vendors', () => {
     const config = new RuntimeConfig({
       vendors: {
-        '/alpinejs.mjs': 'https://custom.cdn.com/alpine.js',
+        'alpinejs.mjs': 'https://custom.cdn.com/alpine.js',
       },
     });
 
     // Custom should override default
-    assertEquals(config.vendors['/alpinejs.mjs'], 'https://custom.cdn.com/alpine.js');
+    assertEquals(config.vendors['alpinejs.mjs'], 'https://custom.cdn.com/alpine.js');
     // Other defaults should remain
-    assertEquals(config.vendors['/alpinejs.mjs.map'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map');
+    assertEquals(config.vendors['alpinejs.mjs.map'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map');
   });
 });

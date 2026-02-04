@@ -11,7 +11,7 @@ import { router as vendor } from './middleware/vendor.ts';
 import { RuntimeConfig } from './config.ts';
 import { router as updater } from './routes/updater.ts';
 import { router as sse } from './routes/sse.ts';
-import {router as view} from './routes/views.ts';
+import { router as view } from './routes/views.ts';
 import type { AlpineAppConfig, AlpineAppState } from './types.ts';
 
 /**

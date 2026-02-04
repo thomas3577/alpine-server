@@ -35,4 +35,3 @@ const staticFileWatch = async (path?: string): Promise<void> => {
 };
 
 export { service, staticFileWatch };
-

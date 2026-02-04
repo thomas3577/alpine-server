@@ -13,7 +13,6 @@ export class VendorCache {
   }
 
   async fetch(url: string): Promise<CacheEntry> {
-
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`CDN fetch failed: ${response.status} ${response.statusText}`);

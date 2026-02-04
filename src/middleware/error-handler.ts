@@ -1,9 +1,7 @@
 import type { Context } from '@oak/oak';
-
 import { isHttpError } from '@oak/oak';
-import * as log from '@std/log';
-
 import type { AlpineAppState } from '../types.ts';
+import * as log from '@std/log';
 
 export const errorHandler = async (ctx: Context<AlpineAppState>, next: () => Promise<unknown>): Promise<void> => {
   try {

@@ -1,5 +1,4 @@
 import type { Context } from '@oak/oak';
-
 import { bold, cyan, green } from '@std/fmt/colors';
 import { info } from '@std/log';
 

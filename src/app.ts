@@ -1,19 +1,17 @@
 import { Application } from '@oak/oak';
 import type { Middleware, Router } from '@oak/oak';
-
 import { staticFiles } from './middleware/static-files.ts';
 import { errorHandler } from './middleware/error-handler.ts';
 import { logger } from './middleware/logger.ts';
 import { botShield } from './middleware/bot-shield.ts';
 import { timing } from './middleware/timing.ts';
 import { securityHeaders } from './middleware/security-headers.ts';
-import { staticFileWatch } from './services/watch.service.ts';
-import { vendor } from './middleware/vendor.ts';
+import { staticFileWatch } from './services/sse.ts';
+import { router as vendor } from './middleware/vendor.ts';
 import { RuntimeConfig } from './config.ts';
-import { router as updaterRouter } from './services/updater.service.ts';
-import { router as sseRouter } from './services/sse.service.ts';
-import view from './views/index.ts';
-
+import { router as updater } from './routes/updater.ts';
+import { router as sse } from './routes/sse.ts';
+import { router as view } from './routes/views.ts';
 import type { AlpineAppConfig, AlpineAppState } from './types.ts';
 
 /**
@@ -119,7 +117,7 @@ export class AlpineApp {
     this.#app.use(timing);
     this.#app.use(securityHeaders);
     this.#app.use(botShield);
-    this.#app.use(vendor);
+    this.#app.use(vendor.routes());
 
     // User middlewares
     for (const middleware of this.#userMiddlewares) {
@@ -131,9 +129,9 @@ export class AlpineApp {
       this.#app.use(router.routes());
     }
 
-    this.#app.use(updaterRouter.routes());
+    this.#app.use(updater.routes());
     this.#app.use(staticFiles);
-    this.#app.use(sseRouter.routes());
+    this.#app.use(sse.routes());
     this.#app.use(view.routes());
 
     if (runtime.dev) {

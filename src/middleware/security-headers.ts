@@ -1,5 +1,4 @@
 import type { Context } from '@oak/oak';
-
 import type { AlpineAppState } from '../types.ts';
 
 const buildCspHeaderValue = (): string => {

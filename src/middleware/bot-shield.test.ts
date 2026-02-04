@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { botShield } from './bot-shield.ts';
 import type { Context } from '@oak/oak';
+import { botShield } from './bot-shield.ts';
 
 // Helper to create a mock context
 const createMockContext = (pathname: string, headers: Record<string, string> = {}): Context => {
@@ -33,21 +33,6 @@ Deno.test('botShield', async (t) => {
 
     assertEquals(nextCalled, true);
     assertEquals(ctx.response.status, 200);
-  });
-
-  await t.step('should block /vendor paths', async () => {
-    const ctx = createMockContext('/vendor/test.js');
-    let nextCalled = false;
-
-    await botShield(ctx, async () =>
-      await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
-
-    assertEquals(nextCalled, false);
-    assertEquals(ctx.response.status, 404);
-    assertEquals(ctx.state.shield?.blocked, true);
-    assertEquals(ctx.state.shield?.reason, 'denylist');
   });
 
   await t.step('should block /cgi-bin paths', async () => {

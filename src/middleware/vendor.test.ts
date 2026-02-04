@@ -1,87 +1,90 @@
 import { assertEquals } from '@std/assert';
-import { vendor } from './vendor.ts';
-import type { Context } from '@oak/oak';
-import type { Vendor } from '../types.ts';
+import { Application } from '@oak/oak';
+import { router } from './vendor.ts';
 
-const createMockContext = (pathname: string, vendors: Record<string, Vendor>): Context => {
-  const headers = new Map<string, string>();
+const createTestApp = (vendors: Record<string, string>) => {
+  const app = new Application();
 
-  const ctx = {
-    request: {
-      url: new URL(`http://localhost${pathname}`),
-    },
-    response: {
-      headers: {
-        get: (key: string) => headers.get(key.toLowerCase()) ?? null,
-        set: (key: string, value: string) => headers.set(key.toLowerCase(), value),
-        append: (key: string, value: string) => {
-          const existing = headers.get(key.toLowerCase());
-          headers.set(key.toLowerCase(), existing ? `${existing}, ${value}` : value);
-        },
-      },
-      body: null,
-    },
-    state: {
-      config: {
-        vendors,
-      },
-    },
-  } as unknown as Context;
+  app.use(async (ctx, next) => {
+    ctx.state.config = { vendors };
+    await next();
+  });
 
-  return ctx;
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+
+  return app;
 };
 
-Deno.test('vendor', async (t) => {
-  await t.step('should serve cached vendor content', async () => {
-    const vendors: Record<string, Vendor> = {
-      '/test.js': {
-        url: 'https://example.com/test.js',
-        type: 'application/javascript',
-        content: 'console.log("test");',
-      },
-    };
+// Mock responses for different URLs
+const mockFetchResponses = new Map<string, { content: string; contentType: string }>();
 
-    const ctx = createMockContext('/test.js', vendors);
+const originalFetch = globalThis.fetch;
 
-    await vendor(ctx, async () => {});
+const mockFetch = (url: string | URL | Request): Promise<Response> => {
+  const urlString = url.toString();
+  const mock = mockFetchResponses.get(urlString);
 
-    assertEquals(ctx.response.body, 'console.log("test");');
-    assertEquals(ctx.response.headers.get('content-type'), 'application/javascript');
+  if (!mock) {
+    return Promise.resolve(new Response(null, { status: 404 }));
+  }
+
+  const body = new TextEncoder().encode(mock.content);
+  return Promise.resolve(
+    new Response(body, {
+      status: 200,
+      headers: { 'content-type': mock.contentType },
+    }),
+  );
+};
+
+Deno.test('vendor router', async (t) => {
+  // Setup mock fetch before tests
+  globalThis.fetch = mockFetch as typeof fetch;
+
+  await t.step('should serve vendor resource from cache', async () => {
+    mockFetchResponses.set('https://example.com/test.js', {
+      content: 'console.log("test");',
+      contentType: 'application/javascript',
+    });
+
+    const vendors = { 'test.js': 'https://example.com/test.js' };
+    const app = createTestApp(vendors);
+
+    const request = new Request('http://localhost/vendor/test.js');
+    const response = await app.handle(request);
+
+    assertEquals(response?.status, 200);
+    assertEquals(response?.headers.get('content-type'), 'application/javascript');
+    assertEquals(response?.headers.get('cache-control'), 'public, max-age=31536000, immutable');
   });
 
-  await t.step('should call next for non-vendor paths', async () => {
-    const vendors: Record<string, Vendor> = {
-      '/test.js': {
-        url: 'https://example.com/test.js',
-        type: 'application/javascript',
-      },
-    };
+  await t.step('should return 404 for non-whitelisted resources', async () => {
+    const vendors = { 'test.js': 'https://example.com/test.js' };
+    const app = createTestApp(vendors);
 
-    const ctx = createMockContext('/other.js', vendors);
-    let nextCalled = false;
+    const request = new Request('http://localhost/vendor/malicious.js');
+    const response = await app.handle(request);
 
-    await vendor(ctx, async () =>
-      await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
-
-    assertEquals(nextCalled, true);
-    assertEquals(ctx.response.body, null);
+    assertEquals(response?.status, 404);
   });
 
-  await t.step('should set correct content-type header', async () => {
-    const vendors: Record<string, Vendor> = {
-      '/style.css': {
-        url: 'https://example.com/style.css',
-        type: 'text/css; charset=utf-8',
-        content: 'body { margin: 0; }',
-      },
-    };
+  await t.step('should handle different content types', async () => {
+    mockFetchResponses.set('https://example.com/style.css', {
+      content: 'body { margin: 0; }',
+      contentType: 'text/css; charset=utf-8',
+    });
 
-    const ctx = createMockContext('/style.css', vendors);
+    const vendors = { 'style.css': 'https://example.com/style.css' };
+    const app = createTestApp(vendors);
 
-    await vendor(ctx, async () => {});
+    const request = new Request('http://localhost/vendor/style.css');
+    const response = await app.handle(request);
 
-    assertEquals(ctx.response.headers.get('content-type'), 'text/css; charset=utf-8');
+    assertEquals(response?.status, 200);
+    assertEquals(response?.headers.get('content-type'), 'text/css; charset=utf-8');
   });
+
+  // Cleanup: restore original fetch
+  globalThis.fetch = originalFetch;
 });

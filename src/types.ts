@@ -1,18 +1,6 @@
 import type { ListenOptions } from '@oak/oak';
 
 /**
- * Configuration for a vendor asset (JavaScript, CSS, etc.).
- */
-export type Vendor = {
-  /** URL to the vendor asset */
-  url: string;
-  /** MIME type of the asset (e.g., 'text/javascript', 'text/css') */
-  type: string;
-  /** Optional cached content of the asset */
-  content?: string;
-};
-
-/**
  * Configuration options for the Oak server.
  */
 export type OakModuleConfig = {
@@ -30,6 +18,8 @@ export type AlpineAppRuntimeConfig = {
   staticFilesPath: string;
   /** List of file extensions to serve as static files (e.g., ['.html', '.css', '.js']) */
   staticExtensions: string[];
+  /** Optional vendor configurations to extend or override default vendors */
+  vendors?: Record<string, string>;
 };
 
 /**
@@ -39,7 +29,7 @@ export interface IRuntimeConfig extends AlpineAppRuntimeConfig {
   /** Whether the application is running in production mode (inverse of dev) */
   production: boolean;
   /** Map of vendor names to their configurations */
-  vendors: Record<string, Vendor>;
+  vendors: Record<string, string>;
 }
 
 /**

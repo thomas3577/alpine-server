@@ -1,18 +1,32 @@
-import type { Context } from '@oak/oak';
+import { Router } from '@oak/oak';
+import { vendorCache } from '../services/vendor.ts';
 
-import type { Vendor } from '../types.ts';
+const router = new Router({ prefix: '/vendor' });
 
-export const vendor = async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
-  const vendor: Vendor = ctx.state.config.vendors[ctx.request.url.pathname];
-  if (vendor) {
-    if (!vendor.content) {
-      const response: Response = await fetch(vendor.url);
-      vendor.content = await response.text();
-    }
+// Handle all CDN requests with whitelist
+router.get('/:filename', async (ctx) => {
+  const filename = ctx.params.filename;
 
-    ctx.response.headers.append('content-type', vendor.type);
-    ctx.response.body = vendor.content;
-  } else {
-    await next();
+  // Check whitelist
+  const cdnPath = ctx.state.config.vendors[filename] ?? ctx.state.config.vendors[`/${filename}`];
+  if (!cdnPath) {
+    ctx.throw(404, 'Resource not found in whitelist');
   }
-};
+
+  try {
+    const entry = await vendorCache.getOrFetch(cdnPath);
+
+    // Set headers
+    ctx.response.headers.set('Content-Type', entry.contentType);
+    ctx.response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+
+    // Set body
+    ctx.response.body = entry.content;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    ctx.throw(502, `Failed to fetch vendor resource: ${message}`);
+  }
+});
+
+export { router };

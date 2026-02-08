@@ -18,6 +18,11 @@ A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js
 - 🎯 **Alpine.js Ready** – Auto-injects updater script in dev, CSP configured for Alpine
 - 📝 **Request Logging** – Colored console logs with timing info
 
+## Versions
+
+- **Oak**: v17.2.0
+- **Alpine.js**: v3.15.8 (default configuration)
+
 ## Installation
 
 ```bash

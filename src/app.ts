@@ -7,7 +7,7 @@ import { botShield } from './middleware/bot-shield.ts';
 import { timing } from './middleware/timing.ts';
 import { securityHeaders } from './middleware/security-headers.ts';
 import { staticFileWatch } from './services/sse.ts';
-import { router as vendor } from './middleware/vendor.ts';
+import { createVendorRouter } from './middleware/vendor.ts';
 import { RuntimeConfig } from './config.ts';
 import { router as updater } from './routes/updater.ts';
 import { router as sse } from './routes/sse.ts';
@@ -117,7 +117,7 @@ export class AlpineApp {
     this.#app.use(timing);
     this.#app.use(securityHeaders);
     this.#app.use(botShield);
-    this.#app.use(vendor.routes());
+    this.#app.use(createVendorRouter(runtime.vendors).routes());
 
     // User middlewares
     for (const middleware of this.#userMiddlewares) {

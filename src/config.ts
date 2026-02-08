@@ -1,7 +1,7 @@
 import { join } from '@std/path';
 import { resolveStaticFilesPath } from './utils.ts';
 
-import type { AlpineAppRuntimeConfig, IRuntimeConfig } from './types.ts';
+import type { AlpineAppRuntimeConfig, IRuntimeConfig, IVendors } from './types.ts';
 
 const defaultStaticFilesPath = join(Deno.cwd(), 'public');
 
@@ -19,7 +19,7 @@ export class RuntimeConfig implements IRuntimeConfig {
   readonly staticFilesPath: string;
   readonly production: boolean;
   readonly staticExtensions: string[];
-  readonly vendors: Record<string, string>;
+  readonly vendors: IVendors;
   readonly updaterFilename: string = updaterFilename;
 
   constructor(input: Partial<AlpineAppRuntimeConfig> | undefined) {
@@ -27,7 +27,13 @@ export class RuntimeConfig implements IRuntimeConfig {
 
     this.dev = Boolean(raw.dev);
     this.production = !this.dev;
-    this.vendors = { ...defaultVendors, ...raw.vendors };
+    this.vendors = {
+      map: {
+        ...defaultVendors,
+        ...(raw.vendors?.map ?? {})
+      },
+      route: raw.vendors?.route ?? '/',
+    };
     this.staticFilesPath = resolveStaticFilesPath(raw.staticFilesPath, defaultStaticFilesPath);
     this.staticExtensions = Array.isArray(raw.staticExtensions) && raw.staticExtensions.every((ext) => typeof ext === 'string') ? raw.staticExtensions : defaultStaticExtensions;
   }

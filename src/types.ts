@@ -19,8 +19,18 @@ export type AlpineAppRuntimeConfig = {
   /** List of file extensions to serve as static files (e.g., ['.html', '.css', '.js']) */
   staticExtensions: string[];
   /** Optional vendor configurations to extend or override default vendors */
-  vendors?: Record<string, string>;
+  vendors?: IVendors;
 };
+
+/**
+ * Vendor configuration mapping vendor names to their CDN URLs and route.
+ */
+export interface IVendors {
+  /** Map of vendor names to their CDN URLs (e.g., { 'jquery': 'https://cdn.example.com/jquery.min.js' }) */
+  map: Record<string, string>;
+  /** Route prefix for serving vendor files (e.g., '/vendor'). Defaults to '/' if not specified. */
+  route?: string;
+}
 
 /**
  * Complete runtime configuration interface including computed properties.
@@ -29,7 +39,7 @@ export interface IRuntimeConfig extends AlpineAppRuntimeConfig {
   /** Whether the application is running in production mode (inverse of dev) */
   production: boolean;
   /** Map of vendor names to their configurations */
-  vendors: Record<string, string>;
+  vendors: IVendors;
 }
 
 /**

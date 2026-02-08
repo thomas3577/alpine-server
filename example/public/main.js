@@ -1,4 +1,4 @@
-import Alpine from '/vendor/alpinejs.mjs';
+import Alpine from '/alpinejs.mjs';
 
 Alpine.data('main', () => ({
   message: 'Welcome to Alpine App',

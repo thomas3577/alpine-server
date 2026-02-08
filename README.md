@@ -206,22 +206,26 @@ Add additional CDN resources or override defaults:
 const app = new AlpineApp({
   app: {
     vendors: {
-      // Add HTMX
-      'htmx.js': 'https://unpkg.com/htmx.org@1.9.10',
-      // Add Petite Vue
-      'petite-vue.js': 'https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.es.js',
-      // Override default Alpine.js version
-      '/alpinejs.mjs': 'https://esm.sh/alpinejs@3.14.0/es2024/alpinejs.mjs',
+      map: {
+        // Add HTMX
+        'htmx.js': 'https://unpkg.com/htmx.org@1.9.10',
+        // Add Petite Vue
+        'petite-vue.js': 'https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.es.js',
+        // Override default Alpine.js version
+        'alpinejs.mjs': 'https://esm.sh/alpinejs@3.14.0/es2024/alpinejs.mjs',
+      },
+      // Optional: Serve vendors under a prefix (default: '/')
+      // route: '/vendor'
     },
   },
 });
 ```
 
-Access vendors at `/vendor/:filename`:
+Access vendors relative to root (or configured route):
 
 ```html
-<script type="module" src="/vendor/alpinejs.mjs"></script>
-<script src="/vendor/htmx.js"></script>
+<script type="module" src="/alpinejs.mjs"></script>
+<script src="/htmx.js"></script>
 ```
 
 ## Development Mode
@@ -234,11 +238,11 @@ Enable `dev: true` for:
 
 ## Endpoints
 
-| Path                    | Description                                             |
-| ----------------------- | ------------------------------------------------------- |
-| `GET /`                 | Serves `index.html` from static root                    |
-| `GET /:path*`           | Serves static files or `index.html` from subdirectories |
-| `GET /vendor/:filename` | Vendor CDN proxy with whitelist (cached in memory)      |
+| Path                    | Description                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| `GET /`                 | Serves `index.html` from static root                          |
+| `GET /:path*`           | Serves static files or `index.html` from subdirectories       |
+| `GET /:filename`        | Vendor CDN proxy with whitelist (default route, customizable) |
 
 ## Example HTML with Alpine.js
 
@@ -248,7 +252,7 @@ Enable `dev: true` for:
   <head>
     <meta charset="UTF-8">
     <title>My Alpine App</title>
-    <script type="module" src="/vendor/alpinejs.mjs"></script>
+    <script type="module" src="/alpinejs.mjs"></script>
   </head>
   <body>
     <div x-data="{ count: 0 }">

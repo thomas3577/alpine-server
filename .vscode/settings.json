@@ -18,6 +18,7 @@
     "alpinejs",
     "denoland",
     "HSTS",
+    "htmx",
     "phpmyadmin"
   ]
 }

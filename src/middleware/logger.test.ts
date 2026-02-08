@@ -44,7 +44,7 @@ Deno.test('logger', async (t) => {
   });
 
   await t.step('should skip logging for blocked requests', async () => {
-    const ctx = createMockContext('/vendor/test', 'GET', '1.0ms', true);
+    const ctx = createMockContext('/test.js', 'GET', '1.0ms', true);
 
     await logger(ctx, async () => {});
 

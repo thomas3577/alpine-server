@@ -1,15 +1,18 @@
 import { assertEquals } from '@std/assert';
 import { Application } from '@oak/oak';
-import { router } from './vendor.ts';
+import { createVendorRouter } from './vendor.ts';
+import type { IVendors } from '../types.ts';
 
-const createTestApp = (vendors: Record<string, string>) => {
+const createTestApp = (vendors: Record<string, string>, route: string = '/') => {
   const app = new Application();
+  const vendorsConfig: IVendors = { map: vendors, route };
 
   app.use(async (ctx, next) => {
-    ctx.state.config = { vendors };
+    ctx.state.config = { vendors: vendorsConfig };
     await next();
   });
 
+  const router = createVendorRouter(vendorsConfig);
   app.use(router.routes());
   app.use(router.allowedMethods());
 
@@ -51,7 +54,7 @@ Deno.test('vendor router', async (t) => {
     const vendors = { 'test.js': 'https://example.com/test.js' };
     const app = createTestApp(vendors);
 
-    const request = new Request('http://localhost/vendor/test.js');
+    const request = new Request('http://localhost/test.js');
     const response = await app.handle(request);
 
     assertEquals(response?.status, 200);
@@ -63,10 +66,30 @@ Deno.test('vendor router', async (t) => {
     const vendors = { 'test.js': 'https://example.com/test.js' };
     const app = createTestApp(vendors);
 
-    const request = new Request('http://localhost/vendor/malicious.js');
+    const request = new Request('http://localhost/malicious.js');
     const response = await app.handle(request);
 
     assertEquals(response?.status, 404);
+  });
+
+  await t.step('should serve vendor resource from custom route', async () => {
+    mockFetchResponses.set('https://example.com/custom.js', {
+      content: 'console.log("custom");',
+      contentType: 'application/javascript',
+    });
+
+    const vendors = { 'custom.js': 'https://example.com/custom.js' };
+    const app = createTestApp(vendors, '/assets');
+
+    // Should work on custom route
+    const request = new Request('http://localhost/assets/custom.js');
+    const response = await app.handle(request);
+    assertEquals(response?.status, 200);
+
+    // Should NOT work on root
+    const requestRoot = new Request('http://localhost/custom.js');
+    const responseRoot = await app.handle(requestRoot);
+    assertEquals(responseRoot?.status, 404);
   });
 
   await t.step('should handle different content types', async () => {
@@ -78,7 +101,7 @@ Deno.test('vendor router', async (t) => {
     const vendors = { 'style.css': 'https://example.com/style.css' };
     const app = createTestApp(vendors);
 
-    const request = new Request('http://localhost/vendor/style.css');
+    const request = new Request('http://localhost/style.css');
     const response = await app.handle(request);
 
     assertEquals(response?.status, 200);

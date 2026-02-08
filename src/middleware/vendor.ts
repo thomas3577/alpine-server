@@ -11,7 +11,16 @@ export const createVendorRouter = (vendors: IVendors) => {
     const filename = ctx.params.filename;
 
     // Check whitelist
-    const cdnPath = ctx.state.config.vendors.map[filename] ?? ctx.state.config.vendors.map[`/${filename}`];
+    let cdnPath = ctx.state.config.vendors.map[filename] ?? ctx.state.config.vendors.map[`/${filename}`];
+
+    if (!cdnPath && filename?.endsWith('.map')) {
+      const originalFilename = filename.slice(0, -4);
+      const originalCdnPath = ctx.state.config.vendors.map[originalFilename] ?? ctx.state.config.vendors.map[`/${originalFilename}`];
+      if (originalCdnPath) {
+        cdnPath = `${originalCdnPath}.map`;
+      }
+    }
+
     if (!cdnPath) {
       await next();
       return;

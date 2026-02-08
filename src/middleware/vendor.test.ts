@@ -108,6 +108,24 @@ Deno.test('vendor router', async (t) => {
     assertEquals(response?.headers.get('content-type'), 'text/css; charset=utf-8');
   });
 
+  await t.step('should serve implicit map files', async () => {
+    mockFetchResponses.set('https://example.com/lib.js.map', {
+      content: '{"version":3}',
+      contentType: 'application/json',
+    });
+
+    // Only lib.js is explicitly defined
+    const vendors = { 'lib.js': 'https://example.com/lib.js' };
+    const app = createTestApp(vendors);
+
+    // Requesting lib.js.map should work
+    const request = new Request('http://localhost/lib.js.map');
+    const response = await app.handle(request);
+
+    assertEquals(response?.status, 200);
+    assertEquals(response?.headers.get('content-type'), 'application/json');
+  });
+
   // Cleanup: restore original fetch
   globalThis.fetch = originalFetch;
 });

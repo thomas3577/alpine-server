@@ -9,7 +9,6 @@ const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg
 
 const defaultVendors: Record<string, string> = {
   'alpinejs.mjs': `https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs`,
-  'alpinejs.mjs.map': `https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map`,
 };
 
 export const updaterFilename = 'updater.js';

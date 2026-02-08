@@ -238,11 +238,11 @@ Enable `dev: true` for:
 
 ## Endpoints
 
-| Path                    | Description                                                   |
-| ----------------------- | ------------------------------------------------------------- |
-| `GET /`                 | Serves `index.html` from static root                          |
-| `GET /:path*`           | Serves static files or `index.html` from subdirectories       |
-| `GET /:filename`        | Vendor CDN proxy with whitelist (default route, customizable) |
+| Path             | Description                                                   |
+| ---------------- | ------------------------------------------------------------- |
+| `GET /`          | Serves `index.html` from static root                          |
+| `GET /:path*`    | Serves static files or `index.html` from subdirectories       |
+| `GET /:filename` | Vendor CDN proxy with whitelist (default route, customizable) |
 
 ## Example HTML with Alpine.js
 

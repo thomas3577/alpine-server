@@ -30,7 +30,7 @@ export class RuntimeConfig implements IRuntimeConfig {
     this.vendors = {
       map: {
         ...defaultVendors,
-        ...(raw.vendors?.map ?? {})
+        ...(raw.vendors?.map ?? {}),
       },
       route: raw.vendors?.route ?? '/',
     };

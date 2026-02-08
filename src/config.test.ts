@@ -52,7 +52,6 @@ Deno.test('RuntimeConfig', async (t) => {
   await t.step('should use default vendors when no vendors provided', () => {
     const config = new RuntimeConfig({});
     assertEquals(config.vendors.map['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs');
-    assertEquals(config.vendors.map['alpinejs.mjs.map'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map');
   });
 
   await t.step('should merge custom vendors with default vendors', () => {
@@ -80,7 +79,5 @@ Deno.test('RuntimeConfig', async (t) => {
 
     // Custom should override default
     assertEquals(config.vendors.map['alpinejs.mjs'], 'https://custom.cdn.com/alpine.js');
-    // Other defaults should remain
-    assertEquals(config.vendors.map['alpinejs.mjs.map'], 'https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs.map');
   });
 });

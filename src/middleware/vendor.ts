@@ -7,7 +7,7 @@ export const createVendorRouter = (vendors: IVendors) => {
   const router = new Router({ prefix });
 
   // Handle all CDN requests with whitelist
-  router.get('/:filename', async (ctx, next) => {
+  router.get('/:filename(.*)', async (ctx, next) => {
     const filename = ctx.params.filename;
 
     // Check whitelist

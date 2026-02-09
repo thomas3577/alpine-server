@@ -5,7 +5,7 @@ import type { AlpineAppRuntimeConfig, IRuntimeConfig, IVendors } from './types.t
 
 const defaultStaticFilesPath = join(Deno.cwd(), 'public');
 
-const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt'];
+const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf'];
 
 const defaultVendors: Record<string, string> = {
   'alpinejs.mjs': `https://esm.sh/alpinejs@3.15.8/es2024/alpinejs.mjs`,

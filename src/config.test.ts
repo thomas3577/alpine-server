@@ -10,7 +10,7 @@ Deno.test('RuntimeConfig', async (t) => {
     assertEquals(config.dev, false);
     assertEquals(config.production, true);
     assertEquals(config.staticFilesPath, join(cwd, 'public'));
-    assertEquals(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']);
+    assertEquals(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
   });
 
   await t.step('should use default values for an empty input object', () => {
@@ -18,7 +18,7 @@ Deno.test('RuntimeConfig', async (t) => {
     assertEquals(config.dev, false);
     assertEquals(config.production, true);
     assertEquals(config.staticFilesPath, join(cwd, 'public'));
-    assertEquals(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']);
+    assertEquals(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
   });
 
   await t.step('should set dev and production flags correctly', () => {
@@ -42,11 +42,11 @@ Deno.test('RuntimeConfig', async (t) => {
   await t.step('should use default staticExtensions if provided value is not an array of strings', () => {
     // deno-lint-ignore no-explicit-any
     const config1 = new RuntimeConfig({ staticExtensions: ['a', 1] as any });
-    assertEquals(config1.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']);
+    assertEquals(config1.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
 
     // deno-lint-ignore no-explicit-any
     const config2 = new RuntimeConfig({ staticExtensions: 'not-an-array' as any });
-    assertEquals(config2.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']);
+    assertEquals(config2.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
   });
 
   await t.step('should use default vendors when no vendors provided', () => {

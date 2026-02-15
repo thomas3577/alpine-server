@@ -3,6 +3,9 @@ import { isHttpError } from '@oak/oak';
 import type { AlpineAppState } from '../types.ts';
 import * as log from '@std/log';
 
+/**
+ * Converts thrown errors into HTTP responses with optional debug details.
+ */
 export const errorHandler = async (ctx: Context<AlpineAppState>, next: () => Promise<unknown>): Promise<void> => {
   try {
     await next();

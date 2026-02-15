@@ -18,6 +18,9 @@ const buildCspHeaderValue = (): string => {
   ].join('; ');
 };
 
+/**
+ * Applies secure default response headers and CSP for HTML responses.
+ */
 export const securityHeaders = async (context: Context<AlpineAppState>, next: () => Promise<unknown>): Promise<void> => {
   await next();
 

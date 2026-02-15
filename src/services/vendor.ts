@@ -5,13 +5,30 @@ interface CacheEntry {
   headers: Headers;
 }
 
+/**
+ * In-memory cache for vendor CDN assets.
+ */
 export class VendorCache {
   #memoryCache = new Map<string, CacheEntry>();
 
+  /**
+   * Returns a cached entry for a URL when available.
+   *
+   * @param {string} path Vendor URL key.
+   *
+   * @returns {CacheEntry | null} Cached entry or null if not found.
+   */
   get(path: string): CacheEntry | null {
     return this.#memoryCache.get(path) || null;
   }
 
+  /**
+   * Fetches a vendor asset from CDN and caches it in memory.
+   *
+   * @param {string} url Vendor CDN URL.
+   *
+   * @returns {Promise<CacheEntry>} Cached entry or newly fetched entry.
+   */
   async fetch(url: string): Promise<CacheEntry> {
     const response = await fetch(url);
     if (!response.ok) {
@@ -37,6 +54,13 @@ export class VendorCache {
     return entry;
   }
 
+  /**
+   * Reads a vendor asset from cache or fetches and stores it.
+   *
+   * @param {string} url Vendor CDN URL.
+   *
+   * @returns {Promise<CacheEntry>} Cached entry or newly fetched entry.
+   */
   async getOrFetch(url: string): Promise<CacheEntry> {
     const cached = this.get(url);
     if (cached) {
@@ -47,4 +71,5 @@ export class VendorCache {
   }
 }
 
+/** Shared vendor cache instance used by vendor middleware/routes. */
 export const vendorCache = new VendorCache();

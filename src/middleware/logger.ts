@@ -2,6 +2,9 @@ import type { Context } from '@oak/oak';
 import { bold, cyan, green } from '@std/fmt/colors';
 import { info } from '@std/log';
 
+/**
+ * Logs request method, path, and measured response time.
+ */
 export const logger = async (context: Context, next: () => Promise<unknown>): Promise<void> => {
   await next();
 

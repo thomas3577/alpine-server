@@ -37,7 +37,7 @@ export class AlpineApp {
   /**
    * Creates a new AlpineApp instance.
    *
-   * @param config - Configuration for the application and Oak server
+   * @param {AlpineAppConfig | undefined} config - Configuration for the application and Oak server
    */
   constructor(config?: AlpineAppConfig) {
     this.#app = new Application<AlpineAppState>();
@@ -48,8 +48,8 @@ export class AlpineApp {
    * Registers a middleware function that will be executed after system
    * middlewares but before routes.
    *
-   * @param middleware - Middleware function to register
-   * @returns The AlpineApp instance for method chaining
+   * @param {Middleware<AlpineAppState>} middleware - Middleware function to register
+   * @returns {this} The AlpineApp instance for method chaining
    *
    * @example
    * ```ts
@@ -69,8 +69,8 @@ export class AlpineApp {
    * Appends a router to the application. Routes will be registered after
    * all middlewares but before internal routes (updater, static files, etc.).
    *
-   * @param router - Oak Router instance to append
-   * @returns The AlpineApp instance for method chaining
+   * @param {Router} router - Oak Router instance to append
+   * @returns {this} The AlpineApp instance for method chaining
    *
    * @example
    * ```ts

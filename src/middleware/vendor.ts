@@ -2,6 +2,11 @@ import { Router } from '@oak/oak';
 import { vendorCache } from '../services/vendor.ts';
 import type { IVendors } from '../types.ts';
 
+/**
+ * Builds a router that proxies and caches configured vendor CDN assets.
+ *
+ * @param vendors Vendor route configuration.
+ */
 export const createVendorRouter = (vendors: IVendors) => {
   const prefix = (vendors.route && vendors.route !== '/') ? vendors.route : undefined;
   const router = new Router({ prefix });

@@ -56,6 +56,9 @@ const shouldBlockPath = (pathname: string): boolean => {
   return blockedPathPatterns.some((re) => re.test(pathname));
 };
 
+/**
+ * Blocks common exploit-scan requests and applies lightweight rate limiting.
+ */
 export const botShield = async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
   const pathname = ctx.request.url.pathname;
 

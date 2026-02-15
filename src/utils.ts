@@ -14,6 +14,12 @@ const isPathInside = (root: string, candidate: string): boolean => {
  * - Missing/empty input => return defaultRoot
  * - Relative paths => resolved against cwd
  * - Absolute paths => allowed only if inside cwd
+ *
+ * @param {unknown} value User input for static files path.
+ * @param {string} defaultRoot Default static files path to use when input is missing/empty.
+ *
+ * @returns {string} Resolved absolute path to static files root.
+ * @throws {Error} If resolved path is outside cwd.
  */
 export const resolveStaticFilesPath = (value: unknown, defaultRoot: string): string => {
   const cwd = Deno.cwd();

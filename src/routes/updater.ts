@@ -1,10 +1,10 @@
 import { Router } from '@oak/oak';
-import { updaterFilename } from '../config.ts';
+import { UPDATER_FILENAME } from '../config.ts';
 import type { AlpineAppState } from '../types.ts';
 
 const updater = `const sse = new EventSource('/sse'); sse.onopen = () => sse.addEventListener('reload', () => location.reload());`;
 const updateDummy = ';';
-const router: Router<AlpineAppState> = new Router<AlpineAppState>({ prefix: `/${updaterFilename}` });
+const router: Router<AlpineAppState> = new Router<AlpineAppState>({ prefix: `/${UPDATER_FILENAME}` });
 
 router.get('/', (ctx) => {
   const { hostname } = ctx.request.url;
@@ -13,4 +13,4 @@ router.get('/', (ctx) => {
   ctx.response.body = hostname === 'localhost' ? updater : updateDummy;
 });
 
-export { router, updaterFilename };
+export { router, UPDATER_FILENAME as updaterFilename };

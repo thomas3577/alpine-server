@@ -1,5 +1,8 @@
 import type { Context } from '@oak/oak';
 
+/**
+ * Measures request duration and exposes timing headers.
+ */
 export const timing = async (context: Context, next: () => Promise<unknown>): Promise<void> => {
   const start = performance.now();
 

@@ -1,5 +1,20 @@
 # Usage
 
+## CLI Quickstart
+
+Create a new project scaffold:
+
+```sh
+deno run -A jsr:@dx/alpine-server/cli create my-app
+```
+
+Then run the generated app:
+
+```sh
+cd my-app
+deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts
+```
+
 ## Basic Setup
 
 ```typescript

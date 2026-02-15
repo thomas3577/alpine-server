@@ -31,6 +31,20 @@ const app = new AlpineApp({
 await app.run();
 ```
 
+## CLI
+
+Create a new Alpine Server project scaffold:
+
+```sh
+deno run -A jsr:@dx/alpine-server/cli create my-app
+```
+
+With options:
+
+```sh
+deno run -A jsr:@dx/alpine-server/cli create my-app --port 3000 --force
+```
+
 ## Documentation
 
 For more detailed information, please refer to the documentation in the [docs](./docs) folder:

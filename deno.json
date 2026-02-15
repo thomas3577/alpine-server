@@ -1,9 +1,9 @@
 {
   "name": "@dx/alpine-server",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "license": "MIT",
   "tasks": {
-    "test": "deno test --allow-run",
+    "test": "deno test --allow-run --allow-read --allow-write",
     "check": "deno fmt --check && deno lint",
     "update": "deno outdated --update --latest"
   },
@@ -18,7 +18,8 @@
     "@std/path": "jsr:@std/path@^1.1.4"
   },
   "exports": {
-    ".": "./mod.ts"
+    ".": "./mod.ts",
+    "./cli": "./cli.ts"
   },
   "publish": {
     "exclude": [

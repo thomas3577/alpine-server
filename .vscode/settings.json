@@ -1,5 +1,6 @@
 {
   "deno.enable": true,
+  "deno.lint": true,
   "deno.config": "./deno.json",
   "deno.internalDebug": true,
   "editor.defaultFormatter": "denoland.vscode-deno",

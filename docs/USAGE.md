@@ -5,7 +5,7 @@
 Create a new project scaffold:
 
 ```sh
-deno run -A jsr:@dx/alpine-server/cli create my-app
+deno run -A jsr:@dx/alpine-server/cli new my-app
 ```
 
 Then run the generated app:

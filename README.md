@@ -36,13 +36,13 @@ await app.run();
 Create a new Alpine Server project scaffold:
 
 ```sh
-deno run -A jsr:@dx/alpine-server/cli create my-app
+deno run -A jsr:@dx/alpine-server/cli new my-app
 ```
 
 With options:
 
 ```sh
-deno run -A jsr:@dx/alpine-server/cli create my-app --port 3000 --force
+deno run -A jsr:@dx/alpine-server/cli new my-app --port 3000 --force
 ```
 
 ## Documentation

@@ -127,23 +127,27 @@ const VSCODE_SETTINGS_TEMPLATE = `{
 }
 `;
 
-const VSCODE_LAUNCH_TEMPLATE = `{
+const VSCODE_LAUNCH_TEMPLATE = (port: number) => `{
   "version": "0.2.0",
   "configurations": [
     {
       "name": "Run app",
-      "type": "deno",
+      "type": "node",
       "request": "launch",
-      "program": "\${workspaceFolder}/main.ts",
       "cwd": "\${workspaceFolder}",
+      "runtimeExecutable": "deno",
       "runtimeArgs": [
+        "run",
         "--inspect",
         "--allow-net",
         "--allow-read",
         "--allow-write",
         "--allow-env",
-        "--watch"
+        "--watch",
+        "main.ts"
       ],
+      "attachSimplePort": 9229,
+      "console": "integratedTerminal",
       "serverReadyAction": {
         "action": "startDebugging",
         "pattern": "URL: http",
@@ -154,7 +158,7 @@ const VSCODE_LAUNCH_TEMPLATE = `{
       "name": "client",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:8000"
+      "url": "http://localhost:${port}"
     }
   ]
 }
@@ -222,7 +226,7 @@ export const buildScaffoldFiles = (projectName: string, port: number): Record<st
   [join('public', 'main.js')]: MAIN_JS_TEMPLATE,
   [join('public', 'style.css')]: STYLE_CSS_TEMPLATE,
   [join('.vscode', 'settings.json')]: VSCODE_SETTINGS_TEMPLATE,
-  [join('.vscode', 'launch.json')]: VSCODE_LAUNCH_TEMPLATE,
+  [join('.vscode', 'launch.json')]: VSCODE_LAUNCH_TEMPLATE(port),
 });
 
 const isDirectoryEmpty = async (directory: string): Promise<boolean> => {

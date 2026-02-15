@@ -51,7 +51,9 @@ Deno.test('buildScaffoldFiles returns expected files', () => {
 
   assertStringIncludes(files['main.ts'], 'port: 5000');
   assertStringIncludes(files['README.md'], '# demo-app');
-  assertStringIncludes(files[join('.vscode', 'launch.json')], '"type": "deno"');
+  assertStringIncludes(files[join('.vscode', 'launch.json')], '"type": "node"');
+  assertStringIncludes(files[join('.vscode', 'launch.json')], '"runtimeExecutable": "deno"');
+  assertStringIncludes(files[join('.vscode', 'launch.json')], '"url": "http://localhost:5000"');
 });
 
 Deno.test('createProject writes scaffold files', async () => {

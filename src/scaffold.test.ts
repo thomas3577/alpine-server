@@ -3,6 +3,11 @@ import { basename, join } from '@std/path';
 
 import { buildScaffoldFiles, createProject, parseCliArgs } from './scaffold.ts';
 
+const asTextContent = (content: string | Uint8Array): string => {
+  assertEquals(typeof content, 'string');
+  return content;
+};
+
 Deno.test('parseCliArgs', async (t) => {
   await t.step('returns help when no args are passed', () => {
     const parsed = parseCliArgs([]);
@@ -50,13 +55,13 @@ Deno.test('buildScaffoldFiles returns expected files', () => {
   assert(join('.vscode', 'settings.json') in files);
   assert(join('.vscode', 'launch.json') in files);
 
-  assertStringIncludes(files['main.ts'], 'port: 5000');
-  assertStringIncludes(files['README.md'], '# demo-app');
-  assertStringIncludes(files[join('public', 'index.html')], 'href="favicon.png"');
+  assertStringIncludes(asTextContent(files['main.ts']), 'port: 5000');
+  assertStringIncludes(asTextContent(files['README.md']), '# demo-app');
+  assertStringIncludes(asTextContent(files[join('public', 'index.html')]), 'href="favicon.png"');
   assert(files[join('public', 'favicon.png')] instanceof Uint8Array);
-  assertStringIncludes(files[join('.vscode', 'launch.json')], '"type": "node"');
-  assertStringIncludes(files[join('.vscode', 'launch.json')], '"runtimeExecutable": "deno"');
-  assertStringIncludes(files[join('.vscode', 'launch.json')], '"url": "http://localhost:5000"');
+  assertStringIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"type": "node"');
+  assertStringIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"runtimeExecutable": "deno"');
+  assertStringIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"url": "http://localhost:5000"');
 });
 
 Deno.test('createProject writes scaffold files', async () => {

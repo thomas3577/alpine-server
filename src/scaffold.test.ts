@@ -44,6 +44,7 @@ Deno.test('buildScaffoldFiles returns expected files', () => {
   assert('deno.json' in files);
   assert('README.md' in files);
   assert(join('public', 'index.html') in files);
+  assert(join('public', 'favicon.png') in files);
   assert(join('public', 'main.js') in files);
   assert(join('public', 'style.css') in files);
   assert(join('.vscode', 'settings.json') in files);
@@ -51,6 +52,8 @@ Deno.test('buildScaffoldFiles returns expected files', () => {
 
   assertStringIncludes(files['main.ts'], 'port: 5000');
   assertStringIncludes(files['README.md'], '# demo-app');
+  assertStringIncludes(files[join('public', 'index.html')], 'href="favicon.png"');
+  assert(files[join('public', 'favicon.png')] instanceof Uint8Array);
   assertStringIncludes(files[join('.vscode', 'launch.json')], '"type": "node"');
   assertStringIncludes(files[join('.vscode', 'launch.json')], '"runtimeExecutable": "deno"');
   assertStringIncludes(files[join('.vscode', 'launch.json')], '"url": "http://localhost:5000"');
@@ -67,13 +70,17 @@ Deno.test('createProject writes scaffold files', async () => {
     force: false,
   });
 
-  assertEquals(written.length, 8);
+  assertEquals(written.length, 9);
 
   const main = await Deno.readTextFile(join(targetDir, 'main.ts'));
   assertStringIncludes(main, 'port: 4100');
 
   const html = await Deno.readTextFile(join(targetDir, 'public', 'index.html'));
   assertStringIncludes(html, '<title>new-app</title>');
+  assertStringIncludes(html, 'href="favicon.png"');
+
+  const favicon = await Deno.readFile(join(targetDir, 'public', 'favicon.png'));
+  assertEquals(favicon.length > 0, true);
 
   const vscodeSettings = await Deno.readTextFile(join(targetDir, '.vscode', 'settings.json'));
   assertStringIncludes(vscodeSettings, '"deno.enable": true');

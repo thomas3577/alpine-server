@@ -11,4 +11,6 @@ const app = new AlpineApp({
   },
 });
 
+console.log(`URL: http://localhost:8000`);
+
 await app.run();

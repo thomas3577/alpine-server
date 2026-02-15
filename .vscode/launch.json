@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "debug",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/example",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect",
+        "--allow-net",
+        "--allow-read",
+        "--allow-write",
+        "--allow-env",
+        "--watch",
+        "main.ts"
+      ],
+      "attachSimplePort": 9229,
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "pattern": "URL: http",
+        "name": "client"
+      }
+    },
+    {
+      "name": "client",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8000"
+    }
+  ]
+}

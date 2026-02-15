@@ -4,7 +4,9 @@ import { basename, join } from '@std/path';
 import { buildScaffoldFiles, createProject, parseCliArgs } from './scaffold.ts';
 
 const asTextContent = (content: string | Uint8Array): string => {
-  assertEquals(typeof content, 'string');
+  if (typeof content !== 'string') {
+    throw new TypeError('Expected scaffold content to be text');
+  }
   return content;
 };
 

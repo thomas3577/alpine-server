@@ -4,11 +4,10 @@ import type { AlpineAppState } from '../types.ts';
 
 const NOOP_SCRIPT = ';';
 const updaterScriptUrl = new URL('./updater-client.js', import.meta.url);
-const localHostnames = new Set(['localhost', '127.0.0.1', '::1']);
 let updaterScriptPromise: Promise<string> | undefined;
 
-const getUpdaterScript = async (hostname: string): Promise<string> => {
-  if (!localHostnames.has(hostname)) {
+const getUpdaterScript = async (dev: boolean): Promise<string> => {
+  if (!dev) {
     return NOOP_SCRIPT;
   }
 
@@ -17,22 +16,13 @@ const getUpdaterScript = async (hostname: string): Promise<string> => {
       try {
         const permission = await Deno.permissions.query({ name: 'read', path: updaterScriptUrl });
         if (permission.state !== 'granted') {
+          console.warn('Read permission for updater script is not granted. Returning no-op script.');
           return NOOP_SCRIPT;
         }
-      } catch {
-        return NOOP_SCRIPT;
-      }
 
-      try {
         return await Deno.readTextFile(updaterScriptUrl);
       } catch (error) {
-        if (
-          error instanceof Deno.errors.PermissionDenied ||
-          error instanceof Deno.errors.NotFound
-        ) {
-          return NOOP_SCRIPT;
-        }
-
+        console.error('Failed to read updater script:', error);
         return NOOP_SCRIPT;
       }
     })();
@@ -44,10 +34,8 @@ const getUpdaterScript = async (hostname: string): Promise<string> => {
 const router: Router<AlpineAppState> = new Router<AlpineAppState>({ prefix: `/${UPDATER_FILENAME}` });
 
 router.get('/', async (ctx) => {
-  const { hostname } = ctx.request.url;
-
-  ctx.response.body = await getUpdaterScript(hostname);
+  ctx.response.body = await getUpdaterScript(ctx.state.config.dev);
   ctx.response.headers.append('content-type', 'application/javascript; charset=utf-8');
 });
 
-export { router, UPDATER_FILENAME as updaterFilename };
+export { router };

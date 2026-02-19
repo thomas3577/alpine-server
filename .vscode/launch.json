@@ -9,12 +9,11 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
-        "--inspect",
+        "--inspect-wait=127.0.0.1:9229",
         "--allow-net",
         "--allow-read",
         "--allow-write",
         "--allow-env",
-        "--watch",
         "main.ts"
       ],
       "attachSimplePort": 9229,

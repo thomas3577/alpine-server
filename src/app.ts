@@ -3,7 +3,6 @@ import type { Middleware, Router } from '@oak/oak';
 import { staticFiles } from './middleware/static-files.ts';
 import { errorHandler } from './middleware/error-handler.ts';
 import { logger } from './middleware/logger.ts';
-import { botShield } from './middleware/bot-shield.ts';
 import { timing } from './middleware/timing.ts';
 import { securityHeaders } from './middleware/security-headers.ts';
 import { staticFileWatch } from './services/sse.ts';
@@ -116,7 +115,6 @@ export class AlpineApp {
     this.#app.use(logger);
     this.#app.use(timing);
     this.#app.use(securityHeaders);
-    this.#app.use(botShield);
     this.#app.use(createVendorRouter(runtime.vendors).routes());
 
     // User middlewares

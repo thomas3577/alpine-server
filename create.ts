@@ -8,12 +8,35 @@ import { basename, resolve } from '@std/path';
 
 import { createProject, getHelpText, parseCliArgs } from './src/scaffold.ts';
 
+const CREATE_HELP_TEXT = `alpine-server template
+
+Usage:
+  deno create jsr:@dx/alpine-server -- <project-name> [options]
+
+Options:
+  --port <number>   Server port in main.ts (default: 8000)
+  --force           Allow creating in a non-empty directory
+  -h, --help        Show this help message
+`;
+
+export const normalizeCreateArgs = (args: string[]): string[] => {
+  if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
+    return ['help'];
+  }
+
+  if (args[0] === 'new' || args[0] === 'help') {
+    return args;
+  }
+
+  return ['new', ...args];
+};
+
 const main = async () => {
   try {
-    const parsed = parseCliArgs(['new', ...Deno.args]);
+    const parsed = parseCliArgs(normalizeCreateArgs(Deno.args));
 
     if (parsed.command === 'help') {
-      console.log(getHelpText());
+      console.log(CREATE_HELP_TEXT);
       return;
     }
 
@@ -35,6 +58,8 @@ const main = async () => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);
     console.log('');
+    console.log(CREATE_HELP_TEXT);
+    console.log('Alternative:');
     console.log(getHelpText());
     Deno.exit(1);
   }

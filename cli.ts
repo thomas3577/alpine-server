@@ -1,3 +1,9 @@
+/**
+ * CLI module entrypoint for alpine-server project scaffolding.
+ *
+ * Parses command-line arguments and creates a new alpine-server project
+ * with optional target directory, port, and force flags.
+ */
 import { basename, resolve } from '@std/path';
 
 import { createProject, getHelpText, parseCliArgs } from './src/scaffold.ts';

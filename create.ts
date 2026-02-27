@@ -1,3 +1,9 @@
+/**
+ * Convenience CLI entrypoint for creating a new alpine-server project.
+ *
+ * Runs the scaffold command in `new` mode and supports the same
+ * target directory and option handling as the main CLI.
+ */
 import { basename, resolve } from '@std/path';
 
 import { createProject, getHelpText, parseCliArgs } from './src/scaffold.ts';

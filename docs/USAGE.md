@@ -5,7 +5,19 @@
 Create a new project scaffold:
 
 ```sh
+deno create jsr:@dx/alpine-server my-app
+```
+
+Alternative using the explicit CLI entrypoint:
+
+```sh
 deno run -A jsr:@dx/alpine-server/cli new my-app
+```
+
+With options:
+
+```sh
+deno create jsr:@dx/alpine-server my-app --port 3000 --force
 ```
 
 Then run the generated app:

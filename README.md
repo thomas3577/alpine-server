@@ -39,10 +39,20 @@ Create a new Alpine Server project scaffold:
 deno run -A jsr:@dx/alpine-server/cli new my-app
 ```
 
+Or with Deno 2.7+ create templates:
+
+```sh
+deno create jsr:@dx/alpine-server my-app
+```
+
 With options:
 
 ```sh
 deno run -A jsr:@dx/alpine-server/cli new my-app --port 3000 --force
+```
+
+```sh
+deno create jsr:@dx/alpine-server my-app --port 3000 --force
 ```
 
 ## Documentation

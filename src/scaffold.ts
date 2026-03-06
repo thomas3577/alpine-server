@@ -1,5 +1,7 @@
 import { basename, dirname, join, resolve } from '@std/path';
 
+import denoConfig from '../deno.json' with { type: 'json' };
+
 export interface CreateProjectOptions {
   targetDir: string;
   projectName: string;
@@ -123,7 +125,7 @@ Created with @dx/alpine-server CLI.
 
 const DENO_JSON_TEMPLATE = `{
   "imports": {
-    "@dx/alpine-server": "jsr:@dx/alpine-server"
+    "@dx/alpine-server": "jsr:@dx/alpine-server@${denoConfig.version}"
   }
 }
 `;

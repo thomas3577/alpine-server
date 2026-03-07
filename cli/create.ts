@@ -6,7 +6,7 @@
  */
 import { basename, resolve } from '@std/path';
 
-import { getHelpText, parseCliArgs } from './parser.ts';
+import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
 import { createProject } from './scaffold.ts';
 
 const CREATE_HELP_TEXT = `alpine-server template
@@ -21,6 +21,10 @@ Options:
 `;
 
 export const normalizeCreateArgs = (args: string[]): string[] => {
+  if (args.includes('-v') || args.includes('--version')) {
+    return ['version'];
+  }
+
   if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
     return ['help'];
   }
@@ -38,6 +42,11 @@ const main = async () => {
 
     if (parsed.command === 'help') {
       console.log(CREATE_HELP_TEXT);
+      return;
+    }
+
+    if (parsed.command === 'version') {
+      console.log(getVersion());
       return;
     }
 

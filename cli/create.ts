@@ -6,7 +6,7 @@
  */
 import { basename, resolve } from '@std/path';
 
-import { createProject, getHelpText, parseCliArgs } from './src/scaffold.ts';
+import { createProject, getHelpText, parseCliArgs } from './scaffold.ts';
 
 const CREATE_HELP_TEXT = `alpine-server template
 
@@ -53,7 +53,7 @@ const main = async () => {
     console.log(`Created alpine-server project in ${targetDir}`);
     console.log('Run:');
     console.log(`  cd ${parsed.targetDir}`);
-    console.log('  deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts');
+    console.log('  deno task dev');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);

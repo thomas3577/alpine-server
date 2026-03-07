@@ -9,23 +9,36 @@ export interface CreateProjectOptions {
   force: boolean;
 }
 
+export interface AddPageOptions {
+  pageName: string;
+  force: boolean;
+}
+
 export interface ParsedCliArgs {
-  command: 'new' | 'help';
+  command: 'new' | 'help' | 'add';
   targetDir: string;
   port: number;
   force: boolean;
+  pageName: string;
 }
 
 type ScaffoldFileContent = string | Uint8Array;
 
-const HELP_TEXT = `alpine-server CLI
+const VALID_PAGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const HELP_TEXT = `alpine-server CLI (alp)
 
 Usage:
-  deno run -A jsr:@dx/alpine-server/cli new <project-name> [options]
+  alp new <project-name> [options]
+  alp add <page-name> [options]
+
+Commands:
+  new <project-name>   Create a new alpine-server project
+  add <page-name>      Add a new page to the current project
 
 Options:
-  --port <number>   Server port in app.ts (default: 8000)
-  --force           Allow creating in a non-empty directory
+  --port <number>   Server port in app.ts (default: 8000, only for new)
+  --force           Overwrite existing files
   -h, --help        Show this help message
 `;
 
@@ -67,6 +80,28 @@ const INDEX_HTML_TEMPLATE = (projectName: string) =>
   </body>
 </html>
 `;
+
+const PAGE_INDEX_HTML_TEMPLATE = (pageName: string) => {
+  const title = pageName.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="/style.css">
+    <script defer type="module" src="/main.js"></script>
+  </head>
+  <body x-data="{ }">
+    <main>
+      <h1>${title}</h1>
+      <p><a href="/">Home</a></p>
+    </main>
+  </body>
+</html>
+`;
+};
 
 const FAVICON_PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACPTkDJAAACLklEQVRYCe1UQUsbURB+72Uj2iIi4kH6G+JazKpUU+Oa0pZCoYgHDz148dCLh170IF1vOQjtTfBmL4JexUokFXNJYtqi6aUohWLx4EG9WLVEM85ENmyeu5v1/gaStzPzzftmvzf7GFOmFFAKKAU8FNANc7zTMJe6JybCHpBA4amtnxb9vMDcLdFpDE8ClD9ijqN9eai1jWSzKxduWL8YEQODD4ThjM8mByOWjBdyQDeGZpD8U6UG/wDg5b+r4/X+/tfNMtbPd5ITjhpxU6JGAZR8Dgnfu27M2bcmLl5sb6ePXfOOoEzuSN1RoqKAZVkCyRc8yWkHYNFLgK3u2PMO54bysx/57Ta1SvB43NJOzjKfUaIxeTN3n/8OaQ2Jndz6Hzlfj9yJt2eCRwxzGQ961Jms94yDeRjWtMT3bOqXjb0PuV1DTQgh+DwGzuxgkBWP6lGpVMro0cTjIHg/jNjNpze5Fk7gdJz6AeUcMNYOrLzZZZhPKEefGL2RjPPy7SOoDGExl8qHhYjjV3/kVeAWx7lpKQPb6Oodfkb5oE3Y5FRTvQd+5NPFkAjF8Mo4oERQwyYeXF/Dqt5jvqGaek04yQlfbYCcnfzGfiPXBnDI9sgPbtAAwFb0qPmWaryakMkJW9MABQqF1N8mwZ+iEkXygxoOZqjMYBGv8XdUIzfhRk64mpuQArZFBl618v/na/hmfXYs6Co4n94tfE0Snj5PWqkhWpUpBZQCSgGlgKzADRwQ0F0sf3NzAAAAAElFTkSuQmCC';
@@ -124,6 +159,10 @@ Created with @dx/alpine-server CLI.
 `;
 
 const DENO_JSON_TEMPLATE = `{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts",
+    "alp": "deno run -A jsr:@dx/alpine-server/cli"
+  },
   "imports": {
     "@dx/alpine-server": "jsr:@dx/alpine-server@${denoConfig.version}"
   }
@@ -180,26 +219,11 @@ const VSCODE_LAUNCH_TEMPLATE = (port: number) =>
 
 export const getHelpText = (): string => HELP_TEXT;
 
-export const parseCliArgs = (args: string[]): ParsedCliArgs => {
-  if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
-    return { command: 'help', targetDir: '', port: 8000, force: false };
-  }
-
-  const [command, ...rest] = args;
-
-  if (command !== 'new') {
-    throw new Error(`Unknown command: ${command}`);
-  }
-
-  const targetDir = rest[0];
-  if (!targetDir || targetDir.startsWith('-')) {
-    throw new Error('Missing required <project-name> argument for new command');
-  }
-
+const parseOptions = (rest: string[], startIndex: number): { port: number; force: boolean } => {
   let port = 8000;
   let force = false;
 
-  for (let index = 1; index < rest.length; index += 1) {
+  for (let index = startIndex; index < rest.length; index += 1) {
     const token = rest[index];
 
     if (token === '--force') {
@@ -224,12 +248,43 @@ export const parseCliArgs = (args: string[]): ParsedCliArgs => {
     throw new Error(`Unknown option: ${token}`);
   }
 
-  return {
-    command: 'new',
-    targetDir,
-    port,
-    force,
-  };
+  return { port, force };
+};
+
+export const parseCliArgs = (args: string[]): ParsedCliArgs => {
+  if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
+    return { command: 'help', targetDir: '', port: 8000, force: false, pageName: '' };
+  }
+
+  const [command, ...rest] = args;
+
+  if (command === 'new') {
+    const targetDir = rest[0];
+    if (!targetDir || targetDir.startsWith('-')) {
+      throw new Error('Missing required <project-name> argument for new command');
+    }
+
+    const { port, force } = parseOptions(rest, 1);
+
+    return { command: 'new', targetDir, port, force, pageName: '' };
+  }
+
+  if (command === 'add') {
+    const pageName = rest[0];
+    if (!pageName || pageName.startsWith('-')) {
+      throw new Error('Missing required <page-name> argument for add command');
+    }
+
+    if (!VALID_PAGE_NAME.test(pageName)) {
+      throw new Error(`Invalid page name: ${pageName}. Use lowercase letters, numbers, and hyphens only.`);
+    }
+
+    const { force } = parseOptions(rest, 1);
+
+    return { command: 'add', targetDir: '', port: 8000, force, pageName };
+  }
+
+  throw new Error(`Unknown command: ${command}`);
 };
 
 export const buildScaffoldFiles = (projectName: string, port: number): Record<string, ScaffoldFileContent> => ({
@@ -242,6 +297,10 @@ export const buildScaffoldFiles = (projectName: string, port: number): Record<st
   [join('public', 'style.css')]: STYLE_CSS_TEMPLATE,
   [join('.vscode', 'settings.json')]: VSCODE_SETTINGS_TEMPLATE,
   [join('.vscode', 'launch.json')]: VSCODE_LAUNCH_TEMPLATE(port),
+});
+
+export const buildPageFiles = (pageName: string): Record<string, string> => ({
+  'index.html': PAGE_INDEX_HTML_TEMPLATE(pageName),
 });
 
 const isDirectoryEmpty = async (directory: string): Promise<boolean> => {
@@ -265,6 +324,15 @@ const ensureTargetDir = async (targetDir: string, force: boolean): Promise<void>
   await Deno.mkdir(targetDir, { recursive: true });
 };
 
+const directoryExists = async (path: string): Promise<boolean> => {
+  try {
+    const stat = await Deno.stat(path);
+    return stat.isDirectory;
+  } catch (_error) {
+    return false;
+  }
+};
+
 export const createProject = async (options: CreateProjectOptions): Promise<string[]> => {
   const targetDir = resolve(options.targetDir);
   const projectName = options.projectName.trim() || basename(targetDir);
@@ -282,6 +350,33 @@ export const createProject = async (options: CreateProjectOptions): Promise<stri
     } else {
       await Deno.writeTextFile(absolutePath, content);
     }
+    writtenFiles.push(absolutePath);
+  }
+
+  return writtenFiles;
+};
+
+export const addPage = async (options: AddPageOptions): Promise<string[]> => {
+  const publicDir = resolve('public');
+
+  if (!(await directoryExists(publicDir))) {
+    throw new Error('No public/ directory found. Are you in an alpine-server project?');
+  }
+
+  const pageDir = join(publicDir, options.pageName);
+
+  if ((await directoryExists(pageDir)) && !options.force) {
+    throw new Error(`Page "${options.pageName}" already exists. Use --force to overwrite.`);
+  }
+
+  await Deno.mkdir(pageDir, { recursive: true });
+
+  const files = buildPageFiles(options.pageName);
+  const writtenFiles: string[] = [];
+
+  for (const [relativePath, content] of Object.entries(files)) {
+    const absolutePath = join(pageDir, relativePath);
+    await Deno.writeTextFile(absolutePath, content);
     writtenFiles.push(absolutePath);
   }
 

@@ -24,7 +24,42 @@ Then run the generated app:
 
 ```sh
 cd my-app
-deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts
+deno task dev
+```
+
+## Adding Pages
+
+Inside your project, add new pages using the local CLI:
+
+```sh
+deno task alp add about
+deno task alp add contact
+```
+
+This creates `public/<page-name>/index.html` with an Alpine.js template that shares the root `style.css` and `main.js`.
+
+Page names must be lowercase with optional hyphens (e.g. `about`, `about-us`, `contact`).
+
+Use `--force` to overwrite an existing page:
+
+```sh
+deno task alp add about --force
+```
+
+### Global CLI Installation
+
+For convenience, install the CLI globally:
+
+```sh
+deno install -gA jsr:@dx/alpine-server/cli --name alp
+```
+
+Then use it directly:
+
+```sh
+alp new my-app
+cd my-app
+alp add about
 ```
 
 ## Basic Setup

@@ -1,6 +1,6 @@
 {
   "name": "@dx/alpine-server",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "license": "MIT",
   "tasks": {
     "test": "deno test --allow-run --allow-read --allow-write",
@@ -19,8 +19,8 @@
   },
   "exports": {
     ".": "./mod.ts",
-    "./cli": "./cli.ts",
-    "./create": "./create.ts"
+    "./cli": "./cli/cli.ts",
+    "./create": "./cli/create.ts"
   },
   "publish": {
     "exclude": [

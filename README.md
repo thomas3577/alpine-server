@@ -55,6 +55,28 @@ deno run -A jsr:@dx/alpine-server/cli new my-app --port 3000 --force
 deno create jsr:@dx/alpine-server -- my-app --port 3000 --force
 ```
 
+### Local CLI (`alp`)
+
+After creating a project, the local CLI is available as a Deno task:
+
+```sh
+deno task alp add about
+deno task alp add contact --force
+```
+
+For global usage, install with:
+
+```sh
+deno install -gA jsr:@dx/alpine-server/cli --name alp
+```
+
+Then use directly:
+
+```sh
+alp new my-app
+alp add about
+```
+
 ## Documentation
 
 For more detailed information, please refer to the documentation in the [docs](./docs) folder:

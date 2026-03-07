@@ -74,6 +74,7 @@ Then use directly:
 
 ```sh
 alp new my-app
+cd my-app
 alp add about
 ```
 

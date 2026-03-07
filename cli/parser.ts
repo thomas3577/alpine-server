@@ -42,10 +42,16 @@ const parseOptions = (rest: string[], startIndex: number): { port: number; force
       if (!value) {
         throw new Error('Missing value for --port');
       }
-      const parsedPort = Number.parseInt(value, 10);
-      if (!Number.isInteger(parsedPort) || parsedPort <= 0 || parsedPort > 65535) {
+
+      if (!/^\d+$/.test(value)) {
         throw new Error(`Invalid port: ${value}`);
       }
+
+      const parsedPort = Number.parseInt(value, 10);
+      if (parsedPort <= 0 || parsedPort > 65535) {
+        throw new Error(`Invalid port: ${value}`);
+      }
+
       port = parsedPort;
       index += 1;
       continue;

@@ -1,33 +1,8 @@
-import { basename, dirname, join, resolve } from '@std/path';
+import { join } from '@std/path';
 
 import denoConfig from '../deno.json' with { type: 'json' };
 
-export interface CreateProjectOptions {
-  targetDir: string;
-  projectName: string;
-  port: number;
-  force: boolean;
-}
-
-export interface ParsedCliArgs {
-  command: 'new' | 'help';
-  targetDir: string;
-  port: number;
-  force: boolean;
-}
-
-type ScaffoldFileContent = string | Uint8Array;
-
-const HELP_TEXT = `alpine-server CLI
-
-Usage:
-  deno run -A jsr:@dx/alpine-server/cli new <project-name> [options]
-
-Options:
-  --port <number>   Server port in app.ts (default: 8000)
-  --force           Allow creating in a non-empty directory
-  -h, --help        Show this help message
-`;
+import type { ScaffoldFileContent } from './types.ts';
 
 const MAIN_TS_TEMPLATE = (port: number) =>
   `import { AlpineApp } from '@dx/alpine-server';
@@ -67,6 +42,28 @@ const INDEX_HTML_TEMPLATE = (projectName: string) =>
   </body>
 </html>
 `;
+
+export const PAGE_INDEX_HTML_TEMPLATE = (pageName: string) => {
+  const title = pageName.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="/style.css">
+    <script defer type="module" src="/main.js"></script>
+  </head>
+  <body x-data="{ }">
+    <main>
+      <h1>${title}</h1>
+      <p><a href="/">Home</a></p>
+    </main>
+  </body>
+</html>
+`;
+};
 
 const FAVICON_PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACPTkDJAAACLklEQVRYCe1UQUsbURB+72Uj2iIi4kH6G+JazKpUU+Oa0pZCoYgHDz148dCLh170IF1vOQjtTfBmL4JexUokFXNJYtqi6aUohWLx4EG9WLVEM85ENmyeu5v1/gaStzPzzftmvzf7GFOmFFAKKAU8FNANc7zTMJe6JybCHpBA4amtnxb9vMDcLdFpDE8ClD9ijqN9eai1jWSzKxduWL8YEQODD4ThjM8mByOWjBdyQDeGZpD8U6UG/wDg5b+r4/X+/tfNMtbPd5ITjhpxU6JGAZR8Dgnfu27M2bcmLl5sb6ePXfOOoEzuSN1RoqKAZVkCyRc8yWkHYNFLgK3u2PMO54bysx/57Ta1SvB43NJOzjKfUaIxeTN3n/8OaQ2Jndz6Hzlfj9yJt2eCRwxzGQ961Jms94yDeRjWtMT3bOqXjb0PuV1DTQgh+DwGzuxgkBWP6lGpVMro0cTjIHg/jNjNpze5Fk7gdJz6AeUcMNYOrLzZZZhPKEefGL2RjPPy7SOoDGExl8qHhYjjV3/kVeAWx7lpKQPb6Oodfkb5oE3Y5FRTvQd+5NPFkAjF8Mo4oERQwyYeXF/Dqt5jvqGaek04yQlfbYCcnfzGfiPXBnDI9sgPbtAAwFb0qPmWaryakMkJW9MABQqF1N8mwZ+iEkXygxoOZqjMYBGv8XdUIzfhRk64mpuQArZFBl618v/na/hmfXYs6Co4n94tfE0Snj5PWqkhWpUpBZQCSgGlgKzADRwQ0F0sf3NzAAAAAElFTkSuQmCC';
@@ -124,6 +121,10 @@ Created with @dx/alpine-server CLI.
 `;
 
 const DENO_JSON_TEMPLATE = `{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts",
+    "alp": "deno run -A jsr:@dx/alpine-server@${denoConfig.version}/cli"
+  },
   "imports": {
     "@dx/alpine-server": "jsr:@dx/alpine-server@${denoConfig.version}"
   }
@@ -178,60 +179,6 @@ const VSCODE_LAUNCH_TEMPLATE = (port: number) =>
 }
 `;
 
-export const getHelpText = (): string => HELP_TEXT;
-
-export const parseCliArgs = (args: string[]): ParsedCliArgs => {
-  if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
-    return { command: 'help', targetDir: '', port: 8000, force: false };
-  }
-
-  const [command, ...rest] = args;
-
-  if (command !== 'new') {
-    throw new Error(`Unknown command: ${command}`);
-  }
-
-  const targetDir = rest[0];
-  if (!targetDir || targetDir.startsWith('-')) {
-    throw new Error('Missing required <project-name> argument for new command');
-  }
-
-  let port = 8000;
-  let force = false;
-
-  for (let index = 1; index < rest.length; index += 1) {
-    const token = rest[index];
-
-    if (token === '--force') {
-      force = true;
-      continue;
-    }
-
-    if (token === '--port') {
-      const value = rest[index + 1];
-      if (!value) {
-        throw new Error('Missing value for --port');
-      }
-      const parsedPort = Number.parseInt(value, 10);
-      if (!Number.isInteger(parsedPort) || parsedPort <= 0 || parsedPort > 65535) {
-        throw new Error(`Invalid port: ${value}`);
-      }
-      port = parsedPort;
-      index += 1;
-      continue;
-    }
-
-    throw new Error(`Unknown option: ${token}`);
-  }
-
-  return {
-    command: 'new',
-    targetDir,
-    port,
-    force,
-  };
-};
-
 export const buildScaffoldFiles = (projectName: string, port: number): Record<string, ScaffoldFileContent> => ({
   'deno.json': DENO_JSON_TEMPLATE,
   'app.ts': MAIN_TS_TEMPLATE(port),
@@ -244,46 +191,6 @@ export const buildScaffoldFiles = (projectName: string, port: number): Record<st
   [join('.vscode', 'launch.json')]: VSCODE_LAUNCH_TEMPLATE(port),
 });
 
-const isDirectoryEmpty = async (directory: string): Promise<boolean> => {
-  try {
-    for await (const _entry of Deno.readDir(directory)) {
-      return false;
-    }
-    return true;
-  } catch (_error) {
-    return true;
-  }
-};
-
-const ensureTargetDir = async (targetDir: string, force: boolean): Promise<void> => {
-  const hasDirectory = await isDirectoryEmpty(targetDir);
-
-  if (!hasDirectory && !force) {
-    throw new Error('Target directory is not empty. Use --force to continue.');
-  }
-
-  await Deno.mkdir(targetDir, { recursive: true });
-};
-
-export const createProject = async (options: CreateProjectOptions): Promise<string[]> => {
-  const targetDir = resolve(options.targetDir);
-  const projectName = options.projectName.trim() || basename(targetDir);
-
-  await ensureTargetDir(targetDir, options.force);
-
-  const files = buildScaffoldFiles(projectName, options.port);
-  const writtenFiles: string[] = [];
-
-  for (const [relativePath, content] of Object.entries(files)) {
-    const absolutePath = join(targetDir, relativePath);
-    await Deno.mkdir(dirname(absolutePath), { recursive: true });
-    if (content instanceof Uint8Array) {
-      await Deno.writeFile(absolutePath, content);
-    } else {
-      await Deno.writeTextFile(absolutePath, content);
-    }
-    writtenFiles.push(absolutePath);
-  }
-
-  return writtenFiles;
-};
+export const buildPageFiles = (pageName: string): Record<string, string> => ({
+  'index.html': PAGE_INDEX_HTML_TEMPLATE(pageName),
+});

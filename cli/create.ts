@@ -6,7 +6,8 @@
  */
 import { basename, resolve } from '@std/path';
 
-import { createProject, getHelpText, parseCliArgs } from './src/scaffold.ts';
+import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
+import { createProject } from './scaffold.ts';
 
 const CREATE_HELP_TEXT = `alpine-server template
 
@@ -20,6 +21,10 @@ Options:
 `;
 
 export const normalizeCreateArgs = (args: string[]): string[] => {
+  if (args.includes('-v') || args.includes('--version')) {
+    return ['version'];
+  }
+
   if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
     return ['help'];
   }
@@ -31,6 +36,10 @@ export const normalizeCreateArgs = (args: string[]): string[] => {
   return ['new', ...args];
 };
 
+const assertUnreachable = (_value: never): never => {
+  throw new Error('Unreachable');
+};
+
 const main = async () => {
   try {
     const parsed = parseCliArgs(normalizeCreateArgs(Deno.args));
@@ -40,20 +49,31 @@ const main = async () => {
       return;
     }
 
-    const targetDir = resolve(parsed.targetDir);
-    const projectName = basename(targetDir);
+    if (parsed.command === 'version') {
+      console.log(getVersion());
+      return;
+    }
 
-    await createProject({
-      targetDir,
-      projectName,
-      port: parsed.port,
-      force: parsed.force,
-    });
+    if (parsed.command === 'new') {
+      const targetDir = resolve(parsed.targetDir);
+      const projectName = basename(targetDir);
 
-    console.log(`Created alpine-server project in ${targetDir}`);
-    console.log('Run:');
-    console.log(`  cd ${parsed.targetDir}`);
-    console.log('  deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts');
+      await createProject({
+        targetDir,
+        projectName,
+        port: parsed.port,
+        force: parsed.force,
+      });
+
+      console.log(`Created alpine-server project in ${targetDir}`);
+      console.log('Run:');
+      console.log(`  cd ${parsed.targetDir}`);
+      console.log('  deno task dev');
+      return;
+    }
+
+    // 'add' is not reachable via normalizeCreateArgs but satisfies exhaustiveness
+    assertUnreachable(parsed as never);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);

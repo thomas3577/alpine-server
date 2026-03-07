@@ -64,11 +64,11 @@ const parseOptions = (rest: string[], startIndex: number): { port: number; force
 };
 
 export const parseCliArgs = (args: string[]): ParsedCliArgs => {
-  if (args.includes('-v') || args.includes('--version')) {
+  if (args.includes('-v') || args.includes('--version') || args[0] === 'version') {
     return { command: 'version', targetDir: '', port: 8000, force: false, pageName: '' };
   }
 
-  if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
+  if (args.length === 0 || args.includes('-h') || args.includes('--help') || args[0] === 'help') {
     return { command: 'help', targetDir: '', port: 8000, force: false, pageName: '' };
   }
 

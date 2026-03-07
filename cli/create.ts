@@ -36,6 +36,10 @@ export const normalizeCreateArgs = (args: string[]): string[] => {
   return ['new', ...args];
 };
 
+const assertUnreachable = (_value: never): never => {
+  throw new Error('Unreachable');
+};
+
 const main = async () => {
   try {
     const parsed = parseCliArgs(normalizeCreateArgs(Deno.args));
@@ -50,24 +54,26 @@ const main = async () => {
       return;
     }
 
-    if (parsed.command !== 'new') {
-      throw new Error(`Unknown command: ${parsed.command}`);
+    if (parsed.command === 'new') {
+      const targetDir = resolve(parsed.targetDir);
+      const projectName = basename(targetDir);
+
+      await createProject({
+        targetDir,
+        projectName,
+        port: parsed.port,
+        force: parsed.force,
+      });
+
+      console.log(`Created alpine-server project in ${targetDir}`);
+      console.log('Run:');
+      console.log(`  cd ${parsed.targetDir}`);
+      console.log('  deno task dev');
+      return;
     }
 
-    const targetDir = resolve(parsed.targetDir);
-    const projectName = basename(targetDir);
-
-    await createProject({
-      targetDir,
-      projectName,
-      port: parsed.port,
-      force: parsed.force,
-    });
-
-    console.log(`Created alpine-server project in ${targetDir}`);
-    console.log('Run:');
-    console.log(`  cd ${parsed.targetDir}`);
-    console.log('  deno task dev');
+    // 'add' is not reachable via normalizeCreateArgs but satisfies exhaustiveness
+    assertUnreachable(parsed as never);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);

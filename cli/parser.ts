@@ -25,19 +25,23 @@ export const getHelpText = (): string => HELP_TEXT;
 
 export const getVersion = (): string => denoConfig.version;
 
-const parseOptions = (rest: string[], startIndex: number): { port: number; force: boolean } => {
+const parseOptions = (
+  rest: string[],
+  startIndex: number,
+  allowedOptions: Set<string>,
+): { port: number; force: boolean } => {
   let port = 8000;
   let force = false;
 
   for (let index = startIndex; index < rest.length; index += 1) {
     const token = rest[index];
 
-    if (token === '--force') {
+    if (token === '--force' && allowedOptions.has('force')) {
       force = true;
       continue;
     }
 
-    if (token === '--port') {
+    if (token === '--port' && allowedOptions.has('port')) {
       const value = rest[index + 1];
       if (!value) {
         throw new Error('Missing value for --port');
@@ -80,7 +84,7 @@ export const parseCliArgs = (args: string[]): ParsedCliArgs => {
       throw new Error('Missing required <project-name> argument for new command');
     }
 
-    const { port, force } = parseOptions(rest, 1);
+    const { port, force } = parseOptions(rest, 1, new Set(['port', 'force']));
 
     return { command: 'new', targetDir, port, force };
   }
@@ -95,7 +99,7 @@ export const parseCliArgs = (args: string[]): ParsedCliArgs => {
       throw new Error(`Invalid page name: ${pageName}. Use lowercase letters, numbers, and hyphens only.`);
     }
 
-    const { force } = parseOptions(rest, 1);
+    const { force } = parseOptions(rest, 1, new Set(['force']));
 
     return { command: 'add', pageName, force };
   }

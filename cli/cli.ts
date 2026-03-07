@@ -9,6 +9,10 @@ import { basename, resolve } from '@std/path';
 import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
 import { addPage, createProject } from './scaffold.ts';
 
+const assertUnreachable = (_value: never): never => {
+  throw new Error('Unreachable');
+};
+
 const main = async () => {
   try {
     const parsed = parseCliArgs(Deno.args);
@@ -33,24 +37,25 @@ const main = async () => {
       return;
     }
 
-    if (parsed.command !== 'new') {
-      throw new Error(`Unknown command: ${parsed.command}`);
+    if (parsed.command === 'new') {
+      const targetDir = resolve(parsed.targetDir);
+      const projectName = basename(targetDir);
+
+      await createProject({
+        targetDir,
+        projectName,
+        port: parsed.port,
+        force: parsed.force,
+      });
+
+      console.log(`Created alpine-server project in ${targetDir}`);
+      console.log('Run:');
+      console.log(`  cd ${parsed.targetDir}`);
+      console.log('  deno task dev');
+      return;
     }
 
-    const targetDir = resolve(parsed.targetDir);
-    const projectName = basename(targetDir);
-
-    await createProject({
-      targetDir,
-      projectName,
-      port: parsed.port,
-      force: parsed.force,
-    });
-
-    console.log(`Created alpine-server project in ${targetDir}`);
-    console.log('Run:');
-    console.log(`  cd ${parsed.targetDir}`);
-    console.log('  deno task dev');
+    assertUnreachable(parsed);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);

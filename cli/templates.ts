@@ -123,7 +123,7 @@ Created with @dx/alpine-server CLI.
 const DENO_JSON_TEMPLATE = `{
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts",
-    "alp": "deno run -A jsr:@dx/alpine-server/cli"
+    "alp": "deno run -A jsr:@dx/alpine-server@${denoConfig.version}/cli"
   },
   "imports": {
     "@dx/alpine-server": "jsr:@dx/alpine-server@${denoConfig.version}"

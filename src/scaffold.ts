@@ -24,7 +24,7 @@ Usage:
   deno run -A jsr:@dx/alpine-server/cli new <project-name> [options]
 
 Options:
-  --port <number>   Server port in main.ts (default: 8000)
+  --port <number>   Server port in app.ts (default: 8000)
   --force           Allow creating in a non-empty directory
   -h, --help        Show this help message
 `;
@@ -120,7 +120,7 @@ Created with @dx/alpine-server CLI.
 
 ## Run
 
-\`deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts\`
+\`deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts\`
 `;
 
 const DENO_JSON_TEMPLATE = `{
@@ -146,27 +146,30 @@ const VSCODE_LAUNCH_TEMPLATE = (port: number) =>
       "type": "node",
       "request": "launch",
       "cwd": "\${workspaceFolder}",
+      "cascadeTerminateToConfigurations": [
+        "client"
+      ],
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
-        "--inspect",
+        "--inspect-wait=127.0.0.1:9229",
         "--allow-net",
         "--allow-read",
         "--allow-write",
         "--allow-env",
         "--watch",
-        "main.ts"
+        "app.ts"
       ],
       "attachSimplePort": 9229,
       "console": "integratedTerminal",
       "serverReadyAction": {
         "action": "startDebugging",
-        "pattern": "URL: http",
-        "name": "client"
+        "pattern": "Starting...",
+        "name": "Open client"
       }
     },
     {
-      "name": "client",
+      "name": "Open client",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:${port}"
@@ -231,7 +234,7 @@ export const parseCliArgs = (args: string[]): ParsedCliArgs => {
 
 export const buildScaffoldFiles = (projectName: string, port: number): Record<string, ScaffoldFileContent> => ({
   'deno.json': DENO_JSON_TEMPLATE,
-  'main.ts': MAIN_TS_TEMPLATE(port),
+  'app.ts': MAIN_TS_TEMPLATE(port),
   'README.md': README_TEMPLATE(projectName),
   [join('public', 'index.html')]: INDEX_HTML_TEMPLATE(projectName),
   [join('public', 'favicon.png')]: FAVICON_PNG_TEMPLATE,

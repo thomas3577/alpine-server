@@ -1,5 +1,6 @@
 import { Application } from '@oak/oak';
 import type { Middleware, Router } from '@oak/oak';
+import { info } from '@std/log';
 import { staticFiles } from './middleware/static-files.ts';
 import { errorHandler } from './middleware/error-handler.ts';
 import { logger } from './middleware/logger.ts';
@@ -135,6 +136,8 @@ export class AlpineApp {
     if (runtime.dev) {
       staticFileWatch(runtime.staticFilesPath);
     }
+
+    info('Starting...');
 
     await this.#app.listen(this.#config.oak?.listenOptions);
   }

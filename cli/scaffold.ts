@@ -15,7 +15,7 @@ export interface AddPageOptions {
 }
 
 export interface ParsedCliArgs {
-  command: 'new' | 'help' | 'add';
+  command: 'new' | 'help' | 'add' | 'version';
   targetDir: string;
   port: number;
   force: boolean;
@@ -40,6 +40,7 @@ Options:
   --port <number>   Server port in app.ts (default: 8000, only for new)
   --force           Overwrite existing files
   -h, --help        Show this help message
+  -v, --version     Show version number
 `;
 
 const MAIN_TS_TEMPLATE = (port: number) =>
@@ -219,6 +220,8 @@ const VSCODE_LAUNCH_TEMPLATE = (port: number) =>
 
 export const getHelpText = (): string => HELP_TEXT;
 
+export const getVersion = (): string => denoConfig.version;
+
 const parseOptions = (rest: string[], startIndex: number): { port: number; force: boolean } => {
   let port = 8000;
   let force = false;
@@ -252,6 +255,10 @@ const parseOptions = (rest: string[], startIndex: number): { port: number; force
 };
 
 export const parseCliArgs = (args: string[]): ParsedCliArgs => {
+  if (args.includes('-v') || args.includes('--version')) {
+    return { command: 'version', targetDir: '', port: 8000, force: false, pageName: '' };
+  }
+
   if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
     return { command: 'help', targetDir: '', port: 8000, force: false, pageName: '' };
   }

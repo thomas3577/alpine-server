@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertRejects, assertStringIncludes, assertThrows } from '@std/assert';
 import { basename, join } from '@std/path';
 
-import { addPage, buildPageFiles, buildScaffoldFiles, createProject, parseCliArgs } from './scaffold.ts';
+import { addPage, buildPageFiles, buildScaffoldFiles, createProject, getVersion, parseCliArgs } from './scaffold.ts';
 
 const asTextContent = (content: string | Uint8Array): string => {
   if (typeof content !== 'string') {
@@ -77,6 +77,21 @@ Deno.test('parseCliArgs', async (t) => {
     const parsed = parseCliArgs(['add', 'about-us']);
     assertEquals(parsed.pageName, 'about-us');
   });
+
+  await t.step('returns version for -v flag', () => {
+    const parsed = parseCliArgs(['-v']);
+    assertEquals(parsed.command, 'version');
+  });
+
+  await t.step('returns version for --version flag', () => {
+    const parsed = parseCliArgs(['--version']);
+    assertEquals(parsed.command, 'version');
+  });
+});
+
+Deno.test('getVersion returns a semver string', () => {
+  const version = getVersion();
+  assert(/^\d+\.\d+\.\d+/.test(version));
 });
 
 Deno.test('buildScaffoldFiles returns expected files', () => {

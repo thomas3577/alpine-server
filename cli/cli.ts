@@ -6,11 +6,16 @@
  */
 import { basename, resolve } from '@std/path';
 
-import { addPage, createProject, getHelpText, parseCliArgs } from './scaffold.ts';
+import { addPage, createProject, getHelpText, getVersion, parseCliArgs } from './scaffold.ts';
 
 const main = async () => {
   try {
     const parsed = parseCliArgs(Deno.args);
+
+    if (parsed.command === 'version') {
+      console.log(getVersion());
+      return;
+    }
 
     if (parsed.command === 'help') {
       console.log(getHelpText());

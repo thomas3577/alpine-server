@@ -67,7 +67,11 @@ export const addPage = async (options: AddPageOptions): Promise<string[]> => {
     throw new Error('No public/ directory found. Are you in an alpine-server project?');
   }
 
-  const pageDir = join(publicDir, options.pageName);
+  const pageDir = resolve(publicDir, options.pageName);
+
+  if (!pageDir.startsWith(publicDir + '/') && !pageDir.startsWith(publicDir + '\\')) {
+    throw new Error(`Invalid page name: "${options.pageName}". Page must be nested under public/.`);
+  }
 
   if ((await directoryExists(pageDir)) && !options.force) {
     throw new Error(`Page "${options.pageName}" already exists. Use --force to overwrite.`);

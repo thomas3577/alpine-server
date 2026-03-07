@@ -47,7 +47,7 @@ Deno.test('parseCliArgs', async (t) => {
 Deno.test('buildScaffoldFiles returns expected files', () => {
   const files = buildScaffoldFiles('demo-app', 5000);
 
-  assert('main.ts' in files);
+  assert('app.ts' in files);
   assert('deno.json' in files);
   assert('README.md' in files);
   assert(join('public', 'index.html') in files);
@@ -57,7 +57,7 @@ Deno.test('buildScaffoldFiles returns expected files', () => {
   assert(join('.vscode', 'settings.json') in files);
   assert(join('.vscode', 'launch.json') in files);
 
-  assertStringIncludes(asTextContent(files['main.ts']), 'port: 5000');
+  assertStringIncludes(asTextContent(files['app.ts']), 'port: 5000');
   assertStringIncludes(asTextContent(files['README.md']), '# demo-app');
   assertStringIncludes(asTextContent(files[join('public', 'index.html')]), 'href="favicon.png"');
   assert(files[join('public', 'favicon.png')] instanceof Uint8Array);
@@ -79,7 +79,7 @@ Deno.test('createProject writes scaffold files', async () => {
 
   assertEquals(written.length, 9);
 
-  const main = await Deno.readTextFile(join(targetDir, 'main.ts'));
+  const main = await Deno.readTextFile(join(targetDir, 'app.ts'));
   assertStringIncludes(main, 'port: 4100');
 
   const html = await Deno.readTextFile(join(targetDir, 'public', 'index.html'));

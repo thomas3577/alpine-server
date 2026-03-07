@@ -30,7 +30,7 @@ const main = async () => {
     console.log(`Created alpine-server project in ${targetDir}`);
     console.log('Run:');
     console.log(`  cd ${parsed.targetDir}`);
-    console.log('  deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts');
+    console.log('  deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);

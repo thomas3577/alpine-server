@@ -24,7 +24,7 @@ Then run the generated app:
 
 ```sh
 cd my-app
-deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts
+deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts
 ```
 
 ## Basic Setup
@@ -146,7 +146,7 @@ your-project/
 │   ├── app.js
 │   └── about/
 │       └── index.html
-└── main.ts
+└── app.ts
 ```
 
 Access files at:

@@ -7,7 +7,7 @@ This is a simple example application to demonstrate the capabilities of the Alpi
 To run the example application, use the following command from the root of the project:
 
 ```sh
-deno run --watch --allow-net --allow-read ./main.ts
+deno run --watch --allow-net --allow-read ./app.ts
 ```
 
 This will start a web server on port 8000. You can view the application by opening your browser to [http://localhost:8000](http://localhost:8000).

@@ -14,7 +14,7 @@ Usage:
   deno create jsr:@dx/alpine-server -- <project-name> [options]
 
 Options:
-  --port <number>   Server port in main.ts (default: 8000)
+  --port <number>   Server port in app.ts (default: 8000)
   --force           Allow creating in a non-empty directory
   -h, --help        Show this help message
 `;
@@ -53,7 +53,7 @@ const main = async () => {
     console.log(`Created alpine-server project in ${targetDir}`);
     console.log('Run:');
     console.log(`  cd ${parsed.targetDir}`);
-    console.log('  deno run --allow-net --allow-read --allow-write --allow-env --watch main.ts');
+    console.log('  deno run --allow-net --allow-read --allow-write --allow-env --watch app.ts');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);

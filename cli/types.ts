@@ -10,12 +10,27 @@ export interface AddPageOptions {
   force: boolean;
 }
 
-export interface ParsedCliArgs {
-  command: 'new' | 'help' | 'add' | 'version';
+export interface HelpArgs {
+  command: 'help';
+}
+
+export interface VersionArgs {
+  command: 'version';
+}
+
+export interface NewArgs {
+  command: 'new';
   targetDir: string;
   port: number;
   force: boolean;
-  pageName: string;
 }
+
+export interface AddArgs {
+  command: 'add';
+  pageName: string;
+  force: boolean;
+}
+
+export type ParsedCliArgs = HelpArgs | VersionArgs | NewArgs | AddArgs;
 
 export type ScaffoldFileContent = string | Uint8Array;

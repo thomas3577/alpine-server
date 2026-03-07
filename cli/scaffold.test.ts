@@ -19,7 +19,7 @@ Deno.test('parseCliArgs', async (t) => {
 
   await t.step('parses new command with defaults', () => {
     const parsed = parseCliArgs(['new', 'my-app']);
-    assertEquals(parsed.command, 'new');
+    assert(parsed.command === 'new');
     assertEquals(parsed.targetDir, 'my-app');
     assertEquals(parsed.port, 8000);
     assertEquals(parsed.force, false);
@@ -27,7 +27,7 @@ Deno.test('parseCliArgs', async (t) => {
 
   await t.step('parses new command with options', () => {
     const parsed = parseCliArgs(['new', 'my-app', '--port', '3000', '--force']);
-    assertEquals(parsed.command, 'new');
+    assert(parsed.command === 'new');
     assertEquals(parsed.port, 3000);
     assertEquals(parsed.force, true);
   });
@@ -46,14 +46,14 @@ Deno.test('parseCliArgs', async (t) => {
 
   await t.step('parses add command', () => {
     const parsed = parseCliArgs(['add', 'about']);
-    assertEquals(parsed.command, 'add');
+    assert(parsed.command === 'add');
     assertEquals(parsed.pageName, 'about');
     assertEquals(parsed.force, false);
   });
 
   await t.step('parses add command with force', () => {
     const parsed = parseCliArgs(['add', 'contact', '--force']);
-    assertEquals(parsed.command, 'add');
+    assert(parsed.command === 'add');
     assertEquals(parsed.pageName, 'contact');
     assertEquals(parsed.force, true);
   });
@@ -76,6 +76,7 @@ Deno.test('parseCliArgs', async (t) => {
 
   await t.step('accepts hyphenated page names', () => {
     const parsed = parseCliArgs(['add', 'about-us']);
+    assert(parsed.command === 'add');
     assertEquals(parsed.pageName, 'about-us');
   });
 
@@ -121,7 +122,8 @@ Deno.test('buildScaffoldFiles includes alp task in deno.json', () => {
   const files = buildScaffoldFiles('demo-app', 5000);
   const denoJson = asTextContent(files['deno.json']);
   assertStringIncludes(denoJson, '"alp"');
-  assertStringIncludes(denoJson, 'jsr:@dx/alpine-server/cli');
+  assertStringIncludes(denoJson, 'jsr:@dx/alpine-server@');
+  assertStringIncludes(denoJson, '/cli');
 });
 
 Deno.test('buildPageFiles returns index.html with correct content', () => {
@@ -141,49 +143,57 @@ Deno.test('buildPageFiles capitalizes hyphenated names', () => {
 
 Deno.test('createProject writes scaffold files', async () => {
   const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
-  const targetDir = join(tempRoot, 'new-app');
+  try {
+    const targetDir = join(tempRoot, 'new-app');
 
-  const written = await createProject({
-    targetDir,
-    projectName: 'new-app',
-    port: 4100,
-    force: false,
-  });
+    const written = await createProject({
+      targetDir,
+      projectName: 'new-app',
+      port: 4100,
+      force: false,
+    });
 
-  assertEquals(written.length, 9);
+    assertEquals(written.length, 9);
 
-  const main = await Deno.readTextFile(join(targetDir, 'app.ts'));
-  assertStringIncludes(main, 'port: 4100');
+    const main = await Deno.readTextFile(join(targetDir, 'app.ts'));
+    assertStringIncludes(main, 'port: 4100');
 
-  const html = await Deno.readTextFile(join(targetDir, 'public', 'index.html'));
-  assertStringIncludes(html, '<title>new-app</title>');
-  assertStringIncludes(html, 'href="favicon.png"');
+    const html = await Deno.readTextFile(join(targetDir, 'public', 'index.html'));
+    assertStringIncludes(html, '<title>new-app</title>');
+    assertStringIncludes(html, 'href="favicon.png"');
 
-  const favicon = await Deno.readFile(join(targetDir, 'public', 'favicon.png'));
-  assertEquals(favicon.length > 0, true);
+    const favicon = await Deno.readFile(join(targetDir, 'public', 'favicon.png'));
+    assertEquals(favicon.length > 0, true);
 
-  const vscodeSettings = await Deno.readTextFile(join(targetDir, '.vscode', 'settings.json'));
-  assertStringIncludes(vscodeSettings, '"deno.enable": true');
+    const vscodeSettings = await Deno.readTextFile(join(targetDir, '.vscode', 'settings.json'));
+    assertStringIncludes(vscodeSettings, '"deno.enable": true');
+  } finally {
+    await Deno.remove(tempRoot, { recursive: true });
+  }
 });
 
 Deno.test('createProject rejects non-empty target without force', async () => {
   const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
-  const targetDir = join(tempRoot, 'existing-app');
+  try {
+    const targetDir = join(tempRoot, 'existing-app');
 
-  await Deno.mkdir(targetDir, { recursive: true });
-  await Deno.writeTextFile(join(targetDir, 'keep.txt'), 'keep');
+    await Deno.mkdir(targetDir, { recursive: true });
+    await Deno.writeTextFile(join(targetDir, 'keep.txt'), 'keep');
 
-  await assertRejects(
-    () =>
-      createProject({
-        targetDir,
-        projectName: basename(targetDir),
-        port: 8000,
-        force: false,
-      }),
-    Error,
-    'Target directory is not empty',
-  );
+    await assertRejects(
+      () =>
+        createProject({
+          targetDir,
+          projectName: basename(targetDir),
+          port: 8000,
+          force: false,
+        }),
+      Error,
+      'Target directory is not empty',
+    );
+  } finally {
+    await Deno.remove(tempRoot, { recursive: true });
+  }
 });
 
 Deno.test('addPage creates page in public directory', async () => {
@@ -202,6 +212,7 @@ Deno.test('addPage creates page in public directory', async () => {
     assertStringIncludes(html, 'x-data');
   } finally {
     Deno.chdir(originalDir);
+    await Deno.remove(tempRoot, { recursive: true });
   }
 });
 

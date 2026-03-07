@@ -65,11 +65,11 @@ const parseOptions = (rest: string[], startIndex: number): { port: number; force
 
 export const parseCliArgs = (args: string[]): ParsedCliArgs => {
   if (args.includes('-v') || args.includes('--version') || args[0] === 'version') {
-    return { command: 'version', targetDir: '', port: 8000, force: false, pageName: '' };
+    return { command: 'version' };
   }
 
   if (args.length === 0 || args.includes('-h') || args.includes('--help') || args[0] === 'help') {
-    return { command: 'help', targetDir: '', port: 8000, force: false, pageName: '' };
+    return { command: 'help' };
   }
 
   const [command, ...rest] = args;
@@ -82,7 +82,7 @@ export const parseCliArgs = (args: string[]): ParsedCliArgs => {
 
     const { port, force } = parseOptions(rest, 1);
 
-    return { command: 'new', targetDir, port, force, pageName: '' };
+    return { command: 'new', targetDir, port, force };
   }
 
   if (command === 'add') {
@@ -97,7 +97,7 @@ export const parseCliArgs = (args: string[]): ParsedCliArgs => {
 
     const { force } = parseOptions(rest, 1);
 
-    return { command: 'add', targetDir: '', port: 8000, force, pageName };
+    return { command: 'add', pageName, force };
   }
 
   throw new Error(`Unknown command: ${command}`);

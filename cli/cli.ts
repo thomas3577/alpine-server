@@ -33,6 +33,10 @@ const main = async () => {
       return;
     }
 
+    if (parsed.command !== 'new') {
+      throw new Error(`Unknown command: ${parsed.command}`);
+    }
+
     const targetDir = resolve(parsed.targetDir);
     const projectName = basename(targetDir);
 

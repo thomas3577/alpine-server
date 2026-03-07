@@ -13,15 +13,18 @@ const isDirectoryEmpty = async (directory: string): Promise<boolean> => {
       return false;
     }
     return true;
-  } catch (_error) {
-    return true;
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      return true;
+    }
+    throw error;
   }
 };
 
 const ensureTargetDir = async (targetDir: string, force: boolean): Promise<void> => {
-  const hasDirectory = await isDirectoryEmpty(targetDir);
+  const isEmpty = await isDirectoryEmpty(targetDir);
 
-  if (!hasDirectory && !force) {
+  if (!isEmpty && !force) {
     throw new Error('Target directory is not empty. Use --force to continue.');
   }
 

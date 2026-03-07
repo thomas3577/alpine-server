@@ -18,3 +18,8 @@ Deno.test('normalizeCreateArgs returns help for help flags', () => {
   assertEquals(normalizeCreateArgs(['--help']), ['help']);
   assertEquals(normalizeCreateArgs(['-h']), ['help']);
 });
+
+Deno.test('normalizeCreateArgs returns version for version flags', () => {
+  assertEquals(normalizeCreateArgs(['-v']), ['version']);
+  assertEquals(normalizeCreateArgs(['--version']), ['version']);
+});

@@ -6,7 +6,8 @@
  */
 import { basename, resolve } from '@std/path';
 
-import { addPage, createProject, getHelpText, getVersion, parseCliArgs } from './scaffold.ts';
+import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
+import { addPage, createProject } from './scaffold.ts';
 
 const main = async () => {
   try {

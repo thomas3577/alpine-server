@@ -6,7 +6,8 @@
  */
 import { basename, resolve } from '@std/path';
 
-import { createProject, getHelpText, parseCliArgs } from './scaffold.ts';
+import { getHelpText, parseCliArgs } from './parser.ts';
+import { createProject } from './scaffold.ts';
 
 const CREATE_HELP_TEXT = `alpine-server template
 

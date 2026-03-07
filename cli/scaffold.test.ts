@@ -1,7 +1,8 @@
 import { assert, assertEquals, assertRejects, assertStringIncludes, assertThrows } from '@std/assert';
 import { basename, join } from '@std/path';
 
-import { addPage, buildPageFiles, buildScaffoldFiles, createProject, getVersion, parseCliArgs } from './scaffold.ts';
+import { getVersion, parseCliArgs } from './parser.ts';
+import { addPage, buildPageFiles, buildScaffoldFiles, createProject } from './scaffold.ts';
 
 const asTextContent = (content: string | Uint8Array): string => {
   if (typeof content !== 'string') {

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Running deno fmt..."
-deno fmt
+deno fmt --check
 if [ $? -ne 0 ]; then
   echo "deno fmt failed"
   exit 1

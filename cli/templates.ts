@@ -33,7 +33,7 @@ const INDEX_HTML_TEMPLATE = (projectName: string) =>
     <link rel="stylesheet" href="style.css">
     <script defer type="module" src="main.js"></script>
   </head>
-  <body x-data="counterApp">
+  <body x-data="main">
     <main>
       <h1>${projectName}</h1>
       <p>Count: <span x-text="count"></span></p>
@@ -72,9 +72,7 @@ const FAVICON_PNG_TEMPLATE = Uint8Array.from(atob(FAVICON_PNG_BASE64), (char) =>
 
 const MAIN_JS_TEMPLATE = `import Alpine from '/alpinejs.mjs';
 
-window.Alpine = Alpine;
-
-Alpine.data('counterApp', () => ({
+Alpine.data('main', () => ({
   count: 0,
   increment() {
     this.count += 1;

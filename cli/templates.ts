@@ -8,16 +8,12 @@ const MAIN_TS_TEMPLATE = (port: number) =>
   `import { AlpineApp } from '@dx/alpine-server';
 
 const app = new AlpineApp({
-  app: {
-    dev: true,
-    staticFilesPath: './public',
-  },
   oak: {
-    listenOptions: { port: ${port} },
+    listenOptions: {
+      port: ${port}
+    },
   },
 });
-
-console.log('URL: http://localhost:${port}');
 
 await app.run();
 `;
@@ -25,21 +21,24 @@ await app.run();
 const INDEX_HTML_TEMPLATE = (projectName: string) =>
   `<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${projectName}</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="style.css">
-    <script defer type="module" src="main.js"></script>
-  </head>
-  <body x-data="main">
-    <main>
-      <h1>${projectName}</h1>
-      <p>Count: <span x-text="count"></span></p>
-      <button @click="increment">Increment</button>
-    </main>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${projectName}</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+  <script defer type="module" src="main.js"></script>
+</head>
+
+<body x-data="main">
+  <main>
+    <h1>${projectName}</h1>
+    <p>Count: <span x-text="count"></span></p>
+    <button @click="increment">Increment</button>
+  </main>
+</body>
+
 </html>
 `;
 

@@ -1,5 +1,4 @@
 import type { ServerSentEventInit, ServerSentEventTarget } from '@oak/oak';
-
 import { ServerSentEvent } from '@oak/oak';
 
 class SseService {

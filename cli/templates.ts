@@ -1,7 +1,5 @@
 import { join } from '@std/path';
-
 import denoConfig from '../deno.json' with { type: 'json' };
-
 import type { ScaffoldFileContent } from './types.ts';
 
 const MAIN_TS_TEMPLATE = (port: number) =>

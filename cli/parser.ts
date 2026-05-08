@@ -1,5 +1,4 @@
 import denoConfig from '../deno.json' with { type: 'json' };
-
 import type { ParsedCliArgs } from './types.ts';
 
 const VALID_PAGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

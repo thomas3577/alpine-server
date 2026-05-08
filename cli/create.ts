@@ -4,8 +4,8 @@
  * Runs the scaffold command in `new` mode and supports the same
  * target directory and option handling as the main CLI.
  */
-import { basename, resolve } from '@std/path';
 
+import { basename, resolve } from '@std/path';
 import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
 import { createProject } from './scaffold.ts';
 

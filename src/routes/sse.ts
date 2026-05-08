@@ -1,7 +1,7 @@
 import type { Context, ServerSentEventTarget } from '@oak/oak';
 import { Router, Status } from '@oak/oak';
 import { cyan, green } from '@std/fmt/colors';
-import * as log from '@std/log';
+import { info } from '@std/log';
 import { service } from '../services/sse.ts';
 
 const router = new Router({ prefix: '/sse' });
@@ -14,10 +14,10 @@ router.get('/', async (context: Context) => {
 
   service.addClient(target);
 
-  log.info(`${green('SSE connected')} ${cyan(connection)}`);
+  info(`${green('SSE connected')} ${cyan(connection)}`);
 
   target.addEventListener('close', () => {
-    log.info(`${green('SSE disconnect')} ${cyan(connection)}`);
+    info(`${green('SSE disconnect')} ${cyan(connection)}`);
     service.removeClient(target);
   });
 });

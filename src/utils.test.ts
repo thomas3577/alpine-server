@@ -1,10 +1,9 @@
 import { assertEquals, assertThrows } from '@std/assert';
-import * as path from '@std/path';
-
+import { join, resolve } from '@std/path';
 import { resolveStaticFilesPath } from './utils.ts';
 
 const cwd = Deno.cwd();
-const defaultRoot = path.join(cwd, 'default');
+const defaultRoot = join(cwd, 'default');
 
 Deno.test('resolveStaticFilesPath', async (t) => {
   await t.step('should return defaultRoot if value is missing or empty', () => {
@@ -15,17 +14,17 @@ Deno.test('resolveStaticFilesPath', async (t) => {
 
   await t.step('should resolve relative paths against cwd', () => {
     const relativePath = 'public';
-    const expected = path.join(cwd, relativePath);
+    const expected = join(cwd, relativePath);
     assertEquals(resolveStaticFilesPath(relativePath, defaultRoot), expected);
   });
 
   await t.step('should allow absolute paths inside cwd', () => {
-    const absolutePath = path.join(cwd, 'public');
+    const absolutePath = join(cwd, 'public');
     assertEquals(resolveStaticFilesPath(absolutePath, defaultRoot), absolutePath);
   });
 
   await t.step('should throw for absolute paths outside cwd', () => {
-    const outsidePath = path.resolve(cwd, '..');
+    const outsidePath = resolve(cwd, '..');
     assertThrows(
       () => {
         resolveStaticFilesPath(outsidePath, defaultRoot);
@@ -48,7 +47,7 @@ Deno.test('resolveStaticFilesPath', async (t) => {
 
   await t.step('should handle nested paths correctly', () => {
     const nestedPath = 'public/assets';
-    const expected = path.join(cwd, nestedPath);
+    const expected = join(cwd, nestedPath);
     assertEquals(resolveStaticFilesPath(nestedPath, defaultRoot), expected);
   });
 });

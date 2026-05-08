@@ -1,6 +1,5 @@
 import { join } from '@std/path';
 import { resolveStaticFilesPath } from './utils.ts';
-
 import type { AlpineAppRuntimeConfig, IRuntimeConfig, IVendors } from './types.ts';
 
 const defaultStaticFilesPath = join(Deno.cwd(), 'public');

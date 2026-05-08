@@ -2,7 +2,6 @@ import type { Element, HTMLDocument } from '@deno/dom';
 import { Router } from '@oak/oak';
 import { join } from '@std/path';
 import { DOMParser } from '@deno/dom';
-
 import type { AlpineAppState } from '../types.ts';
 import { UPDATER_FILENAME } from '../config.ts';
 

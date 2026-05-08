@@ -3,10 +3,18 @@ import type { ServerSentEventInit, ServerSentEventTarget } from '@oak/oak';
 import { ServerSentEvent } from '@oak/oak';
 
 class SseService {
-  #clients = new Map<string, ServerSentEventTarget>();
+  #clients = new Set<ServerSentEventTarget>();
 
-  get clients(): Map<string, ServerSentEventTarget> {
+  get clients(): Set<ServerSentEventTarget> {
     return this.#clients;
+  }
+
+  addClient(target: ServerSentEventTarget): void {
+    this.#clients.add(target);
+  }
+
+  removeClient(target: ServerSentEventTarget): void {
+    this.#clients.delete(target);
   }
 
   send(type: string, eventInit?: ServerSentEventInit): void {

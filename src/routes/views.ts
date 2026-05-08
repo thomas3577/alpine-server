@@ -35,7 +35,7 @@ const injectUpdater = (html: string): string | null => {
   const element: HTMLDocument | null = domParser.parseFromString(html, 'text/html');
   if (element) {
     const script: Element = element.createElement('script');
-    script.setAttribute('src', UPDATER_FILENAME);
+    script.setAttribute('src', `/${UPDATER_FILENAME}`);
     script.setAttribute('defer', '');
 
     element.head.appendChild(script);

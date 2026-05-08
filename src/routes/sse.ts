@@ -12,13 +12,13 @@ router.get('/', async (context: Context) => {
   const connection: string = context.request.ip;
   const target: ServerSentEventTarget = await context.sendEvents();
 
-  service.clients.set(connection, target);
+  service.addClient(target);
 
   log.info(`${green('SSE connected')} ${cyan(connection)}`);
 
   target.addEventListener('close', () => {
     log.info(`${green('SSE disconnect')} ${cyan(connection)}`);
-    service.clients.delete(connection);
+    service.removeClient(target);
   });
 });
 

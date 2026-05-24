@@ -9,31 +9,39 @@ type MockTarget = {
   close: () => void;
 };
 
-const createContext = (accept: string, target: MockTarget): Context => {
+type MockContext = {
+  context: Context;
+  listeners: Map<string, () => void>;
+};
+
+const createContext = (accept: string, target: MockTarget): MockContext => {
   const listeners = new Map<string, () => void>();
   target.addEventListener = (type: string, listener: () => void) => {
     listeners.set(type, listener);
   };
 
   return {
-    request: {
-      method: 'GET',
-      url: new URL('http://localhost/sse/'),
-      ip: '127.0.0.1',
-      accepts: (value: string) => (accept === value ? value : undefined),
-    },
-    response: {
-      status: 200,
-      headers: new Headers(),
-    },
-    assert: (condition: unknown, status: number) => {
-      if (!condition) {
-        throw { status };
-      }
-    },
-    sendEvents: () => Promise.resolve(target),
-    state: {},
-  } as unknown as Context;
+    context: {
+      request: {
+        method: 'GET',
+        url: new URL('http://localhost/sse/'),
+        ip: '127.0.0.1',
+        accepts: (value: string) => (accept === value ? value : undefined),
+      },
+      response: {
+        status: 200,
+        headers: new Headers(),
+      },
+      assert: (condition: unknown, status: number) => {
+        if (!condition) {
+          throw { status };
+        }
+      },
+      sendEvents: () => Promise.resolve(target),
+      state: {},
+    } as unknown as Context,
+    listeners,
+  };
 };
 
 const runSseMiddleware = async (ctx: Context): Promise<void> => {
@@ -49,11 +57,16 @@ Deno.test('sse route', async (t) => {
       dispatchEvent: () => true,
       close: () => {},
     };
-    const ctx = createContext('text/event-stream', target);
+    const { context, listeners } = createContext('text/event-stream', target);
 
-    await runSseMiddleware(ctx);
+    await runSseMiddleware(context);
 
     assertEquals(service.clients.size, 1);
+
+    const closeListener = listeners.get('close');
+    assert(closeListener);
+    closeListener();
+    assertEquals(service.clients.size, 0);
 
     service.close();
   });
@@ -65,10 +78,10 @@ Deno.test('sse route', async (t) => {
       dispatchEvent: () => true,
       close: () => {},
     };
-    const ctx = createContext('application/json', target);
+    const { context } = createContext('application/json', target);
 
     try {
-      await runSseMiddleware(ctx);
+      await runSseMiddleware(context);
       assert(false, 'Expected unsupported media type assertion');
     } catch (error) {
       assertEquals((error as { status?: number }).status, 415);

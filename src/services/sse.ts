@@ -5,7 +5,7 @@ class SseService {
   #clients = new Set<ServerSentEventTarget>();
 
   get clients(): Set<ServerSentEventTarget> {
-    return this.#clients;
+    return new Set(this.#clients);
   }
 
   /** Adds an SSE target to the private client set for future broadcasts. */

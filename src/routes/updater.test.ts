@@ -25,6 +25,12 @@ Deno.test('updater route', async (t) => {
     assert(response);
     assertEquals(response.status, 200);
     assertEquals(await response.text(), ';');
+
+    const canonicalResponse = await app.handle(new Request('http://localhost/updater.js'));
+
+    assert(canonicalResponse);
+    assertEquals(canonicalResponse.status, 200);
+    assertEquals(await canonicalResponse.text(), ';');
   });
 
   await t.step('returns updater client script in development', async () => {
@@ -37,5 +43,13 @@ Deno.test('updater route', async (t) => {
     const script = await response.text();
     assert(script.length > 1);
     assert(script.includes('EventSource'));
+
+    const canonicalResponse = await app.handle(new Request('http://localhost/updater.js'));
+
+    assert(canonicalResponse);
+    assertEquals(canonicalResponse.status, 200);
+    const canonicalScript = await canonicalResponse.text();
+    assert(canonicalScript.length > 1);
+    assert(canonicalScript.includes('EventSource'));
   });
 });

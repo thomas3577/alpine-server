@@ -11,7 +11,7 @@ A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js
 ## Versions
 
 - **Oak**: v17.2.0
-- **Alpine.js**: v3.15.11 (default configuration)
+- **Alpine.js**: v3.15.12 (default configuration)
 
 ## Example
 

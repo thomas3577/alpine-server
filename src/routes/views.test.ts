@@ -2,15 +2,9 @@ import { assert, assertEquals } from '@std/assert';
 import { Application } from '@oak/oak';
 import { join } from '@std/path';
 import { router } from './views.ts';
+import { UPDATER_FILENAME } from '../config.ts';
+import { createRuntimeConfig } from '../test/runtime-config.ts';
 import type { IRuntimeConfig } from '../types.ts';
-
-const createRuntimeConfig = (dev: boolean, staticFilesPath: string): IRuntimeConfig => ({
-  dev,
-  production: !dev,
-  staticFilesPath,
-  staticExtensions: ['.html', '.css', '.js'],
-  vendors: { map: {}, route: '/' },
-});
 
 const createApp = (config: IRuntimeConfig): Application => {
   const app = new Application();
@@ -44,7 +38,8 @@ Deno.test('views route', async (t) => {
       assertEquals(response.status, 200);
 
       const html = await response.text();
-      assert(html.includes('src="/updater.js"'));
+      const updaterSrc = `src="/${UPDATER_FILENAME}"`;
+      assert(html.includes(updaterSrc));
     } finally {
       await Deno.remove(root, { recursive: true });
     }

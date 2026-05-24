@@ -8,10 +8,12 @@ class SseService {
     return this.#clients;
   }
 
+  /** Adds an SSE target to the private client set for future broadcasts. */
   addClient(target: ServerSentEventTarget): void {
     this.#clients.add(target);
   }
 
+  /** Removes an SSE target from the private client set to stop broadcasts. */
   removeClient(target: ServerSentEventTarget): void {
     this.#clients.delete(target);
   }
@@ -28,6 +30,7 @@ class SseService {
   }
 }
 
+/** Singleton SSE service instance shared across routes and file-watch events. */
 const service = new SseService();
 
 const staticFileWatch = async (path?: string): Promise<void> => {

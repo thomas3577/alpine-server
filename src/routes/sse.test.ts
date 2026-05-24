@@ -31,7 +31,7 @@ const createContext = (accept: string, target: MockTarget): Context => {
         throw { status };
       }
     },
-    sendEvents: () => target,
+    sendEvents: () => Promise.resolve(target),
     state: {},
   } as unknown as Context;
 };

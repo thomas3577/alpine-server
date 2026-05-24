@@ -1,15 +1,7 @@
 import { assert, assertEquals } from '@std/assert';
 import { Application } from '@oak/oak';
 import { router } from './updater.ts';
-import type { IRuntimeConfig } from '../types.ts';
-
-const createRuntimeConfig = (dev: boolean, staticFilesPath: string): IRuntimeConfig => ({
-  dev,
-  production: !dev,
-  staticFilesPath,
-  staticExtensions: ['.html', '.css', '.js'],
-  vendors: { map: {}, route: '/' },
-});
+import { createRuntimeConfig } from '../test/runtime-config.ts';
 
 const createApp = (dev: boolean): Application => {
   const app = new Application();

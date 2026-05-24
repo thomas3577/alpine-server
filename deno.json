@@ -5,7 +5,7 @@
   "tasks": {
     "test": "deno test --allow-run --allow-read --allow-write",
     "check": "deno fmt --check && deno lint",
-    "example": "cd example && deno run --allow-net --allow-read --allow-run app.ts",
+    "example": "cd example && deno run --allow-net --allow-read --allow-run --allow-env app.ts",
     "update": "deno outdated --update --latest"
   },
   "imports": {

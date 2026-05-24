@@ -51,8 +51,8 @@ Deno.test('RuntimeConfig', async (t) => {
 
   await t.step('should use default vendors when no vendors provided', () => {
     const config = new RuntimeConfig({});
-    assertEquals(config.vendors.map['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.11/es2024/alpinejs.mjs');
-    assertEquals(config.vendors.map['alpinejs-sort.mjs'], 'https://esm.sh/@alpinejs/sort@3.15.11/es2024/sort.mjs');
+    assertEquals(config.vendors.map['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.12/es2024/alpinejs.mjs');
+    assertEquals(config.vendors.map['alpinejs-sort.mjs'], 'https://esm.sh/@alpinejs/sort@3.15.12/es2024/sort.mjs');
   });
 
   await t.step('should merge custom vendors with default vendors', () => {
@@ -65,7 +65,7 @@ Deno.test('RuntimeConfig', async (t) => {
     });
 
     // Should have both default and custom vendors
-    assertEquals(config.vendors.map['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.11/es2024/alpinejs.mjs');
+    assertEquals(config.vendors.map['alpinejs.mjs'], 'https://esm.sh/alpinejs@3.15.12/es2024/alpinejs.mjs');
     assertEquals(config.vendors.map['htmx.js'], 'https://unpkg.com/htmx.org@1.9.10');
   });
 

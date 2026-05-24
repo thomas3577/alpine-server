@@ -1,5 +1,4 @@
 import { assertEquals } from '@std/assert';
-
 import { normalizeCreateArgs } from './create.ts';
 
 Deno.test('normalizeCreateArgs returns help for no args', () => {

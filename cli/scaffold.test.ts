@@ -1,6 +1,5 @@
 import { assert, assertEquals, assertRejects, assertStringIncludes, assertThrows } from '@std/assert';
 import { basename, join } from '@std/path';
-
 import { getVersion, parseCliArgs } from './parser.ts';
 import { addPage, buildPageFiles, buildScaffoldFiles, createProject } from './scaffold.ts';
 

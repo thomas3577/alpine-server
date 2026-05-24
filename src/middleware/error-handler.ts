@@ -1,7 +1,7 @@
 import type { Context } from '@oak/oak';
 import { isHttpError } from '@oak/oak';
 import type { AlpineAppState } from '../types.ts';
-import * as log from '@std/log';
+import { error } from '@std/log';
 
 /**
  * Converts thrown errors into HTTP responses with optional debug details.
@@ -31,7 +31,7 @@ export const errorHandler = async (ctx: Context<AlpineAppState>, next: () => Pro
       ctx.response.type = 'text/plain';
       ctx.response.body = 'Not Found';
     } else {
-      log.error(err);
+      error(err);
       ctx.response.status = 500;
       ctx.response.type = 'text/plain';
       ctx.response.body = ctx.state.config.dev ? `Internal Server Error\n\n${String(err)}` : 'Internal Server Error';

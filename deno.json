@@ -1,10 +1,11 @@
 {
   "name": "@dx/alpine-server",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "license": "MIT",
   "tasks": {
     "test": "deno test --allow-run --allow-read --allow-write",
     "check": "deno fmt --check && deno lint",
+    "example": "cd example && deno run --allow-net --allow-read --allow-run --allow-env app.ts",
     "update": "deno outdated --update --latest"
   },
   "imports": {
@@ -13,7 +14,7 @@
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
     "@std/encoding": "jsr:@std/encoding@^1.0.10",
-    "@std/fmt": "jsr:@std/fmt@^1.0.9",
+    "@std/fmt": "jsr:@std/fmt@^1.0.10",
     "@std/log": "jsr:@std/log@^0.224.14",
     "@std/path": "jsr:@std/path@^1.1.4"
   },

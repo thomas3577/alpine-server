@@ -1,12 +1,21 @@
 import type { ServerSentEventInit, ServerSentEventTarget } from '@oak/oak';
-
 import { ServerSentEvent } from '@oak/oak';
 
 class SseService {
-  #clients = new Map<string, ServerSentEventTarget>();
+  #clients = new Set<ServerSentEventTarget>();
 
-  get clients(): Map<string, ServerSentEventTarget> {
-    return this.#clients;
+  get clients(): Set<ServerSentEventTarget> {
+    return new Set(this.#clients);
+  }
+
+  /** Adds an SSE target to the private client set for future broadcasts. */
+  addClient(target: ServerSentEventTarget): void {
+    this.#clients.add(target);
+  }
+
+  /** Removes an SSE target from the private client set to stop broadcasts. */
+  removeClient(target: ServerSentEventTarget): void {
+    this.#clients.delete(target);
   }
 
   send(type: string, eventInit?: ServerSentEventInit): void {
@@ -21,6 +30,7 @@ class SseService {
   }
 }
 
+/** Singleton SSE service instance shared across routes and file-watch events. */
 const service = new SseService();
 
 const staticFileWatch = async (path?: string): Promise<void> => {

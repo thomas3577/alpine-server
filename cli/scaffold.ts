@@ -1,5 +1,4 @@
 import { basename, dirname, join, resolve } from '@std/path';
-
 import { buildPageFiles, buildScaffoldFiles } from './templates.ts';
 import type { AddPageOptions, CreateProjectOptions } from './types.ts';
 

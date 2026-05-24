@@ -4,8 +4,8 @@
  * Parses command-line arguments and creates new alpine-server projects
  * or adds pages to existing projects.
  */
-import { basename, resolve } from '@std/path';
 
+import { basename, resolve } from '@std/path';
 import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
 import { addPage, createProject } from './scaffold.ts';
 

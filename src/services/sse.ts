@@ -1,3 +1,4 @@
+/** A single SSE payload: `event` names the event, `data` is its optional string body. */
 export type SseMessage = { event: string; data?: string };
 
 /**

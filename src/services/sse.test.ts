@@ -33,12 +33,17 @@ Deno.test('SseClient', async (t) => {
     assertEquals(received, [{ event: 'reload', data: 'x' }]);
   });
 
-  await t.step('ignores pushes after close', () => {
+  await t.step('ignores pushes after close', async () => {
     const client = new SseClient();
     client.push(null);
     client.push({ event: 'reload' });
 
-    assertEquals(client, client); // no throw
+    const received: unknown[] = [];
+    for await (const message of client) {
+      received.push(message);
+    }
+
+    assertEquals(received, []);
   });
 });
 

@@ -1,5 +1,6 @@
 import { Hono } from '@hono/hono';
 import { HTTPException } from '@hono/hono/http-exception';
+import { error } from '@std/log';
 import { vendorCache } from '../services/vendor.ts';
 import type { AlpineAppState } from '../types.ts';
 
@@ -39,10 +40,10 @@ export const createVendorRouter = (): Hono<{ Variables: AlpineAppState }> => {
       c.header('Cache-Control', 'public, max-age=31536000, immutable');
 
       return c.body(entry.content as Uint8Array<ArrayBuffer>);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+    } catch (err) {
+      error(`Failed to fetch vendor resource ${cdnPath}: ${err instanceof Error ? err.message : String(err)}`);
 
-      throw new HTTPException(502, { message: `Failed to fetch vendor resource: ${message}` });
+      throw new HTTPException(502, { message: 'Failed to fetch vendor resource' });
     }
   });
 

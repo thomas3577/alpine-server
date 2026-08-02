@@ -29,6 +29,7 @@ router.get('/', (c) => {
     stream.onAbort(() => {
       info(`${green('SSE disconnect')} ${cyan(remote)}`);
       service.removeClient(client);
+      client.push(null);
     });
 
     for await (const message of client) {

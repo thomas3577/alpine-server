@@ -6,7 +6,7 @@
 
 > ⚠️ **EXPERIMENTAL**: This library is in early development and highly experimental. APIs may change without notice. Not recommended for production use.
 
-A secure, production-ready Hono (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
+A secure, experimental Hono (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
 
 ## Versions
 

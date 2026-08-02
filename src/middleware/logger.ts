@@ -3,14 +3,21 @@ import { bold, cyan, green } from '@std/fmt/colors';
 import { info } from '@std/log';
 
 /**
+ * Context variables optionally set by a shield/rate-limiting middleware
+ * upstream of `logger`, flagging requests that were intentionally blocked.
+ */
+export type LoggerState = {
+  shield?: { blocked: boolean };
+};
+
+/**
  * Logs request method, path, and measured response time.
  */
-export const logger = async (c: Context, next: Next): Promise<void> => {
+export const logger = async (c: Context<{ Variables: LoggerState }>, next: Next): Promise<void> => {
   await next();
 
   // Skip noisy exploit-scan requests we intentionally blocked.
-  // deno-lint-ignore no-explicit-any
-  if ((c as any).get('shield')?.blocked) {
+  if (c.get('shield')?.blocked) {
     return;
   }
 

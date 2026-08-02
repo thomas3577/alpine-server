@@ -1,14 +1,15 @@
 import { assertEquals } from '@std/assert';
+import { restore, stub } from '@std/testing/mock';
+import { getLogger } from '@std/log';
 import { Hono } from '@hono/hono';
-import { logger } from './logger.ts';
+import { logger, type LoggerState } from './logger.ts';
 
-const createApp = (responseTime?: string, blocked?: boolean): Hono => {
-  const app = new Hono();
+const createApp = (responseTime?: string, blocked?: boolean): Hono<{ Variables: LoggerState }> => {
+  const app = new Hono<{ Variables: LoggerState }>();
 
   app.use(async (c, next) => {
     if (blocked) {
-      // deno-lint-ignore no-explicit-any
-      (c as any).set('shield', { blocked: true });
+      c.set('shield', { blocked: true });
     }
     await next();
   });
@@ -25,11 +26,16 @@ const createApp = (responseTime?: string, blocked?: boolean): Hono => {
 
 Deno.test('logger', async (t) => {
   await t.step('should log request without errors', async () => {
-    const app = createApp('10.5ms');
-    const response = await app.request('/');
+    const infoStub = stub(getLogger('default'), 'info');
+    try {
+      const app = createApp('10.5ms');
+      const response = await app.request('/');
 
-    // Logger uses console, so we just verify it doesn't throw
-    assertEquals(response.headers.get('X-Response-Time'), '10.5ms');
+      assertEquals(response.headers.get('X-Response-Time'), '10.5ms');
+      assertEquals(infoStub.calls.length, 1);
+    } finally {
+      restore();
+    }
   });
 
   await t.step('should handle POST requests', async () => {
@@ -40,11 +46,16 @@ Deno.test('logger', async (t) => {
   });
 
   await t.step('should skip logging for blocked requests', async () => {
-    const app = createApp('1.0ms', true);
-    const response = await app.request('/test.js');
+    const infoStub = stub(getLogger('default'), 'info');
+    try {
+      const app = createApp('1.0ms', true);
+      const response = await app.request('/test.js');
 
-    // Should not throw, but internally skips logging
-    assertEquals(response.headers.get('X-Response-Time'), '1.0ms');
+      assertEquals(response.headers.get('X-Response-Time'), '1.0ms');
+      assertEquals(infoStub.calls.length, 0);
+    } finally {
+      restore();
+    }
   });
 
   await t.step('should handle missing response time header', async () => {

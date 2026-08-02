@@ -40,9 +40,11 @@ Deno.test('sse route', async (t) => {
     assert(response.headers.get('content-type')?.includes('text/event-stream'));
     assertEquals(service.clients.size, 1);
 
-    // Release the open connection instead of leaking it across test steps.
-    service.close();
+    // Cancelling the body triggers stream.onAbort, which alone must clean up the client.
     await response.body?.cancel();
     assertEquals(service.clients.size, 0);
+
+    // Final cleanup in case anything was left registered.
+    service.close();
   });
 });

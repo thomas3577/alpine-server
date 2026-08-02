@@ -1,7 +1,7 @@
-import type { Element, HTMLDocument } from '@deno/dom';
+import type { HTMLScriptElement } from 'linkedom';
 import { Router } from '@oak/oak';
 import { join } from '@std/path';
-import { DOMParser } from '@deno/dom';
+import { DOMParser } from 'linkedom';
 import type { AlpineAppState } from '../types.ts';
 import { UPDATER_FILENAME } from '../config.ts';
 
@@ -30,17 +30,15 @@ const looksLikeFileRequest = (path: string): boolean => {
   return lastSegment.includes('.') && !lastSegment.endsWith('.');
 };
 
-const injectUpdater = (html: string): string | null => {
-  const element: HTMLDocument | null = domParser.parseFromString(html, 'text/html');
-  if (element) {
-    const script: Element = element.createElement('script');
-    script.setAttribute('src', `/${UPDATER_FILENAME}`);
-    script.setAttribute('defer', '');
+const injectUpdater = (html: string): string => {
+  const document = domParser.parseFromString(html, 'text/html');
+  const script: HTMLScriptElement = document.createElement('script', undefined);
+  script.setAttribute('src', `/${UPDATER_FILENAME}`);
+  script.setAttribute('defer', '');
 
-    element.head.appendChild(script);
-  }
+  document.head.appendChild(script);
 
-  return element?.documentElement?.innerHTML ?? null;
+  return document.documentElement.innerHTML;
 };
 
 router.get('/:site*', async (ctx) => {

@@ -1,20 +1,20 @@
 import { assertEquals } from '@std/assert';
-import { Application } from '@oak/oak';
+import { Hono } from '@hono/hono';
+import { errorHandler } from './error-handler.ts';
 import { createVendorRouter } from './vendor.ts';
-import type { IVendors } from '../types.ts';
+import type { AlpineAppState, IVendors } from '../types.ts';
+import { createRuntimeConfig } from '../test/runtime-config.ts';
 
-const createTestApp = (vendors: Record<string, string>, route: string = '/') => {
-  const app = new Application();
+const createTestApp = (vendors: Record<string, string>, route: string = '/'): Hono<{ Variables: AlpineAppState }> => {
+  const app = new Hono<{ Variables: AlpineAppState }>();
   const vendorsConfig: IVendors = { map: vendors, route };
 
-  app.use(async (ctx, next) => {
-    ctx.state.config = { vendors: vendorsConfig };
+  app.use(async (c, next) => {
+    c.set('config', { ...createRuntimeConfig(false, './public'), vendors: vendorsConfig });
     await next();
   });
-
-  const router = createVendorRouter(vendorsConfig);
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+  app.onError(errorHandler);
+  app.route(route, createVendorRouter());
 
   return app;
 };
@@ -54,22 +54,20 @@ Deno.test('vendor router', async (t) => {
     const vendors = { 'test.js': 'https://example.com/test.js' };
     const app = createTestApp(vendors);
 
-    const request = new Request('http://localhost/test.js');
-    const response = await app.handle(request);
+    const response = await app.request('/test.js');
 
-    assertEquals(response?.status, 200);
-    assertEquals(response?.headers.get('content-type'), 'application/javascript');
-    assertEquals(response?.headers.get('cache-control'), 'public, max-age=31536000, immutable');
+    assertEquals(response.status, 200);
+    assertEquals(response.headers.get('content-type'), 'application/javascript');
+    assertEquals(response.headers.get('cache-control'), 'public, max-age=31536000, immutable');
   });
 
   await t.step('should return 404 for non-whitelisted resources', async () => {
     const vendors = { 'test.js': 'https://example.com/test.js' };
     const app = createTestApp(vendors);
 
-    const request = new Request('http://localhost/malicious.js');
-    const response = await app.handle(request);
+    const response = await app.request('/malicious.js');
 
-    assertEquals(response?.status, 404);
+    assertEquals(response.status, 404);
   });
 
   await t.step('should serve vendor resource from custom route', async () => {
@@ -82,14 +80,12 @@ Deno.test('vendor router', async (t) => {
     const app = createTestApp(vendors, '/assets');
 
     // Should work on custom route
-    const request = new Request('http://localhost/assets/custom.js');
-    const response = await app.handle(request);
-    assertEquals(response?.status, 200);
+    const response = await app.request('/assets/custom.js');
+    assertEquals(response.status, 200);
 
     // Should NOT work on root
-    const requestRoot = new Request('http://localhost/custom.js');
-    const responseRoot = await app.handle(requestRoot);
-    assertEquals(responseRoot?.status, 404);
+    const responseRoot = await app.request('/custom.js');
+    assertEquals(responseRoot.status, 404);
   });
 
   await t.step('should handle different content types', async () => {
@@ -101,11 +97,10 @@ Deno.test('vendor router', async (t) => {
     const vendors = { 'style.css': 'https://example.com/style.css' };
     const app = createTestApp(vendors);
 
-    const request = new Request('http://localhost/style.css');
-    const response = await app.handle(request);
+    const response = await app.request('/style.css');
 
-    assertEquals(response?.status, 200);
-    assertEquals(response?.headers.get('content-type'), 'text/css; charset=utf-8');
+    assertEquals(response.status, 200);
+    assertEquals(response.headers.get('content-type'), 'text/css; charset=utf-8');
   });
 
   await t.step('should serve implicit map files', async () => {
@@ -119,11 +114,10 @@ Deno.test('vendor router', async (t) => {
     const app = createTestApp(vendors);
 
     // Requesting lib.js.map should work
-    const request = new Request('http://localhost/lib.js.map');
-    const response = await app.handle(request);
+    const response = await app.request('/lib.js.map');
 
-    assertEquals(response?.status, 200);
-    assertEquals(response?.headers.get('content-type'), 'application/json');
+    assertEquals(response.status, 200);
+    assertEquals(response.headers.get('content-type'), 'application/json');
   });
 
   // Cleanup: restore original fetch

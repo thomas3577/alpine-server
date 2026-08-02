@@ -1,11 +1,9 @@
-import type { ListenOptions } from '@oak/oak';
-
 /**
- * Configuration options for the Oak server.
+ * Configuration options for the underlying Deno server.
  */
-export type OakModuleConfig = {
-  /** Options for the Oak listen method (port, hostname, etc.) */
-  listenOptions?: ListenOptions;
+export type ServerModuleConfig = {
+  /** Options for Deno.serve (port, hostname, etc.) */
+  listenOptions?: Deno.ServeTcpOptions;
 };
 
 /**
@@ -53,7 +51,7 @@ export interface IRuntimeConfig extends AlpineAppRuntimeConfig {
  *     staticFilesPath: './public',
  *     staticExtensions: ['.html', '.css', '.js']
  *   },
- *   oak: {
+ *   server: {
  *     listenOptions: { port: 8000 }
  *   }
  * };
@@ -62,12 +60,12 @@ export interface IRuntimeConfig extends AlpineAppRuntimeConfig {
 export type AlpineAppConfig = {
   /** Application-specific configuration */
   app?: Partial<AlpineAppRuntimeConfig>;
-  /** Oak server configuration */
-  oak?: OakModuleConfig;
+  /** Server configuration */
+  server?: ServerModuleConfig;
 };
 
 /**
- * State object available in Oak context (`ctx.state`).
+ * State object available in Hono context variables (`c.get(...)`/`c.set(...)`).
  */
 export type AlpineAppState = {
   /** Runtime configuration accessible throughout the request lifecycle */

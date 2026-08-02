@@ -72,7 +72,7 @@ const app = new AlpineApp({
     dev: true,
     staticFilesPath: './public',
   },
-  oak: {
+  server: {
     listenOptions: { port: 3000 },
   },
 });
@@ -88,22 +88,20 @@ Add custom middleware using the `use()` method. Middleware runs after system mid
 import { AlpineApp } from '@dx/alpine-server';
 
 const app = new AlpineApp({
-  oak: { listenOptions: { port: 3000 } },
+  server: { listenOptions: { port: 3000 } },
 });
 
 // Add custom middleware
-app.use(async (ctx, next) => {
-  console.log(`Processing: ${ctx.request.url.pathname}`);
+app.use(async (c, next) => {
+  console.log(`Processing: ${c.req.path}`);
   await next();
 });
 
 // Add authentication middleware
-app.use(async (ctx, next) => {
-  const token = ctx.request.headers.get('Authorization');
-  if (!token && ctx.request.url.pathname.startsWith('/api/')) {
-    ctx.response.status = 401;
-    ctx.response.body = { error: 'Unauthorized' };
-    return;
+app.use(async (c, next) => {
+  const token = c.req.header('Authorization');
+  if (!token && c.req.path.startsWith('/api/')) {
+    return c.json({ error: 'Unauthorized' }, 401);
   }
   await next();
 });
@@ -113,29 +111,29 @@ await app.run();
 
 ## Custom Routes
 
-Add custom routes using the `append()` method with an Oak Router:
+Add custom routes using the `append()` method with a Hono instance:
 
 ```typescript
 import { AlpineApp } from '@dx/alpine-server';
-import { Router } from '@oak/oak';
+import { Hono } from 'hono';
 
 const app = new AlpineApp({
-  oak: { listenOptions: { port: 3000 } },
+  server: { listenOptions: { port: 3000 } },
 });
 
-// Create a router with API endpoints
-const apiRouter = new Router();
+// Create a sub-app with API endpoints
+const apiRouter = new Hono();
 
-apiRouter.get('/api/users', (ctx) => {
-  ctx.response.body = { users: ['Alice', 'Bob'] };
+apiRouter.get('/api/users', (c) => {
+  return c.json({ users: ['Alice', 'Bob'] });
 });
 
-apiRouter.post('/api/users', async (ctx) => {
-  const body = await ctx.request.body.json();
-  ctx.response.body = { message: 'User created', user: body };
+apiRouter.post('/api/users', async (c) => {
+  const body = await c.req.json();
+  return c.json({ message: 'User created', user: body });
 });
 
-// Append the router to the app
+// Append the sub-app to the app
 app.append(apiRouter);
 
 await app.run();
@@ -145,24 +143,24 @@ await app.run();
 
 ```typescript
 import { AlpineApp } from '@dx/alpine-server';
-import { Router } from '@oak/oak';
+import { Hono } from 'hono';
 
 const app = new AlpineApp({
   app: { dev: true, staticFilesPath: './public' },
-  oak: { listenOptions: { port: 3000 } },
+  server: { listenOptions: { port: 3000 } },
 });
 
 // Add logging middleware
-app.use(async (ctx, next) => {
+app.use(async (c, next) => {
   const start = Date.now();
   await next();
-  console.log(`${ctx.request.method} ${ctx.request.url.pathname} - ${Date.now() - start}ms`);
+  console.log(`${c.req.method} ${c.req.path} - ${Date.now() - start}ms`);
 });
 
 // Add API routes
-const router = new Router();
-router.get('/api/health', (ctx) => {
-  ctx.response.body = { status: 'ok', timestamp: Date.now() };
+const router = new Hono();
+router.get('/api/health', (c) => {
+  return c.json({ status: 'ok', timestamp: Date.now() });
 });
 app.append(router);
 

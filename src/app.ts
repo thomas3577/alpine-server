@@ -1,5 +1,5 @@
-import { Application } from '@oak/oak';
-import type { Middleware, Router } from '@oak/oak';
+import { Hono } from '@hono/hono';
+import type { MiddlewareHandler } from '@hono/hono';
 import { info } from '@std/log';
 import { staticFiles } from './middleware/static-files.ts';
 import { errorHandler } from './middleware/error-handler.ts';
@@ -8,39 +8,41 @@ import { timing } from './middleware/timing.ts';
 import { securityHeaders } from './middleware/security-headers.ts';
 import { staticFileWatch } from './services/sse.ts';
 import { createVendorRouter } from './middleware/vendor.ts';
-import { RuntimeConfig } from './config.ts';
+import { RuntimeConfig, UPDATER_FILENAME } from './config.ts';
 import { router as updater } from './routes/updater.ts';
 import { router as sse } from './routes/sse.ts';
 import { router as view } from './routes/views.ts';
 import type { AlpineAppConfig, AlpineAppState } from './types.ts';
 
+type AppEnv = { Variables: AlpineAppState };
+
 /**
- * AlpineApp is a web application framework built on top of Oak,
+ * AlpineApp is a web application framework built on top of Hono,
  * providing a streamlined setup with built-in middleware for security,
  * logging, static files, and more.
  *
  * @example
  * ```ts
- * const app = new AlpineApp({ oak: { listenOptions: { port: 8000 } } });
+ * const app = new AlpineApp({ server: { listenOptions: { port: 8000 } } });
  * app.use(myMiddleware);
  * app.append(myRouter);
  * await app.run();
  * ```
  */
 export class AlpineApp {
-  readonly #app: Application<AlpineAppState>;
+  readonly #app: Hono<AppEnv>;
   readonly #config: AlpineAppConfig;
-  readonly #userMiddlewares: Middleware<AlpineAppState>[] = [];
-  readonly #userRouters: Router[] = [];
+  readonly #userMiddlewares: MiddlewareHandler<AppEnv>[] = [];
+  readonly #userRouters: Hono<AppEnv>[] = [];
   #running = false;
 
   /**
    * Creates a new AlpineApp instance.
    *
-   * @param {AlpineAppConfig | undefined} config - Configuration for the application and Oak server
+   * @param {AlpineAppConfig | undefined} config - Configuration for the application and the underlying server
    */
   constructor(config?: AlpineAppConfig) {
-    this.#app = new Application<AlpineAppState>();
+    this.#app = new Hono<AppEnv>();
     this.#config = config ?? {};
   }
 
@@ -48,38 +50,38 @@ export class AlpineApp {
    * Registers a middleware function that will be executed after system
    * middlewares but before routes.
    *
-   * @param {Middleware<AlpineAppState>} middleware - Middleware function to register
+   * @param {MiddlewareHandler<AppEnv>} middleware - Middleware function to register
    * @returns {this} The AlpineApp instance for method chaining
    *
    * @example
    * ```ts
-   * app.use(async (ctx, next) => {
+   * app.use(async (c, next) => {
    *   console.log('Custom middleware');
    *   await next();
    * });
    * ```
    */
-  use(middleware: Middleware<AlpineAppState>): this {
+  use(middleware: MiddlewareHandler<AppEnv>): this {
     this.#userMiddlewares.push(middleware);
 
     return this;
   }
 
   /**
-   * Appends a router to the application. Routes will be registered after
+   * Appends a sub-app to the application. Routes will be registered after
    * all middlewares but before internal routes (updater, static files, etc.).
    *
-   * @param {Router} router - Oak Router instance to append
+   * @param {Hono<AppEnv>} router - Hono instance mounted at the root
    * @returns {this} The AlpineApp instance for method chaining
    *
    * @example
    * ```ts
-   * const router = new Router();
+   * const router = new Hono();
    * router.get('/api/users', getUsers);
    * app.append(router);
    * ```
    */
-  append(router: Router): this {
+  append(router: Hono<AppEnv>): this {
     this.#userRouters.push(router);
 
     return this;
@@ -106,32 +108,34 @@ export class AlpineApp {
 
     const runtime = new RuntimeConfig(this.#config.app);
 
-    this.#app.use(async (ctx, next) => {
-      ctx.state.config = runtime;
+    this.#app.use(async (c, next) => {
+      c.set('config', runtime);
 
       await next();
     });
 
-    this.#app.use(errorHandler);
+    this.#app.onError(errorHandler);
     this.#app.use(logger);
     this.#app.use(timing);
     this.#app.use(securityHeaders);
-    this.#app.use(createVendorRouter(runtime.vendors).routes());
+    this.#app.route(runtime.vendors.route ?? '/', createVendorRouter());
 
     // User middlewares
     for (const middleware of this.#userMiddlewares) {
       this.#app.use(middleware);
     }
 
-    // User routes
+    // User routers
     for (const router of this.#userRouters) {
-      this.#app.use(router.routes());
+      this.#app.route('/', router);
     }
 
-    this.#app.use(updater.routes());
+    // Mounted at both forms so `/updater.js` and `/updater.js/` resolve identically.
+    this.#app.route(`/${UPDATER_FILENAME}`, updater);
+    this.#app.route(`/${UPDATER_FILENAME}/`, updater);
     this.#app.use(staticFiles);
-    this.#app.use(sse.routes());
-    this.#app.use(view.routes());
+    this.#app.route('/sse', sse);
+    this.#app.route('/', view);
 
     if (runtime.dev) {
       staticFileWatch(runtime.staticFilesPath);
@@ -139,6 +143,6 @@ export class AlpineApp {
 
     info('Starting...');
 
-    await this.#app.listen(this.#config.oak?.listenOptions);
+    await Deno.serve(this.#config.server?.listenOptions ?? {}, this.#app.fetch).finished;
   }
 }

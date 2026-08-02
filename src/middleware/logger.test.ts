@@ -1,62 +1,67 @@
 import { assertEquals } from '@std/assert';
-import { logger } from './logger.ts';
-import type { Context } from '@oak/oak';
+import { restore, stub } from '@std/testing/mock';
+import { getLogger } from '@std/log';
+import { Hono } from '@hono/hono';
+import { logger, type LoggerState } from './logger.ts';
 
-const createMockContext = (pathname: string, method: string, responseTime?: string, blocked?: boolean): Context => {
-  const headers = new Map<string, string>();
-  if (responseTime) {
-    headers.set('X-Response-Time', responseTime);
-  }
+const createApp = (responseTime?: string, blocked?: boolean): Hono<{ Variables: LoggerState }> => {
+  const app = new Hono<{ Variables: LoggerState }>();
 
-  const ctx = {
-    request: {
-      method,
-      url: new URL(`http://localhost${pathname}`),
-    },
-    response: {
-      headers: {
-        get: (key: string) => headers.get(key) ?? null,
-        set: (key: string, value: string) => headers.set(key, value),
-      },
-    },
-    state: blocked ? { shield: { blocked: true } } : {},
-  } as unknown as Context;
+  app.use(async (c, next) => {
+    if (blocked) {
+      c.set('shield', { blocked: true });
+    }
+    await next();
+  });
+  app.use(logger);
+  app.all('*', (c) => {
+    if (responseTime) {
+      c.header('X-Response-Time', responseTime);
+    }
+    return c.body(null);
+  });
 
-  return ctx;
+  return app;
 };
 
 Deno.test('logger', async (t) => {
   await t.step('should log request without errors', async () => {
-    const ctx = createMockContext('/', 'GET', '10.5ms');
+    const infoStub = stub(getLogger('default'), 'info');
+    try {
+      const app = createApp('10.5ms');
+      const response = await app.request('/');
 
-    await logger(ctx, async () => {});
-
-    // Logger uses console, so we just verify it doesn't throw
-    assertEquals(ctx.response.headers.get('X-Response-Time'), '10.5ms');
+      assertEquals(response.headers.get('X-Response-Time'), '10.5ms');
+      assertEquals(infoStub.calls.length, 1);
+    } finally {
+      restore();
+    }
   });
 
   await t.step('should handle POST requests', async () => {
-    const ctx = createMockContext('/api/data', 'POST', '25.3ms');
+    const app = createApp('25.3ms');
+    const response = await app.request('/api/data', { method: 'POST' });
 
-    await logger(ctx, async () => {});
-
-    assertEquals(ctx.request.method, 'POST');
+    assertEquals(response.status, 200);
   });
 
   await t.step('should skip logging for blocked requests', async () => {
-    const ctx = createMockContext('/test.js', 'GET', '1.0ms', true);
+    const infoStub = stub(getLogger('default'), 'info');
+    try {
+      const app = createApp('1.0ms', true);
+      const response = await app.request('/test.js');
 
-    await logger(ctx, async () => {});
-
-    // Should not throw, but internally skips logging
-    assertEquals(ctx.state.shield?.blocked, true);
+      assertEquals(response.headers.get('X-Response-Time'), '1.0ms');
+      assertEquals(infoStub.calls.length, 0);
+    } finally {
+      restore();
+    }
   });
 
   await t.step('should handle missing response time header', async () => {
-    const ctx = createMockContext('/', 'GET');
+    const app = createApp();
+    const response = await app.request('/');
 
-    await logger(ctx, async () => {});
-
-    assertEquals(ctx.response.headers.get('X-Response-Time'), null);
+    assertEquals(response.headers.get('X-Response-Time'), null);
   });
 });

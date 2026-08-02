@@ -1,15 +1,15 @@
 import type { HTMLScriptElement } from 'linkedom';
-import { Router } from '@oak/oak';
+import { Hono } from '@hono/hono';
 import { join } from '@std/path';
 import { DOMParser } from 'linkedom';
 import type { AlpineAppState } from '../types.ts';
 import { UPDATER_FILENAME } from '../config.ts';
 
-const router: Router<AlpineAppState> = new Router<AlpineAppState>();
+const router = new Hono<{ Variables: AlpineAppState }>();
 const domParser = new DOMParser();
 
 const isPathTraversalAttempt = (path: string): boolean => {
-  // Oak params are already decoded; reject any attempt to escape the static root.
+  // Hono params are already decoded; reject any attempt to escape the static root.
   const segments = path.split('/');
 
   return segments.includes('..') || path.includes('\\') || path.includes('\0');
@@ -41,30 +41,23 @@ const injectUpdater = (html: string): string => {
   return document.documentElement.innerHTML;
 };
 
-router.get('/:site*', async (ctx) => {
-  const { site } = ctx.params;
-  const sitePath = site ?? '';
+router.get('/:site{.*}', async (c) => {
+  const sitePath = c.req.param('site') ?? '';
 
   if (isPathTraversalAttempt(sitePath) || looksLikeFileRequest(sitePath)) {
-    ctx.response.status = 404;
-    return;
+    return c.text('', 404);
   }
 
-  const path: string = join(ctx.state.config.staticFilesPath, sitePath, 'index.html');
+  const path: string = join(c.get('config').staticFilesPath, sitePath, 'index.html');
 
   try {
     const text: string = await Deno.readTextFile(path);
-    const body: string | null = !ctx.state.config.dev ? text : injectUpdater(text);
+    const body: string = !c.get('config').dev ? text : injectUpdater(text);
 
-    ctx.response.status = !body ? 404 : 200;
-    if (body) {
-      ctx.response.headers.set('Content-Type', 'text/html');
-      ctx.response.body = body;
-    }
+    return c.html(body);
   } catch (err) {
     if (err instanceof Deno.errors.NotFound) {
-      ctx.response.status = 404;
-      return;
+      return c.text('', 404);
     }
 
     throw err;

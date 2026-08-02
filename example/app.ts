@@ -4,7 +4,7 @@ const app = new AlpineApp({
   app: {
     dev: true,
   },
-  oak: {
+  server: {
     listenOptions: {
       port: 8000,
     },

@@ -10,8 +10,8 @@ type AlpineAppConfig = {
     staticExtensions?: string[]; // Allowed file extensions
     vendors?: Record<string, string>; // Custom vendor CDN mappings (filename -> URL)
   };
-  oak?: {
-    listenOptions?: ListenOptions; // Oak server listen options (port, hostname, etc.)
+  server?: {
+    listenOptions?: Deno.ServeTcpOptions; // Deno.serve listen options (port, hostname, etc.)
   };
 };
 ```
@@ -22,7 +22,7 @@ type AlpineAppConfig = {
 - **`staticFilesPath`**: `./public` (resolved against `Deno.cwd()`)
 - **`staticExtensions`**: `['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']`
 - **`vendors`**: Alpine.js from esm.sh (can be extended or overridden)
-- **`listenOptions`**: Oak defaults (port `8000`)
+- **`listenOptions`**: Deno.serve defaults (port `8000`)
 
 ### Example: Production Config
 
@@ -33,7 +33,7 @@ const app = new AlpineApp({
     staticFilesPath: './dist',
     staticExtensions: ['.html', '.css', '.js', '.svg', '.png', '.jpg', '.ico'],
   },
-  oak: {
+  server: {
     listenOptions: {
       port: 8080,
       hostname: '0.0.0.0',

@@ -6,11 +6,11 @@
 
 > ⚠️ **EXPERIMENTAL**: This library is in early development and highly experimental. APIs may change without notice. Not recommended for production use.
 
-A secure, production-ready Oak (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
+A secure, experimental Hono (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
 
 ## Versions
 
-- **Oak**: v17.2.0
+- **Hono**: v4.12.33
 - **Alpine.js**: v3.15.12 (default configuration)
 
 ## Example
@@ -23,7 +23,7 @@ const app = new AlpineApp({
     dev: true,
     staticFilesPath: './public',
   },
-  oak: {
+  server: {
     listenOptions: { port: 3000 },
   },
 });

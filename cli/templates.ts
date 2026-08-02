@@ -6,7 +6,7 @@ const MAIN_TS_TEMPLATE = (port: number) =>
   `import { AlpineApp } from '@dx/alpine-server';
 
 const app = new AlpineApp({
-  oak: {
+  server: {
     listenOptions: {
       port: ${port}
     },

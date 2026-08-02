@@ -1,4 +1,4 @@
-import type { Context } from '@oak/oak';
+import type { Context, Next } from '@hono/hono';
 import type { AlpineAppState } from '../types.ts';
 
 const buildCspHeaderValue = (): string => {
@@ -21,25 +21,23 @@ const buildCspHeaderValue = (): string => {
 /**
  * Applies secure default response headers and CSP for HTML responses.
  */
-export const securityHeaders = async (context: Context<AlpineAppState>, next: () => Promise<unknown>): Promise<void> => {
+export const securityHeaders = async (c: Context<{ Variables: AlpineAppState }>, next: Next): Promise<void> => {
   await next();
 
-  const headers = context.response.headers;
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  c.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  c.header('Cross-Origin-Resource-Policy', 'same-origin');
+  c.header('Cross-Origin-Opener-Policy', 'same-origin');
 
-  headers.set('X-Content-Type-Options', 'nosniff');
-  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-
-  if (!context.state.config.dev) {
+  if (!c.get('config').dev) {
     // Only enable HSTS in production (requires HTTPS).
-    headers.set('Strict-Transport-Security', 'max-age=31536000');
+    c.header('Strict-Transport-Security', 'max-age=31536000');
   }
 
-  const contentType = (headers.get('content-type') ?? '').toLowerCase();
-  const hasCsp = headers.get('Content-Security-Policy') !== null;
+  const contentType = (c.res.headers.get('content-type') ?? '').toLowerCase();
+  const hasCsp = c.res.headers.get('Content-Security-Policy') !== null;
   if (!hasCsp && contentType.includes('text/html')) {
-    headers.set('Content-Security-Policy', buildCspHeaderValue());
+    c.header('Content-Security-Policy', buildCspHeaderValue());
   }
 };

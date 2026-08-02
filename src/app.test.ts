@@ -9,7 +9,7 @@ Deno.test('AlpineApp', async (t) => {
         staticFilesPath: './public',
         staticExtensions: ['.html', '.css', '.js'],
       },
-      oak: {
+      server: {
         listenOptions: {
           port: 8000,
         },
@@ -44,9 +44,9 @@ Deno.test('AlpineApp', async (t) => {
     assertExists(alpineApp);
   });
 
-  await t.step('should construct with only oak config', () => {
+  await t.step('should construct with only server config', () => {
     const alpineApp = new AlpineApp({
-      oak: {
+      server: {
         listenOptions: {
           port: 3000,
           hostname: 'localhost',

@@ -1,21 +1,19 @@
 import { assert, assertEquals } from '@std/assert';
-import { Application } from '@oak/oak';
+import { Hono } from '@hono/hono';
 import { join } from '@std/path';
 import { router } from './views.ts';
 import { UPDATER_FILENAME } from '../config.ts';
 import { createRuntimeConfig } from '../test/runtime-config.ts';
-import type { IRuntimeConfig } from '../types.ts';
+import type { AlpineAppState, IRuntimeConfig } from '../types.ts';
 
-const createApp = (config: IRuntimeConfig): Application => {
-  const app = new Application();
+const createApp = (config: IRuntimeConfig): Hono<{ Variables: AlpineAppState }> => {
+  const app = new Hono<{ Variables: AlpineAppState }>();
 
-  app.use(async (ctx, next) => {
-    ctx.state.config = config;
+  app.use(async (c, next) => {
+    c.set('config', config);
     await next();
   });
-
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+  app.route('/', router);
 
   return app;
 };
@@ -32,9 +30,8 @@ Deno.test('views route', async (t) => {
       );
 
       const app = createApp(createRuntimeConfig(true, root));
-      const response = await app.handle(new Request('http://localhost/foo'));
+      const response = await app.request('/foo');
 
-      assert(response);
       assertEquals(response.status, 200);
 
       const html = await response.text();
@@ -50,9 +47,8 @@ Deno.test('views route', async (t) => {
 
     try {
       const app = createApp(createRuntimeConfig(false, root));
-      const response = await app.handle(new Request('http://localhost/vendor/phpunit.xsd'));
+      const response = await app.request('/vendor/phpunit.xsd');
 
-      assert(response);
       assertEquals(response.status, 404);
     } finally {
       await Deno.remove(root, { recursive: true });
@@ -64,9 +60,8 @@ Deno.test('views route', async (t) => {
 
     try {
       const app = createApp(createRuntimeConfig(false, root));
-      const response = await app.handle(new Request('http://localhost/%2e%2e/secret'));
+      const response = await app.request('/%2e%2e/secret');
 
-      assert(response);
       assertEquals(response.status, 404);
     } finally {
       await Deno.remove(root, { recursive: true });

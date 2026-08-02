@@ -1,92 +1,48 @@
 import { assert, assertEquals } from '@std/assert';
-import type { Context } from '@oak/oak';
+import { Hono } from '@hono/hono';
 import { router } from './sse.ts';
+import { errorHandler } from '../middleware/error-handler.ts';
 import { service } from '../services/sse.ts';
+import { createRuntimeConfig } from '../test/runtime-config.ts';
+import type { AlpineAppState } from '../types.ts';
 
-type MockTarget = {
-  addEventListener: (type: string, listener: () => void) => void;
-  dispatchEvent: (_event: Event) => boolean;
-  close: () => void;
-};
+const createApp = (): Hono<{ Variables: AlpineAppState }> => {
+  const app = new Hono<{ Variables: AlpineAppState }>();
 
-type MockContext = {
-  context: Context;
-  listeners: Map<string, () => void>;
-};
+  app.use(async (c, next) => {
+    c.set('config', createRuntimeConfig(false, './public'));
+    await next();
+  });
+  app.onError(errorHandler);
+  app.route('/sse', router);
 
-const createContext = (accept: string, target: MockTarget): MockContext => {
-  const listeners = new Map<string, () => void>();
-  target.addEventListener = (type: string, listener: () => void) => {
-    listeners.set(type, listener);
-  };
-
-  return {
-    context: {
-      request: {
-        method: 'GET',
-        url: new URL('http://localhost/sse/'),
-        ip: '127.0.0.1',
-        accepts: (value: string) => (accept === value ? value : undefined),
-      },
-      response: {
-        status: 200,
-        headers: new Headers(),
-      },
-      assert: (condition: unknown, status: number) => {
-        if (!condition) {
-          throw { status };
-        }
-      },
-      sendEvents: () => Promise.resolve(target),
-      state: {},
-    } as unknown as Context,
-    listeners,
-  };
-};
-
-const runSseMiddleware = async (ctx: Context): Promise<void> => {
-  const middleware = router.routes();
-  await middleware(ctx, async () => {});
+  return app;
 };
 
 Deno.test('sse route', async (t) => {
-  await t.step('registers a client when accepting event-stream', async () => {
-    service.close();
-    const target: MockTarget = {
-      addEventListener: () => {},
-      dispatchEvent: () => true,
-      close: () => {},
-    };
-    const { context, listeners } = createContext('text/event-stream', target);
-
-    await runSseMiddleware(context);
-
-    assertEquals(service.clients.size, 1);
-
-    const closeListener = listeners.get('close');
-    assert(closeListener);
-    closeListener();
-    assertEquals(service.clients.size, 0);
-
-    service.close();
-  });
-
   await t.step('returns 415 for unsupported media type', async () => {
     service.close();
-    const target: MockTarget = {
-      addEventListener: () => {},
-      dispatchEvent: () => true,
-      close: () => {},
-    };
-    const { context } = createContext('application/json', target);
+    const app = createApp();
 
-    try {
-      await runSseMiddleware(context);
-      assert(false, 'Expected unsupported media type assertion');
-    } catch (error) {
-      assertEquals((error as { status?: number }).status, 415);
-    }
+    const response = await app.request('/sse', { headers: { Accept: 'application/json' } });
 
+    assertEquals(response.status, 415);
+    assertEquals(service.clients.size, 0);
+  });
+
+  await t.step('opens an event-stream connection and registers a client', async () => {
+    service.close();
+    const app = createApp();
+
+    const response = await app.request('/sse', { headers: { Accept: 'text/event-stream' } });
+
+    assertEquals(response.status, 200);
+    assert(response.headers.get('content-type')?.includes('text/event-stream'));
+    assertEquals(service.clients.size, 1);
+
+    // Release the open connection instead of leaking it across test steps.
+    service.close();
+    await response.body?.cancel();
     assertEquals(service.clients.size, 0);
   });
 });

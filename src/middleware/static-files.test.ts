@@ -1,125 +1,86 @@
 import { assertEquals } from '@std/assert';
-import type { Context } from '@oak/oak';
+import { Hono } from '@hono/hono';
 import { staticFiles } from './static-files.ts';
+import { errorHandler } from './error-handler.ts';
 import type { AlpineAppState } from '../types.ts';
+import { createRuntimeConfig } from '../test/runtime-config.ts';
 
-const createMockContext = (pathname: string, staticExtensions: string[]): Context<AlpineAppState> => {
-  const ctx = {
-    request: {
-      url: new URL(`http://localhost${pathname}`),
-    },
-    state: {
-      config: {
-        staticFilesPath: './public',
-        staticExtensions,
-        dev: false,
-        production: true,
-        vendors: {},
-      },
-    },
-  } as unknown as Context<AlpineAppState>;
+const createApp = (staticExtensions: string[], root: string): Hono<{ Variables: AlpineAppState }> => {
+  const app = new Hono<{ Variables: AlpineAppState }>();
 
-  return ctx;
+  app.use(async (c, next) => {
+    c.set('config', { ...createRuntimeConfig(false, root), staticExtensions });
+    await next();
+  });
+  app.onError(errorHandler);
+  app.use(staticFiles);
+  app.all('*', (c) => c.text('fallback-reached'));
+
+  return app;
 };
 
 Deno.test('staticFiles', async (t) => {
   await t.step('should call next for non-static extensions', async () => {
-    const ctx = createMockContext('/api/data', ['.html', '.css', '.js']);
-    let nextCalled = false;
+    const app = createApp(['.html', '.css', '.js'], './public');
+    const response = await app.request('/api/data');
 
-    await staticFiles(ctx, async () =>
-      await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
-
-    assertEquals(nextCalled, true);
+    assertEquals(await response.text(), 'fallback-reached');
   });
 
   await t.step('should call next for paths without extension', async () => {
-    const ctx = createMockContext('/', ['.html', '.css', '.js']);
-    let nextCalled = false;
+    const app = createApp(['.html', '.css', '.js'], './public');
+    const response = await app.request('/');
 
-    await staticFiles(ctx, async () =>
-      await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
-
-    assertEquals(nextCalled, true);
+    assertEquals(await response.text(), 'fallback-reached');
   });
 
-  await t.step('should not call next for .html files', async () => {
-    const ctx = createMockContext('/index.html', ['.html', '.css', '.js']);
-    let nextCalled = false;
+  await t.step('should not call next for .html files (404 on miss)', async () => {
+    const app = createApp(['.html', '.css', '.js'], './public');
+    const response = await app.request('/index.html');
 
-    try {
-      await staticFiles(ctx, async () =>
-        await Promise.resolve().then(() => {
-          nextCalled = true;
-        }));
-    } catch (_err) {
-      // File not found is expected, ignore
-    }
-
-    assertEquals(nextCalled, false);
+    assertEquals(response.status, 404);
   });
 
-  await t.step('should not call next for .css files', async () => {
-    const ctx = createMockContext('/style.css', ['.html', '.css', '.js']);
-    let nextCalled = false;
+  await t.step('should not call next for .css files (404 on miss)', async () => {
+    const app = createApp(['.html', '.css', '.js'], './public');
+    const response = await app.request('/style.css');
 
-    try {
-      await staticFiles(ctx, async () =>
-        await Promise.resolve().then(() => {
-          nextCalled = true;
-        }));
-    } catch (_err) {
-      // File not found is expected, ignore
-    }
-
-    assertEquals(nextCalled, false);
+    assertEquals(response.status, 404);
   });
 
-  await t.step('should not call next for .js files', async () => {
-    const ctx = createMockContext('/app.js', ['.html', '.css', '.js']);
-    let nextCalled = false;
+  await t.step('should not call next for .js files (404 on miss)', async () => {
+    const app = createApp(['.html', '.css', '.js'], './public');
+    const response = await app.request('/app.js');
 
-    try {
-      await staticFiles(ctx, async () =>
-        await Promise.resolve().then(() => {
-          nextCalled = true;
-        }));
-    } catch (_err) {
-      // File not found is expected, ignore
-    }
-
-    assertEquals(nextCalled, false);
+    assertEquals(response.status, 404);
   });
 
   await t.step('should respect custom staticExtensions list', async () => {
-    const ctx = createMockContext('/data.json', ['.json']);
-    let nextCalled = false;
+    const app = createApp(['.json'], './public');
+    const response = await app.request('/data.json');
 
-    try {
-      await staticFiles(ctx, async () =>
-        await Promise.resolve().then(() => {
-          nextCalled = true;
-        }));
-    } catch (_err) {
-      // File not found is expected, ignore
-    }
-
-    assertEquals(nextCalled, false);
+    assertEquals(response.status, 404);
   });
 
   await t.step('should call next for extensions not in list', async () => {
-    const ctx = createMockContext('/image.png', ['.html', '.css', '.js']);
-    let nextCalled = false;
+    const app = createApp(['.html', '.css', '.js'], './public');
+    const response = await app.request('/image.png');
 
-    await staticFiles(ctx, async () =>
-      await Promise.resolve().then(() => {
-        nextCalled = true;
-      }));
+    assertEquals(await response.text(), 'fallback-reached');
+  });
 
-    assertEquals(nextCalled, true);
+  await t.step('should serve an existing static file', async () => {
+    const root = await Deno.makeTempDir();
+    try {
+      await Deno.writeTextFile(`${root}/style.css`, 'body { margin: 0; }');
+      const app = createApp(['.html', '.css', '.js'], root);
+      const response = await app.request('/style.css');
+
+      assertEquals(response.status, 200);
+      assertEquals(response.headers.get('content-type'), 'text/css; charset=utf-8');
+      assertEquals(await response.text(), 'body { margin: 0; }');
+    } finally {
+      await Deno.remove(root, { recursive: true });
+    }
   });
 });

@@ -1,5 +1,4 @@
-import { Router } from '@oak/oak';
-import { UPDATER_FILENAME } from '../config.ts';
+import { Hono } from '@hono/hono';
 import type { AlpineAppState } from '../types.ts';
 
 const NOOP_SCRIPT = ';';
@@ -26,11 +25,12 @@ const getUpdaterScript = async (dev: boolean): Promise<string> => {
   }
 };
 
-const router: Router<AlpineAppState> = new Router<AlpineAppState>({ prefix: `/${UPDATER_FILENAME}` });
+const router = new Hono<{ Variables: AlpineAppState }>();
 
-router.get('/', async (ctx) => {
-  ctx.response.body = await getUpdaterScript(ctx.state.config.dev);
-  ctx.response.headers.append('content-type', 'application/javascript; charset=utf-8');
+router.get('/', async (c) => {
+  const script = await getUpdaterScript(c.get('config').dev);
+
+  return c.body(script, 200, { 'content-type': 'application/javascript; charset=utf-8' });
 });
 
 export { router };

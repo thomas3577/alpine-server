@@ -8,11 +8,6 @@
 
 A secure, experimental Hono (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
 
-## Versions
-
-- **Hono**: v4.12.33
-- **Alpine.js**: v3.15.12 (default configuration)
-
 ## Example
 
 ```typescript

@@ -1,6 +1,6 @@
 {
   "name": "@dx/alpine-server",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "tasks": {
     "test": "deno test --allow-run --allow-read --allow-write",

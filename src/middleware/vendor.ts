@@ -25,7 +25,13 @@ export const createVendorRouter = (): Hono<{ Variables: AlpineAppState }> => {
       const originalFilename = filename.slice(0, -4);
       const originalCdnPath = vendorMap[originalFilename] ?? vendorMap[`/${originalFilename}`];
       if (originalCdnPath) {
-        cdnPath = `${originalCdnPath}.map`;
+        // esm.sh caches a bare `.map` request as an immutable 404 at its CDN edge if that
+        // exact URL is ever requested before the map has been built for that build target
+        // (e.g. by a browser devtools instance). The 404 is then permanently frozen for that
+        // URL. A stable, distinguishing query param sidesteps the poisoned cache key without
+        // affecting our own in-memory cache (still keyed by the full URL, so still hit once
+        // resolved).
+        cdnPath = `${originalCdnPath}.map?dx-alpine-server=map`;
       }
     }
 

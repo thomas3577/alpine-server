@@ -1,3 +1,4 @@
+/** Request logging middleware. */
 import type { Context, Next } from '@hono/hono';
 import { bold, cyan, green } from '@std/fmt/colors';
 import { info } from '@std/log';

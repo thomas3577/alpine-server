@@ -1,3 +1,4 @@
+/** Parses `alp` CLI arguments and provides help/version text. */
 import denoConfig from '../deno.json' with { type: 'json' };
 import { ALPINE_VERSION } from '../src/config.ts';
 import type { ParsedCliArgs } from './types.ts';

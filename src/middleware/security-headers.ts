@@ -1,3 +1,4 @@
+/** Sets CSP, HSTS, and other security-related response headers. */
 import type { Context, Next } from '@hono/hono';
 import type { AlpineAppState } from '../types.ts';
 

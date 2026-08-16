@@ -1,3 +1,4 @@
+/** Default runtime configuration, static file settings, and vendor CDN map. */
 import { join } from '@std/path';
 import { resolveStaticFilesPath } from './utils.ts';
 import type { AlpineAppRuntimeConfig, IRuntimeConfig, IVendors } from './types.ts';

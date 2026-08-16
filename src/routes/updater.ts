@@ -1,3 +1,4 @@
+/** Serves the dev-mode hot-reload updater script. */
 import { Hono } from '@hono/hono';
 import type { AlpineAppState } from '../types.ts';
 

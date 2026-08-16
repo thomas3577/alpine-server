@@ -1,3 +1,4 @@
+/** Catch-all route serving index.html for directory-style requests. */
 import type { HTMLScriptElement } from 'linkedom';
 import { Hono } from '@hono/hono';
 import { join } from '@std/path';

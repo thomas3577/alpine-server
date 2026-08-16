@@ -1,3 +1,4 @@
+/** Serves individual static files by extension from the configured static root. */
 import type { Context, Next } from '@hono/hono';
 import { serveStatic } from '@hono/hono/deno';
 import { extname } from '@std/path';

@@ -1,3 +1,4 @@
+/** Whitelisted reverse-proxy/cache for vendor CDN assets (e.g. Alpine.js). */
 import { Hono } from '@hono/hono';
 import { HTTPException } from '@hono/hono/http-exception';
 import { error } from '@std/log';

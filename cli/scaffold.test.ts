@@ -90,9 +90,9 @@ Deno.test('parseCliArgs', async (t) => {
   });
 });
 
-Deno.test('getVersion returns a semver string', () => {
+Deno.test('getVersion includes alpine-server, Hono, and Alpine.js versions', () => {
   const version = getVersion();
-  assert(/^\d+\.\d+\.\d+/.test(version));
+  assert(/^alpine-server \d+\.\d+\.\d+ \(Hono \S+, Alpine\.js \d+\.\d+\.\d+\)$/.test(version));
 });
 
 Deno.test('buildScaffoldFiles returns expected files', () => {

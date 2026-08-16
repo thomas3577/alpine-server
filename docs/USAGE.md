@@ -114,8 +114,7 @@ await app.run();
 Add custom routes using the `append()` method with a Hono instance:
 
 ```typescript
-import { AlpineApp } from '@dx/alpine-server';
-import { Hono } from 'hono';
+import { AlpineApp, Hono } from '@dx/alpine-server';
 
 const app = new AlpineApp({
   server: { listenOptions: { port: 3000 } },
@@ -142,8 +141,7 @@ await app.run();
 ## Combining Middleware and Routes
 
 ```typescript
-import { AlpineApp } from '@dx/alpine-server';
-import { Hono } from 'hono';
+import { AlpineApp, Hono } from '@dx/alpine-server';
 
 const app = new AlpineApp({
   app: { dev: true, staticFilesPath: './public' },

@@ -20,7 +20,8 @@
   "exports": {
     ".": "./mod.ts",
     "./cli": "./cli/cli.ts",
-    "./create": "./cli/create.ts"
+    "./create": "./cli/create.ts",
+    "./hono": "./src/hono.ts"
   },
   "publish": {
     "exclude": [

@@ -138,6 +138,27 @@ app.append(apiRouter);
 await app.run();
 ```
 
+### Using the Full Hono API
+
+`@dx/alpine-server` re-exports `Hono`/`Context`/`Middleware`/`Next` from its main entrypoint for building sub-apps. For additional Hono utilities like `HTTPException` or the cookie helpers, import them from `@dx/alpine-server/hono` instead of adding `hono`/`@hono/hono` as a direct dependency:
+
+```typescript
+import { Hono } from '@dx/alpine-server';
+import { HTTPException } from '@dx/alpine-server/hono';
+import { getCookie, setCookie } from '@dx/alpine-server/hono';
+
+const apiRouter = new Hono();
+
+apiRouter.get('/api/profile', (c) => {
+  const sessionId = getCookie(c, 'session_id');
+  if (!sessionId) {
+    throw new HTTPException(401, { message: 'Not authenticated' });
+  }
+  setCookie(c, 'last_seen', new Date().toISOString());
+  return c.json({ sessionId });
+});
+```
+
 ## Combining Middleware and Routes
 
 ```typescript

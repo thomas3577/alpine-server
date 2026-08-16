@@ -72,3 +72,8 @@ Separate from the runtime library — scaffolds new projects (`cli/scaffold.ts`,
 - Never relax CSP/HSTS/security headers without explicit justification in code comments and docs.
 - Dev-only behavior must stay guarded by config flags (`config.dev`); production defaults must stay safe.
 - If behavior or configuration changes, update `docs/USAGE.md` / `docs/CONFIGURATION.md` / `README.md` alongside the code, and update `mod.ts` + its tests if exports change.
+
+## Git Guidelines
+
+- Do not add 'Co-Authored-By', generator tags, or any AI references to commit messages or PR descriptions.
+- Keep commit messages concise and strictly focused on changes.

@@ -104,7 +104,7 @@ Deno.test('vendor router', async (t) => {
   });
 
   await t.step('should serve implicit map files', async () => {
-    mockFetchResponses.set('https://example.com/lib.js.map', {
+    mockFetchResponses.set('https://example.com/lib.js.map?dx-alpine-server=map', {
       content: '{"version":3}',
       contentType: 'application/json',
     });

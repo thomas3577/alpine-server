@@ -1,4 +1,5 @@
 import denoConfig from '../deno.json' with { type: 'json' };
+import { ALPINE_VERSION } from '../src/config.ts';
 import type { ParsedCliArgs } from './types.ts';
 
 const VALID_PAGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -22,7 +23,10 @@ Options:
 
 export const getHelpText = (): string => HELP_TEXT;
 
-export const getVersion = (): string => denoConfig.version;
+/** e.g. `"jsr:@hono/hono@^4.13.2"` -> `"^4.13.2"` */
+const honoVersionRange = (): string => denoConfig.imports['@hono/hono'].split('@').pop() ?? 'unknown';
+
+export const getVersion = (): string => `alpine-server ${denoConfig.version} (Hono ${honoVersionRange()}, Alpine.js ${ALPINE_VERSION})`;
 
 const parseOptions = (
   rest: string[],

@@ -1,3 +1,4 @@
+/** Shared type definitions for CLI argument parsing and scaffolding. */
 export interface CreateProjectOptions {
   targetDir: string;
   projectName: string;

@@ -1,3 +1,4 @@
+/** Measures request duration and adds a timing response header. */
 import type { Context, Next } from '@hono/hono';
 
 /**

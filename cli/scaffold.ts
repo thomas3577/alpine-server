@@ -1,3 +1,4 @@
+/** Creates new alpine-server projects and adds pages to existing ones. */
 import { basename, dirname, join, resolve } from '@std/path';
 import { buildPageFiles, buildScaffoldFiles } from './templates.ts';
 import type { AddPageOptions, CreateProjectOptions } from './types.ts';

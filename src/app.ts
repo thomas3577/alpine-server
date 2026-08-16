@@ -1,3 +1,4 @@
+/** Core AlpineApp class: wires Hono middleware, routes, and config into a runnable server. */
 import { Hono } from '@hono/hono';
 import type { MiddlewareHandler } from '@hono/hono';
 import { info } from '@std/log';

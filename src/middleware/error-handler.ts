@@ -1,3 +1,4 @@
+/** Converts thrown errors into HTTP responses. */
 import type { ErrorHandler } from '@hono/hono';
 import { HTTPException } from '@hono/hono/http-exception';
 import type { AlpineAppState } from '../types.ts';

@@ -1,3 +1,4 @@
+/** Path resolution and validation helpers. */
 import { isAbsolute, relative, resolve } from '@std/path';
 
 const isPathInside = (root: string, candidate: string): boolean => {

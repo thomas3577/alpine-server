@@ -20,7 +20,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2.0.5
         with:
-          deno-version: v2.9.1
+          deno-version: v2.9.5
 
       - name: Check for a newer Alpine.js release
         run: deno run --allow-net --allow-read --allow-write ./scripts/update-alpine-version.ts

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@hono/hono@^4.13.4": "4.13.5",
+    "jsr:@hono/hono@^4.13.5": "4.13.5",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/async@^1.5.0": "1.5.0",
     "jsr:@std/data-structures@^1.1.2": "1.1.2",
@@ -189,7 +189,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.13.4",
+      "jsr:@hono/hono@^4.13.5",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/fmt@^1.0.10",
       "jsr:@std/log@~0.224.14",

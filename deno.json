@@ -9,7 +9,7 @@
     "update": "deno outdated --update --latest && deno run --allow-net --allow-read --allow-write ./scripts/update-alpine-version.ts"
   },
   "imports": {
-    "@hono/hono": "jsr:@hono/hono@^4.13.4",
+    "@hono/hono": "jsr:@hono/hono@^4.13.5",
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@std/fmt": "jsr:@std/fmt@^1.0.10",
     "@std/log": "jsr:@std/log@^0.224.14",

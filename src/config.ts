@@ -7,7 +7,7 @@ const defaultStaticFilesPath = join(Deno.cwd(), 'public');
 
 const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf'];
 
-export const ALPINE_VERSION = '3.16.3';
+export const ALPINE_VERSION = '3.17.1';
 
 const defaultVendors: Record<string, string> = {
   'alpinejs.mjs': `https://esm.sh/alpinejs@${ALPINE_VERSION}/es2024/alpinejs.mjs`,

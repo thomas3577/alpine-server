@@ -39,7 +39,7 @@ const injectUpdater = (html: string): string => {
 
   document.head.appendChild(script);
 
-  return document.documentElement.innerHTML;
+  return document.toString();
 };
 
 router.get('/:site{.*}', async (c) => {

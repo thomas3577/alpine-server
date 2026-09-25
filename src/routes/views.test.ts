@@ -26,7 +26,7 @@ Deno.test('views route', async (t) => {
       await Deno.mkdir(join(root, 'foo'), { recursive: true });
       await Deno.writeTextFile(
         join(root, 'foo', 'index.html'),
-        '<!doctype html><html><head><title>Foo</title></head><body>OK</body></html>',
+        '<!doctype html><html lang="de"><head><title>Foo</title></head><body>OK</body></html>',
       );
 
       const app = createApp(createRuntimeConfig(true, root));
@@ -37,6 +37,8 @@ Deno.test('views route', async (t) => {
       const html = await response.text();
       const updaterSrc = `src="/${UPDATER_FILENAME}"`;
       assert(html.includes(updaterSrc));
+      assert(/^<!doctype html>/i.test(html));
+      assert(html.includes('<html lang="de">'));
     } finally {
       await Deno.remove(root, { recursive: true });
     }

@@ -3,6 +3,8 @@
  *
  * Parses command-line arguments and creates new alpine-server projects
  * or adds pages to existing projects.
+ *
+ * @module
  */
 
 import { basename, resolve } from '@std/path';

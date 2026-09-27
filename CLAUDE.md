@@ -32,7 +32,7 @@ Tests live next to the module they cover (`*.test.ts`), using `Deno.test` with `
 6. user sub-apps (registered via `.append()`, mounted at `/`)
 7. updater route (mounted at both `/updater.js` and `/updater.js/` — see note below)
 8. `staticFiles`
-9. `sse` sub-app (mounted at `/sse`)
+9. `sse` sub-app (mounted at `/sse`, dev mode only)
 10. `views` sub-app (catch-all `/:site{.*}`, mounted at `/`) — must stay last since it matches almost anything
 
 **Error handling is not a middleware.** Hono's `compose()` resolves a thrown error into a response at the dispatch level closest to where it's thrown, via the app-wide `onError` handler — _before_ a wrapping `try/catch` middleware would ever see it. This means the oak/Express-style "error-handling middleware wraps `next()` in try/catch" pattern silently does nothing in Hono. `src/middleware/error-handler.ts` is registered via `app.onError(errorHandler)`, not `app.use(errorHandler)`. One consequence: middlewares registered _before_ the error site (`logger`, `timing`, `securityHeaders`) still run their post-`next()` code on an error response, since the promise never actually rejects up the chain — e.g. a 404 still gets timing/security headers applied.

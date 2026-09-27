@@ -3,6 +3,8 @@
  *
  * Re-exports the core `AlpineApp`, related configuration/state types,
  * and selected Hono context/middleware types for consumers.
+ *
+ * @module
  */
 // Copyright 2018-2026 the alpine-server authors. All rights reserved. MIT license.
 

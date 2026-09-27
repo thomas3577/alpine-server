@@ -3,6 +3,8 @@
  *
  * Runs the scaffold command in `new` mode and supports the same
  * target directory and option handling as the main CLI.
+ *
+ * @module
  */
 
 import { basename, resolve } from '@std/path';
@@ -20,6 +22,7 @@ Options:
   -h, --help        Show this help message
 `;
 
+/** Maps `create` CLI arguments to the equivalent `new` command arguments of the main CLI. */
 export const normalizeCreateArgs = (args: string[]): string[] => {
   if (args.includes('-v') || args.includes('--version')) {
     return ['version'];

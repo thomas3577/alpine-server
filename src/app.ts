@@ -135,7 +135,12 @@ export class AlpineApp {
     this.#app.route(`/${UPDATER_FILENAME}`, updater);
     this.#app.route(`/${UPDATER_FILENAME}/`, updater);
     this.#app.use(staticFiles);
-    this.#app.route('/sse', sse);
+
+    // SSE only feeds the dev-mode reload; don't expose it in production.
+    if (runtime.dev) {
+      this.#app.route('/sse', sse);
+    }
+
     this.#app.route('/', view);
 
     if (runtime.dev) {

@@ -4,7 +4,7 @@ import { securityHeaders } from './security-headers.ts';
 import type { AlpineAppState } from '../types.ts';
 import { createRuntimeConfig } from '../test/runtime-config.ts';
 
-const createApp = (dev: boolean, contentType?: string, presetCsp?: string): Hono<{ Variables: AlpineAppState }> => {
+const createApp = (dev: boolean, contentType?: string, presetCsp?: string, presetHeaders: Record<string, string> = {}): Hono<{ Variables: AlpineAppState }> => {
   const app = new Hono<{ Variables: AlpineAppState }>();
 
   app.use(async (c, next) => {
@@ -15,6 +15,9 @@ const createApp = (dev: boolean, contentType?: string, presetCsp?: string): Hono
   app.get('/', (c) => {
     if (presetCsp) {
       c.header('Content-Security-Policy', presetCsp);
+    }
+    for (const [name, value] of Object.entries(presetHeaders)) {
+      c.header(name, value);
     }
     if (contentType) {
       c.header('content-type', contentType);
@@ -91,4 +94,22 @@ Deno.test('securityHeaders', async (t) => {
 
     assertEquals(response.headers.get('Content-Security-Policy'), "default-src 'self' https://esm.sh");
   });
+
+  const presets: Record<string, string> = {
+    'X-Content-Type-Options': 'custom',
+    'Referrer-Policy': 'no-referrer',
+    'Permissions-Policy': 'geolocation=(self)',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
+  };
+
+  for (const [name, value] of Object.entries(presets)) {
+    await t.step(`should not override existing ${name}`, async () => {
+      const app = createApp(false, undefined, undefined, { [name]: value });
+      const response = await app.request('/');
+
+      assertEquals(response.headers.get(name), value);
+    });
+  }
 });

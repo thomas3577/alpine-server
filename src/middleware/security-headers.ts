@@ -25,15 +25,22 @@ const buildCspHeaderValue = (): string => {
 export const securityHeaders = async (c: Context<{ Variables: AlpineAppState }>, next: Next): Promise<void> => {
   await next();
 
-  c.header('X-Content-Type-Options', 'nosniff');
-  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-  c.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  c.header('Cross-Origin-Resource-Policy', 'same-origin');
-  c.header('Cross-Origin-Opener-Policy', 'same-origin');
+  // Defaults only fill gaps; values set by app middlewares or handlers win.
+  const setDefault = (name: string, value: string): void => {
+    if (c.res.headers.get(name) === null) {
+      c.header(name, value);
+    }
+  };
+
+  setDefault('X-Content-Type-Options', 'nosniff');
+  setDefault('Referrer-Policy', 'strict-origin-when-cross-origin');
+  setDefault('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  setDefault('Cross-Origin-Resource-Policy', 'same-origin');
+  setDefault('Cross-Origin-Opener-Policy', 'same-origin');
 
   if (!c.get('config').dev) {
     // Only enable HSTS in production (requires HTTPS).
-    c.header('Strict-Transport-Security', 'max-age=31536000');
+    setDefault('Strict-Transport-Security', 'max-age=31536000');
   }
 
   const contentType = (c.res.headers.get('content-type') ?? '').toLowerCase();

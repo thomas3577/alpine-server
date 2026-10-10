@@ -4,6 +4,7 @@
   "deno.config": "./deno.json",
   "deno.internalDebug": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
+  "npm.packageManager": "npm",
   "search.exclude": {
     "**/deno.lock": true
   },

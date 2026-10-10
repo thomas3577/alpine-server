@@ -5,6 +5,14 @@ updates:
     schedule:
       interval: 'daily'
 
+  # package.json only drives the Node.js/Bun test runs; keep its versions in step with deno.json.
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    cooldown:
+      default-days: 2
+
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:

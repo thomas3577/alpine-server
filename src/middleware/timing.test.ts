@@ -41,7 +41,7 @@ describe('timing', () => {
     const responseTime = response.headers.get('X-Response-Time');
     const timeValue = parseFloat(responseTime?.replace('ms', '') || '0');
 
-    // Should be at least 50ms, but allow some variance
-    assert.deepEqual(timeValue >= 50, true);
+    // setTimeout(50) may fire a few ms early on Windows (coarse timer resolution).
+    assert.ok(timeValue >= 45, `expected >= 45ms, got ${timeValue}ms`);
   });
 });

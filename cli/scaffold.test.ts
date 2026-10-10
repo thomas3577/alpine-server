@@ -100,7 +100,7 @@ describe('parseCliArgs', () => {
 
 it('getVersion includes alpine-server, Hono, and Alpine.js versions', () => {
   const version = getVersion();
-  assert.ok(/^alpine-server \d+\.\d+\.\d+ \(Hono \S+, Alpine\.js \d+\.\d+\.\d+\)$/.test(version));
+  assert.ok(/^alpine-server \d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)? \(Hono \S+, Alpine\.js \d+\.\d+\.\d+\)$/.test(version));
 });
 
 it('buildScaffoldFiles returns expected files', () => {

@@ -11,7 +11,12 @@ type AlpineAppConfig = {
     vendors?: Record<string, string>; // Custom vendor CDN mappings (filename -> URL)
   };
   server?: {
-    listenOptions?: Deno.ServeTcpOptions; // Deno.serve listen options (port, hostname, etc.)
+    listenOptions?: {
+      port?: number; // Default 8000; 0 picks a free port
+      hostname?: string; // Default '0.0.0.0'
+      signal?: AbortSignal; // Abort to shut the server down; run() then resolves
+      onListen?: (addr: { hostname: string; port: number }) => void; // Called once listening
+    };
   };
 };
 ```
@@ -19,10 +24,16 @@ type AlpineAppConfig = {
 ## Default Values
 
 - **`dev`**: `false` (production mode)
-- **`staticFilesPath`**: `./public` (resolved against `Deno.cwd()`)
+- **`staticFilesPath`**: `./public` (resolved against `process.cwd()`)
 - **`staticExtensions`**: `['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt']`
 - **`vendors`**: Alpine.js from esm.sh (can be extended or overridden)
-- **`listenOptions`**: Deno.serve defaults (port `8000`)
+- **`listenOptions`**: port `8000` on hostname `0.0.0.0`, on Deno, Node.js, and Bun alike
+
+`listenOptions` work the same on every runtime. On Deno the object is passed through to `Deno.serve` unchanged, on Node.js it goes to `@hono/node-server`, and on Bun to `Bun.serve`.
+
+## Dev mode
+
+With `dev: true`, the static directory is watched recursively (`fs.watch` from `node:fs`) and every change sends a `reload` event over `/sse` to open pages. The updater script is injected into served `index.html` files. Dev mode also disables HSTS and includes stack traces in error responses, so never enable it in production.
 
 ### Example: Production Config
 

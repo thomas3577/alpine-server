@@ -1,8 +1,9 @@
-import { assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { service, SseClient } from './sse.ts';
 
-Deno.test('SseClient', async (t) => {
-  await t.step('queues a push made before iteration starts', async () => {
+describe('SseClient', () => {
+  it('queues a push made before iteration starts', async () => {
     const client = new SseClient();
     client.push({ event: 'reload' });
     client.push(null);
@@ -12,10 +13,10 @@ Deno.test('SseClient', async (t) => {
       received.push(message);
     }
 
-    assertEquals(received, [{ event: 'reload' }]);
+    assert.deepEqual(received, [{ event: 'reload' }]);
   });
 
-  await t.step('delivers a push made while iteration is already waiting', async () => {
+  it('delivers a push made while iteration is already waiting', async () => {
     const client = new SseClient();
     const received: unknown[] = [];
 
@@ -30,10 +31,10 @@ Deno.test('SseClient', async (t) => {
     client.push(null);
     await consumer;
 
-    assertEquals(received, [{ event: 'reload', data: 'x' }]);
+    assert.deepEqual(received, [{ event: 'reload', data: 'x' }]);
   });
 
-  await t.step('ignores pushes after close', async () => {
+  it('ignores pushes after close', async () => {
     const client = new SseClient();
     client.push(null);
     client.push({ event: 'reload' });
@@ -43,21 +44,21 @@ Deno.test('SseClient', async (t) => {
       received.push(message);
     }
 
-    assertEquals(received, []);
+    assert.deepEqual(received, []);
   });
 });
 
-Deno.test('SseService', async (t) => {
-  await t.step('addClient registers a client for broadcast', () => {
+describe('SseService', () => {
+  it('addClient registers a client for broadcast', () => {
     service.close();
 
     const client = service.addClient();
 
-    assertEquals(service.clients.has(client), true);
+    assert.deepEqual(service.clients.has(client), true);
     service.close();
   });
 
-  await t.step('removeClient stops future broadcasts to that client', async () => {
+  it('removeClient stops future broadcasts to that client', async () => {
     service.close();
 
     const client = service.addClient();
@@ -70,11 +71,11 @@ Deno.test('SseService', async (t) => {
       received.push(message);
     }
 
-    assertEquals(received, []);
+    assert.deepEqual(received, []);
     service.close();
   });
 
-  await t.step('send fans out to every connected client', async () => {
+  it('send fans out to every connected client', async () => {
     service.close();
 
     const clientA = service.addClient();
@@ -94,17 +95,17 @@ Deno.test('SseService', async (t) => {
     service.close();
     await Promise.all([consumerA, consumerB]);
 
-    assertEquals(gotA, [{ event: 'reload', data: undefined }]);
-    assertEquals(gotB, [{ event: 'reload', data: undefined }]);
+    assert.deepEqual(gotA, [{ event: 'reload', data: undefined }]);
+    assert.deepEqual(gotB, [{ event: 'reload', data: undefined }]);
   });
 
-  await t.step('close clears the client set', () => {
+  it('close clears the client set', () => {
     service.close();
     service.addClient();
     service.addClient();
 
     service.close();
 
-    assertEquals(service.clients.size, 0);
+    assert.deepEqual(service.clients.size, 0);
   });
 });

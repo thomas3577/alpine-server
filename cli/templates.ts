@@ -1,5 +1,5 @@
 /** File templates used to scaffold new projects and pages. */
-import { join } from '@std/path';
+import { join } from 'node:path';
 import denoConfig from '../deno.json' with { type: 'json' };
 import type { ScaffoldFileContent } from './types.ts';
 

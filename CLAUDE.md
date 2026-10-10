@@ -4,19 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Context
 
-`@dx/alpine-server` is a Deno + TypeScript library wrapping Hono to serve Alpine.js applications, with built-in security hardening, static file serving, vendor CDN proxying, and dev-mode hot-reload. Published on JSR; still experimental/pre-1.0 — the public API (`mod.ts`) can change, but changes should be deliberate, not incidental. It includes a separate CLI (`cli/`) for scaffolding new projects.
+`@dx/alpine-server` is a TypeScript library wrapping Hono to serve Alpine.js applications, with built-in security hardening, static file serving, vendor CDN proxying, and dev-mode hot-reload. Runs on Deno, Node.js (>= 22.18), and Bun (not Cloudflare Workers); runtime code uses `node:*` APIs and `process`, never the `Deno` namespace, except for the `Deno.serve` branch in `src/serve.ts`. Published on JSR; still experimental/pre-1.0 — the public API (`mod.ts`) can change, but changes should be deliberate, not incidental. It includes a separate CLI (`cli/`) for scaffolding new projects.
 
 ## Commands
 
 ```sh
 deno task check                          # deno fmt --check && deno lint
-deno task test                           # run the full test suite
-deno test --allow-run --allow-read --allow-write src/middleware/vendor.test.ts   # run a single test file
+deno task test                           # run the full test suite on Deno
+npm test                                 # same suite on Node.js (after npm ci)
+bun test                                 # same suite on Bun
+deno test --allow-read --allow-write --allow-net --allow-env src/middleware/vendor.test.ts   # run a single test file
 deno task example                        # runs example/app.ts on :8000 for manual verification
 deno task update                         # deno outdated --update --latest
 ```
 
-Tests live next to the module they cover (`*.test.ts`), using `Deno.test` with `t.step` for grouped cases.
+Tests live next to the module they cover (`*.test.ts`), using `node:test` (`describe`/`it`) and `node:assert/strict` so the same files run under `deno test`, `node --test`, and `bun test`. Setup that must run before the tests goes in `before`/`after` hooks, not in a `describe` body (that runs at collection time). `package.json` + `.npmrc` exist only to install dependencies for Node/Bun test runs; `deno.json` remains the source of truth for publishing.
 
 ## Architecture
 
@@ -47,16 +49,20 @@ Re-exports `AlpineApp`, config/state types, and Hono's `Hono`/`Context`/`Middlew
 
 ### SSE / dev-mode hot reload (`src/services/sse.ts`, `src/routes/sse.ts`)
 
-Hono's `streamSSE()` only exposes a writable stream _inside_ the per-connection callback — there's no handle to push into from outside a request the way oak's `sendEvents()` provided. `SseClient` is a small custom async push/pull queue bridging that gap: the filesystem watcher (`staticFileWatch`, running outside any request) calls `client.push(...)`, and each connection's `streamSSE` callback drains its own client via `for await`. `SseService` is the broadcast hub holding the set of connected clients. The browser side (`src/routes/updater-client.js`) only listens for a `'reload'` event name and calls `location.reload()` — event `data` is not read.
+Hono's `streamSSE()` only exposes a writable stream _inside_ the per-connection callback — there's no handle to push into from outside a request the way oak's `sendEvents()` provided. `SseClient` is a small custom async push/pull queue bridging that gap: the filesystem watcher (`staticFileWatch`, running outside any request) calls `client.push(...)`, and each connection's `streamSSE` callback drains its own client via `for await`. `SseService` is the broadcast hub holding the set of connected clients. The browser side (`UPDATER_SCRIPT`, inlined in `src/routes/updater.ts`) only listens for a `'reload'` event name and calls `location.reload()` — event `data` is not read. The SSE route writes a `: connected` comment right after registering `onAbort`: Bun holds response headers back until the first body chunk, so without it `EventSource.onopen` (where the reload listener is attached) never fires. The watcher is `fs.watch(..., { recursive: true })`; `run()` closes it when the server stops.
+
+### Server start (`src/serve.ts`)
+
+`serve(fetch, listenOptions)` picks the runtime's native server: `Deno.serve` (options passed through unchanged), `Bun.serve` (`idleTimeout: 0`, so long-lived SSE connections aren't cut after 10s), or `@hono/node-server`. The Node adapter is loaded through a dynamic import, so Deno and Bun never load it. All three default to port 8000 on `0.0.0.0` and resolve once `listenOptions.signal` aborts. Node additionally calls `closeAllConnections()`, because open SSE streams would otherwise block `close()` forever.
 
 ### Static files vs. views
 
 Two different code paths serve content, split by whether the path has a known static-file extension:
 
-- `src/middleware/static-files.ts`: extension-gated (`config.staticExtensions`), serves individual files via Hono's Deno `serveStatic`, with a custom `onNotFound` hook that throws `Deno.errors.NotFound` so misses flow through the same `errorHandler` path as everything else (Hono's `serveStatic` normally falls through to `next()` instead of throwing).
-- `src/routes/views.ts`: catch-all `/:site{.*}` route for directory-style requests, reads `index.html` directly via `Deno.readTextFile`, and in dev mode injects the updater `<script>` tag via `linkedom`. `isPathTraversalAttempt`/`looksLikeFileRequest` guard against escaping the static root and against directory routes swallowing file-like requests that should 404 instead.
+- `src/middleware/static-files.ts`: extension-gated (`config.staticExtensions`), serves individual files via Hono's runtime-neutral `serveStatic` core (`@hono/hono/serve-static`, which rejects `..`, `%`, and backslashes) with a `node:fs` `getContent`, plus a custom `onNotFound` hook that throws an `ENOENT` error so misses flow through the same `errorHandler` path as everything else (Hono's `serveStatic` normally falls through to `next()` instead of throwing).
+- `src/routes/views.ts`: catch-all `/:site{.*}` route for directory-style requests, reads `index.html` directly via `readFile` from `node:fs/promises`, and in dev mode injects the updater `<script>` tag via `linkedom`. `isPathTraversalAttempt`/`looksLikeFileRequest` guard against escaping the static root and against directory routes swallowing file-like requests that should 404 instead.
 
-`resolveStaticFilesPath` (`src/utils.ts`) is the single point enforcing that a configured `staticFilesPath` can't resolve outside `Deno.cwd()`.
+`resolveStaticFilesPath` (`src/utils.ts`) is the single point enforcing that a configured `staticFilesPath` can't resolve outside `process.cwd()`. `isNotFoundError` (same file) is the shared not-found check (`ENOENT`/`ENOTDIR`, or a Deno `NotFound` thrown by user code).
 
 ### Vendor CDN proxying (`src/middleware/vendor.ts`, `src/services/vendor.ts`)
 

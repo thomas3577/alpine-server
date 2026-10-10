@@ -1,4 +1,5 @@
-import { assertEquals } from '@std/assert';
+import { after, before, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { Hono } from '@hono/hono';
 import { errorHandler } from './error-handler.ts';
 import { createVendorRouter } from './vendor.ts';
@@ -41,11 +42,16 @@ const mockFetch = (url: string | URL | Request): Promise<Response> => {
   );
 };
 
-Deno.test('vendor router', async (t) => {
-  // Setup mock fetch before tests
-  globalThis.fetch = mockFetch as typeof fetch;
+describe('vendor router', () => {
+  before(() => {
+    globalThis.fetch = mockFetch as typeof fetch;
+  });
 
-  await t.step('should serve vendor resource from cache', async () => {
+  after(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('should serve vendor resource from cache', async () => {
     mockFetchResponses.set('https://example.com/test.js', {
       content: 'console.log("test");',
       contentType: 'application/javascript',
@@ -56,21 +62,21 @@ Deno.test('vendor router', async (t) => {
 
     const response = await app.request('/test.js');
 
-    assertEquals(response.status, 200);
-    assertEquals(response.headers.get('content-type'), 'application/javascript');
-    assertEquals(response.headers.get('cache-control'), 'public, max-age=31536000, immutable');
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(response.headers.get('content-type'), 'application/javascript');
+    assert.deepEqual(response.headers.get('cache-control'), 'public, max-age=31536000, immutable');
   });
 
-  await t.step('should return 404 for non-whitelisted resources', async () => {
+  it('should return 404 for non-whitelisted resources', async () => {
     const vendors = { 'test.js': 'https://example.com/test.js' };
     const app = createTestApp(vendors);
 
     const response = await app.request('/malicious.js');
 
-    assertEquals(response.status, 404);
+    assert.deepEqual(response.status, 404);
   });
 
-  await t.step('should serve vendor resource from custom route', async () => {
+  it('should serve vendor resource from custom route', async () => {
     mockFetchResponses.set('https://example.com/custom.js', {
       content: 'console.log("custom");',
       contentType: 'application/javascript',
@@ -81,14 +87,14 @@ Deno.test('vendor router', async (t) => {
 
     // Should work on custom route
     const response = await app.request('/assets/custom.js');
-    assertEquals(response.status, 200);
+    assert.deepEqual(response.status, 200);
 
     // Should NOT work on root
     const responseRoot = await app.request('/custom.js');
-    assertEquals(responseRoot.status, 404);
+    assert.deepEqual(responseRoot.status, 404);
   });
 
-  await t.step('should handle different content types', async () => {
+  it('should handle different content types', async () => {
     mockFetchResponses.set('https://example.com/style.css', {
       content: 'body { margin: 0; }',
       contentType: 'text/css; charset=utf-8',
@@ -99,11 +105,11 @@ Deno.test('vendor router', async (t) => {
 
     const response = await app.request('/style.css');
 
-    assertEquals(response.status, 200);
-    assertEquals(response.headers.get('content-type'), 'text/css; charset=utf-8');
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(response.headers.get('content-type'), 'text/css; charset=utf-8');
   });
 
-  await t.step('should serve implicit map files', async () => {
+  it('should serve implicit map files', async () => {
     mockFetchResponses.set('https://example.com/lib.js.map?dx-alpine-server=map', {
       content: '{"version":3}',
       contentType: 'application/json',
@@ -116,10 +122,7 @@ Deno.test('vendor router', async (t) => {
     // Requesting lib.js.map should work
     const response = await app.request('/lib.js.map');
 
-    assertEquals(response.status, 200);
-    assertEquals(response.headers.get('content-type'), 'application/json');
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(response.headers.get('content-type'), 'application/json');
   });
-
-  // Cleanup: restore original fetch
-  globalThis.fetch = originalFetch;
 });

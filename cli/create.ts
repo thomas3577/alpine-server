@@ -7,7 +7,8 @@
  * @module
  */
 
-import { basename, resolve } from '@std/path';
+import { basename, resolve } from 'node:path';
+import process from 'node:process';
 import { getHelpText, getVersion, parseCliArgs } from './parser.ts';
 import { createProject } from './scaffold.ts';
 
@@ -45,7 +46,7 @@ const assertUnreachable = (_value: never): never => {
 
 const main = async () => {
   try {
-    const parsed = parseCliArgs(normalizeCreateArgs(Deno.args));
+    const parsed = parseCliArgs(normalizeCreateArgs(process.argv.slice(2)));
 
     if (parsed.command === 'help') {
       console.log(CREATE_HELP_TEXT);
@@ -84,7 +85,7 @@ const main = async () => {
     console.log(CREATE_HELP_TEXT);
     console.log('Alternative:');
     console.log(getHelpText());
-    Deno.exit(1);
+    process.exit(1);
   }
 };
 

@@ -1,24 +1,25 @@
-import { assertEquals } from '@std/assert';
+import { it } from 'node:test';
+import assert from 'node:assert/strict';
 import { normalizeCreateArgs } from './create.ts';
 
-Deno.test('normalizeCreateArgs returns help for no args', () => {
-  assertEquals(normalizeCreateArgs([]), ['help']);
+it('normalizeCreateArgs returns help for no args', () => {
+  assert.deepEqual(normalizeCreateArgs([]), ['help']);
 });
 
-Deno.test('normalizeCreateArgs prefixes new for deno create args', () => {
-  assertEquals(normalizeCreateArgs(['my-app', '--port', '3000']), ['new', 'my-app', '--port', '3000']);
+it('normalizeCreateArgs prefixes new for deno create args', () => {
+  assert.deepEqual(normalizeCreateArgs(['my-app', '--port', '3000']), ['new', 'my-app', '--port', '3000']);
 });
 
-Deno.test('normalizeCreateArgs keeps explicit new command', () => {
-  assertEquals(normalizeCreateArgs(['new', 'my-app']), ['new', 'my-app']);
+it('normalizeCreateArgs keeps explicit new command', () => {
+  assert.deepEqual(normalizeCreateArgs(['new', 'my-app']), ['new', 'my-app']);
 });
 
-Deno.test('normalizeCreateArgs returns help for help flags', () => {
-  assertEquals(normalizeCreateArgs(['--help']), ['help']);
-  assertEquals(normalizeCreateArgs(['-h']), ['help']);
+it('normalizeCreateArgs returns help for help flags', () => {
+  assert.deepEqual(normalizeCreateArgs(['--help']), ['help']);
+  assert.deepEqual(normalizeCreateArgs(['-h']), ['help']);
 });
 
-Deno.test('normalizeCreateArgs returns version for version flags', () => {
-  assertEquals(normalizeCreateArgs(['-v']), ['version']);
-  assertEquals(normalizeCreateArgs(['--version']), ['version']);
+it('normalizeCreateArgs returns version for version flags', () => {
+  assert.deepEqual(normalizeCreateArgs(['-v']), ['version']);
+  assert.deepEqual(normalizeCreateArgs(['--version']), ['version']);
 });

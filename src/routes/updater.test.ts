@@ -1,4 +1,6 @@
-import { assert, assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import process from 'node:process';
 import { Hono } from '@hono/hono';
 import { router } from './updater.ts';
 import { createRuntimeConfig } from '../test/runtime-config.ts';
@@ -8,7 +10,7 @@ const createApp = (dev: boolean): Hono<{ Variables: AlpineAppState }> => {
   const app = new Hono<{ Variables: AlpineAppState }>();
 
   app.use(async (c, next) => {
-    c.set('config', createRuntimeConfig(dev, Deno.cwd()));
+    c.set('config', createRuntimeConfig(dev, process.cwd()));
     await next();
   });
   app.route('/updater.js', router);
@@ -17,35 +19,35 @@ const createApp = (dev: boolean): Hono<{ Variables: AlpineAppState }> => {
   return app;
 };
 
-Deno.test('updater route', async (t) => {
-  await t.step('returns noop script in production', async () => {
+describe('updater route', () => {
+  it('returns noop script in production', async () => {
     const app = createApp(false);
     const response = await app.request('/updater.js/');
 
-    assertEquals(response.status, 200);
-    assertEquals(await response.text(), ';');
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(await response.text(), ';');
 
     const canonicalResponse = await app.request('/updater.js');
 
-    assertEquals(canonicalResponse.status, 200);
-    assertEquals(await canonicalResponse.text(), ';');
+    assert.deepEqual(canonicalResponse.status, 200);
+    assert.deepEqual(await canonicalResponse.text(), ';');
   });
 
-  await t.step('returns updater client script in development', async () => {
+  it('returns updater client script in development', async () => {
     const app = createApp(true);
     const response = await app.request('/updater.js/');
 
-    assertEquals(response.status, 200);
+    assert.deepEqual(response.status, 200);
 
     const script = await response.text();
-    assert(script.length > 1);
-    assert(script.includes('EventSource'));
+    assert.ok(script.length > 1);
+    assert.ok(script.includes('EventSource'));
 
     const canonicalResponse = await app.request('/updater.js');
 
-    assertEquals(canonicalResponse.status, 200);
+    assert.deepEqual(canonicalResponse.status, 200);
     const canonicalScript = await canonicalResponse.text();
-    assert(canonicalScript.length > 1);
-    assert(canonicalScript.includes('EventSource'));
+    assert.ok(canonicalScript.length > 1);
+    assert.ok(canonicalScript.includes('EventSource'));
   });
 });

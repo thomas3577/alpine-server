@@ -2,7 +2,7 @@
 import type { ErrorHandler } from '@hono/hono';
 import { HTTPException } from '@hono/hono/http-exception';
 import type { AlpineAppState } from '../types.ts';
-import { error } from '@std/log';
+import { isNotFoundError } from '../utils.ts';
 
 /**
  * Converts thrown errors into HTTP responses with optional debug details.
@@ -24,11 +24,11 @@ export const errorHandler: ErrorHandler<{ Variables: AlpineAppState }> = (err, c
     }
 
     return c.text(includeStack ? `${status} ${message}\n\n${stack ?? ''}` : `${status} ${message}`, status);
-  } else if (err instanceof Deno.errors.NotFound) {
+  } else if (isNotFoundError(err)) {
     // Avoid crashing/logging on benign filesystem probes.
     return c.text('Not Found', 404);
   } else {
-    error(err);
+    console.error(err);
 
     return c.text(c.get('config').dev ? `Internal Server Error\n\n${String(err)}` : 'Internal Server Error', 500);
   }

@@ -1,6 +1,9 @@
-import { assert, assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { Hono } from '@hono/hono';
-import { join } from '@std/path';
+import { join } from 'node:path';
 import { router } from './views.ts';
 import { UPDATER_FILENAME } from '../config.ts';
 import { createRuntimeConfig } from '../test/runtime-config.ts';
@@ -18,13 +21,13 @@ const createApp = (config: IRuntimeConfig): Hono<{ Variables: AlpineAppState }> 
   return app;
 };
 
-Deno.test('views route', async (t) => {
-  await t.step('injects absolute updater path in dev mode', async () => {
-    const root = await Deno.makeTempDir();
+describe('views route', () => {
+  it('injects absolute updater path in dev mode', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'alpine-server-'));
 
     try {
-      await Deno.mkdir(join(root, 'foo'), { recursive: true });
-      await Deno.writeTextFile(
+      await mkdir(join(root, 'foo'), { recursive: true });
+      await writeFile(
         join(root, 'foo', 'index.html'),
         '<!doctype html><html lang="de"><head><title>Foo</title></head><body>OK</body></html>',
       );
@@ -32,41 +35,41 @@ Deno.test('views route', async (t) => {
       const app = createApp(createRuntimeConfig(true, root));
       const response = await app.request('/foo');
 
-      assertEquals(response.status, 200);
+      assert.deepEqual(response.status, 200);
 
       const html = await response.text();
       const updaterSrc = `src="/${UPDATER_FILENAME}"`;
-      assert(html.includes(updaterSrc));
-      assert(/^<!doctype html>/i.test(html));
-      assert(html.includes('<html lang="de">'));
+      assert.ok(html.includes(updaterSrc));
+      assert.ok(/^<!doctype html>/i.test(html));
+      assert.ok(html.includes('<html lang="de">'));
     } finally {
-      await Deno.remove(root, { recursive: true });
+      await rm(root, { recursive: true, force: true });
     }
   });
 
-  await t.step('returns 404 for file-like paths', async () => {
-    const root = await Deno.makeTempDir();
+  it('returns 404 for file-like paths', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'alpine-server-'));
 
     try {
       const app = createApp(createRuntimeConfig(false, root));
       const response = await app.request('/vendor/phpunit.xsd');
 
-      assertEquals(response.status, 404);
+      assert.deepEqual(response.status, 404);
     } finally {
-      await Deno.remove(root, { recursive: true });
+      await rm(root, { recursive: true, force: true });
     }
   });
 
-  await t.step('returns 404 for path traversal attempts', async () => {
-    const root = await Deno.makeTempDir();
+  it('returns 404 for path traversal attempts', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'alpine-server-'));
 
     try {
       const app = createApp(createRuntimeConfig(false, root));
       const response = await app.request('/%2e%2e/secret');
 
-      assertEquals(response.status, 404);
+      assert.deepEqual(response.status, 404);
     } finally {
-      await Deno.remove(root, { recursive: true });
+      await rm(root, { recursive: true, force: true });
     }
   });
 });

@@ -1,8 +1,9 @@
-import { assertEquals, assertExists } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { AlpineApp } from './app.ts';
 
-Deno.test('AlpineApp', async (t) => {
-  await t.step('should construct with full config', () => {
+describe('AlpineApp', () => {
+  it('should construct with full config', () => {
     const alpineApp = new AlpineApp({
       app: {
         dev: true,
@@ -16,23 +17,23 @@ Deno.test('AlpineApp', async (t) => {
       },
     });
 
-    assertExists(alpineApp);
-    assertEquals(typeof alpineApp.run, 'function');
+    assert.ok(alpineApp);
+    assert.deepEqual(typeof alpineApp.run, 'function');
   });
 
-  await t.step('should construct without config', () => {
+  it('should construct without config', () => {
     const alpineApp = new AlpineApp();
-    assertExists(alpineApp);
-    assertEquals(typeof alpineApp.run, 'function');
+    assert.ok(alpineApp);
+    assert.deepEqual(typeof alpineApp.run, 'function');
   });
 
-  await t.step('should construct with minimal config', () => {
+  it('should construct with minimal config', () => {
     const alpineApp = new AlpineApp({});
-    assertExists(alpineApp);
-    assertEquals(typeof alpineApp.run, 'function');
+    assert.ok(alpineApp);
+    assert.deepEqual(typeof alpineApp.run, 'function');
   });
 
-  await t.step('should construct with only app config', () => {
+  it('should construct with only app config', () => {
     const alpineApp = new AlpineApp({
       app: {
         dev: false,
@@ -41,10 +42,10 @@ Deno.test('AlpineApp', async (t) => {
       },
     });
 
-    assertExists(alpineApp);
+    assert.ok(alpineApp);
   });
 
-  await t.step('should construct with only server config', () => {
+  it('should construct with only server config', () => {
     const alpineApp = new AlpineApp({
       server: {
         listenOptions: {
@@ -54,6 +55,6 @@ Deno.test('AlpineApp', async (t) => {
       },
     });
 
-    assertExists(alpineApp);
+    assert.ok(alpineApp);
   });
 });

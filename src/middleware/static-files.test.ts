@@ -1,4 +1,8 @@
-import { assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { Hono } from '@hono/hono';
 import { staticFiles } from './static-files.ts';
 import { errorHandler } from './error-handler.ts';
@@ -19,68 +23,103 @@ const createApp = (staticExtensions: string[], root: string): Hono<{ Variables: 
   return app;
 };
 
-Deno.test('staticFiles', async (t) => {
-  await t.step('should call next for non-static extensions', async () => {
+describe('staticFiles', () => {
+  it('should call next for non-static extensions', async () => {
     const app = createApp(['.html', '.css', '.js'], './public');
     const response = await app.request('/api/data');
 
-    assertEquals(await response.text(), 'fallback-reached');
+    assert.deepEqual(await response.text(), 'fallback-reached');
   });
 
-  await t.step('should call next for paths without extension', async () => {
+  it('should call next for paths without extension', async () => {
     const app = createApp(['.html', '.css', '.js'], './public');
     const response = await app.request('/');
 
-    assertEquals(await response.text(), 'fallback-reached');
+    assert.deepEqual(await response.text(), 'fallback-reached');
   });
 
-  await t.step('should not call next for .html files (404 on miss)', async () => {
+  it('should not call next for .html files (404 on miss)', async () => {
     const app = createApp(['.html', '.css', '.js'], './public');
     const response = await app.request('/index.html');
 
-    assertEquals(response.status, 404);
+    assert.deepEqual(response.status, 404);
   });
 
-  await t.step('should not call next for .css files (404 on miss)', async () => {
+  it('should not call next for .css files (404 on miss)', async () => {
     const app = createApp(['.html', '.css', '.js'], './public');
     const response = await app.request('/style.css');
 
-    assertEquals(response.status, 404);
+    assert.deepEqual(response.status, 404);
   });
 
-  await t.step('should not call next for .js files (404 on miss)', async () => {
+  it('should not call next for .js files (404 on miss)', async () => {
     const app = createApp(['.html', '.css', '.js'], './public');
     const response = await app.request('/app.js');
 
-    assertEquals(response.status, 404);
+    assert.deepEqual(response.status, 404);
   });
 
-  await t.step('should respect custom staticExtensions list', async () => {
+  it('should respect custom staticExtensions list', async () => {
     const app = createApp(['.json'], './public');
     const response = await app.request('/data.json');
 
-    assertEquals(response.status, 404);
+    assert.deepEqual(response.status, 404);
   });
 
-  await t.step('should call next for extensions not in list', async () => {
+  it('should call next for extensions not in list', async () => {
     const app = createApp(['.html', '.css', '.js'], './public');
     const response = await app.request('/image.png');
 
-    assertEquals(await response.text(), 'fallback-reached');
+    assert.deepEqual(await response.text(), 'fallback-reached');
   });
 
-  await t.step('should serve an existing static file', async () => {
-    const root = await Deno.makeTempDir();
+  it('should serve an existing static file', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'alpine-server-'));
     try {
-      await Deno.writeTextFile(`${root}/style.css`, 'body { margin: 0; }');
+      await writeFile(`${root}/style.css`, 'body { margin: 0; }');
       const app = createApp(['.html', '.css', '.js'], root);
       const response = await app.request('/style.css');
 
-      assertEquals(response.status, 200);
-      assertEquals(response.headers.get('content-type'), 'text/css; charset=utf-8');
-      assertEquals(await response.text(), 'body { margin: 0; }');
+      assert.deepEqual(response.status, 200);
+      assert.deepEqual(response.headers.get('content-type'), 'text/css; charset=utf-8');
+      assert.deepEqual(await response.text(), 'body { margin: 0; }');
     } finally {
-      await Deno.remove(root, { recursive: true });
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('should not serve files outside the static root', async () => {
+    const parent = await mkdtemp(join(tmpdir(), 'alpine-server-'));
+    const root = join(parent, 'public');
+
+    try {
+      await mkdir(root);
+      await writeFile(join(parent, 'secret.css'), 'TOP-SECRET');
+      const app = createApp(['.css'], root);
+
+      // Encoded variants survive URL normalization and reach the middleware as-is.
+      for (const path of ['/%2e%2e/secret.css', '/..%2fsecret.css', '/%2e%2e%2fsecret.css', '/..%5csecret.css', '/foo/%2e%2e/%2e%2e/secret.css']) {
+        const response = await app.request(path);
+
+        assert.deepEqual(response.status, 404, path);
+        assert.ok(!(await response.text()).includes('TOP-SECRET'), path);
+      }
+    } finally {
+      await rm(parent, { recursive: true, force: true });
+    }
+  });
+
+  it('should 404 for a directory matching a static extension', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'alpine-server-'));
+
+    try {
+      await mkdir(join(root, 'folder.css'));
+      const app = createApp(['.css'], root);
+      const response = await app.request('/folder.css');
+
+      assert.deepEqual(response.status, 404);
+    } finally {
+      await rm(root, { recursive: true, force: true });
     }
   });
 });

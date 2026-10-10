@@ -2,11 +2,42 @@
 
 [![JSR Version](https://jsr.io/badges/@dx/alpine-server)](https://jsr.io/@dx/alpine-server)
 [![JSR Score](https://jsr.io/badges/@dx/alpine-server/score)](https://jsr.io/@dx/alpine-server/score)
-[![ci](https://github.com/thomas3577/alpine-server/actions/workflows/deno.yml/badge.svg)](https://github.com/thomas3577/alpine-server/actions/workflows/deno.yml)
+[![ci](https://github.com/thomas3577/alpine-server/actions/workflows/ci.yml/badge.svg)](https://github.com/thomas3577/alpine-server/actions/workflows/ci.yml)
 
 > ⚠️ **EXPERIMENTAL**: This library is in early development and highly experimental. APIs may change without notice. Not recommended for production use.
 
-A secure, experimental Hono (Deno) web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
+A secure, experimental Hono web server optimized for serving Alpine.js applications with built-in development tools, security hardening, and automatic hot-reloading.
+
+## Supported runtimes
+
+| Runtime            | Supported | Notes                                                                     |
+| ------------------ | --------- | ------------------------------------------------------------------------- |
+| Deno               | ✅        | 2.x                                                                       |
+| Node.js            | ✅        | >= 22.18 (runs `.ts` files natively; older 22.x need a build step or tsx) |
+| Bun                | ✅        | 1.x                                                                       |
+| Cloudflare Workers | ❌        | The server reads files from disk and watches them in dev mode.            |
+
+## Installation
+
+```sh
+deno add jsr:@dx/alpine-server      # Deno
+npx jsr add @dx/alpine-server       # Node.js
+bunx jsr add @dx/alpine-server      # Bun
+```
+
+On Node.js and Bun, `jsr add` installs the package through JSR's npm registry and adds `@jsr:registry=https://npm.jsr.io` to `.npmrc`.
+
+## Running
+
+Put the example below into `app.ts` and start it with your runtime:
+
+```sh
+deno run --allow-net --allow-read app.ts   # Deno
+node app.ts                                # Node.js (ESM: set "type": "module" in package.json)
+bun app.ts                                 # Bun
+```
+
+The server listens on port 8000 by default on every runtime. Pass an `AbortSignal` as `listenOptions.signal` to shut it down; `run()` resolves once it has stopped.
 
 ## Example
 
@@ -28,7 +59,7 @@ await app.run();
 
 ## CLI
 
-Create a new Alpine Server project scaffold:
+The scaffolding CLI runs on Deno and generates a Deno project. Create a new Alpine Server project scaffold:
 
 ```sh
 deno run -A jsr:@dx/alpine-server/cli new my-app

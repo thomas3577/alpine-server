@@ -1,53 +1,53 @@
-import { assertEquals, assertThrows } from '@std/assert';
-import { join, resolve } from '@std/path';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import process from 'node:process';
+import { join, resolve } from 'node:path';
 import { resolveStaticFilesPath } from './utils.ts';
 
-const cwd = Deno.cwd();
+const cwd = process.cwd();
 const defaultRoot = join(cwd, 'default');
 
-Deno.test('resolveStaticFilesPath', async (t) => {
-  await t.step('should return defaultRoot if value is missing or empty', () => {
-    assertEquals(resolveStaticFilesPath(undefined, defaultRoot), defaultRoot);
-    assertEquals(resolveStaticFilesPath('', defaultRoot), defaultRoot);
-    assertEquals(resolveStaticFilesPath('  ', defaultRoot), defaultRoot);
+describe('resolveStaticFilesPath', () => {
+  it('should return defaultRoot if value is missing or empty', () => {
+    assert.deepEqual(resolveStaticFilesPath(undefined, defaultRoot), defaultRoot);
+    assert.deepEqual(resolveStaticFilesPath('', defaultRoot), defaultRoot);
+    assert.deepEqual(resolveStaticFilesPath('  ', defaultRoot), defaultRoot);
   });
 
-  await t.step('should resolve relative paths against cwd', () => {
+  it('should resolve relative paths against cwd', () => {
     const relativePath = 'public';
     const expected = join(cwd, relativePath);
-    assertEquals(resolveStaticFilesPath(relativePath, defaultRoot), expected);
+    assert.deepEqual(resolveStaticFilesPath(relativePath, defaultRoot), expected);
   });
 
-  await t.step('should allow absolute paths inside cwd', () => {
+  it('should allow absolute paths inside cwd', () => {
     const absolutePath = join(cwd, 'public');
-    assertEquals(resolveStaticFilesPath(absolutePath, defaultRoot), absolutePath);
+    assert.deepEqual(resolveStaticFilesPath(absolutePath, defaultRoot), absolutePath);
   });
 
-  await t.step('should throw for absolute paths outside cwd', () => {
+  it('should throw for absolute paths outside cwd', () => {
     const outsidePath = resolve(cwd, '..');
-    assertThrows(
+    assert.throws(
       () => {
         resolveStaticFilesPath(outsidePath, defaultRoot);
       },
-      Error,
-      `staticFilesPath must stay within cwd`,
+      /staticFilesPath must stay within cwd/,
     );
   });
 
-  await t.step('should throw for relative paths that resolve outside cwd', () => {
+  it('should throw for relative paths that resolve outside cwd', () => {
     const outsideRelativePath = '../';
-    assertThrows(
+    assert.throws(
       () => {
         resolveStaticFilesPath(outsideRelativePath, defaultRoot);
       },
-      Error,
-      `staticFilesPath must stay within cwd`,
+      /staticFilesPath must stay within cwd/,
     );
   });
 
-  await t.step('should handle nested paths correctly', () => {
+  it('should handle nested paths correctly', () => {
     const nestedPath = 'public/assets';
     const expected = join(cwd, nestedPath);
-    assertEquals(resolveStaticFilesPath(nestedPath, defaultRoot), expected);
+    assert.deepEqual(resolveStaticFilesPath(nestedPath, defaultRoot), expected);
   });
 });

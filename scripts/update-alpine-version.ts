@@ -1,3 +1,5 @@
+import { readFile, writeFile } from 'node:fs/promises';
+
 const CONFIG_FILE = './src/config.ts';
 
 /** Supply-chain guard: ignore releases younger than this — gives a compromised/malicious publish time to be caught and unpublished before we pick it up. */
@@ -36,7 +38,7 @@ async function getEligibleVersion(pkg: string, minAgeHours: number): Promise<str
 }
 
 if (import.meta.main) {
-  const content = await Deno.readTextFile(CONFIG_FILE);
+  const content = await readFile(CONFIG_FILE, 'utf8');
 
   const versionRegex = /const ALPINE_VERSION = '([^']+)';/;
   const match = content.match(versionRegex);
@@ -51,7 +53,7 @@ if (import.meta.main) {
     console.log(`alpinejs: ${current} is newer than the oldest-eligible ${latest} — leaving untouched`);
   } else {
     const updated = content.replace(versionRegex, `const ALPINE_VERSION = '${latest}';`);
-    await Deno.writeTextFile(CONFIG_FILE, updated);
+    await writeFile(CONFIG_FILE, updated);
     console.log(`alpinejs: ${current} → ${latest} (published ≥${MIN_AGE_HOURS}h ago)`);
     console.log(`Updated ${CONFIG_FILE}`);
   }

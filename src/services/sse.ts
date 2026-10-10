@@ -1,3 +1,5 @@
+import { type FSWatcher, watch } from 'node:fs';
+
 /** A single SSE payload: `event` names the event, `data` is its optional string body. */
 export type SseMessage = { event: string; data?: string };
 
@@ -88,15 +90,19 @@ class SseService {
 /** Singleton SSE service instance shared across routes and file-watch events. */
 const service = new SseService();
 
-const staticFileWatch = async (path?: string): Promise<void> => {
+/**
+ * Watches `path` recursively and tells every connected browser to reload on any change.
+ * The caller closes the returned watcher when the server stops.
+ */
+const staticFileWatch = (path?: string): FSWatcher | undefined => {
   if (!path) {
     return;
   }
 
-  for await (const _event of Deno.watchFs(path)) {
+  return watch(path, { recursive: true }, () => {
     service.send('reload');
     service.close();
-  }
+  });
 };
 
 export { service, staticFileWatch };

@@ -1,4 +1,5 @@
-import { assertEquals } from '@std/assert';
+import { afterEach, describe, it, mock } from 'node:test';
+import assert from 'node:assert/strict';
 import { Hono } from '@hono/hono';
 import { HTTPException } from '@hono/hono/http-exception';
 import { errorHandler } from './error-handler.ts';
@@ -27,93 +28,106 @@ const createApp = (dev: boolean, thrower?: () => void): Hono<{ Variables: Alpine
   return app;
 };
 
-Deno.test('errorHandler', async (t) => {
-  await t.step('should pass through successful requests', async () => {
+describe('errorHandler', () => {
+  afterEach(() => mock.restoreAll());
+
+  it('should pass through successful requests', async () => {
     const app = createApp(false);
     const response = await app.request('/');
 
-    assertEquals(response.status, 200);
-    assertEquals(await response.text(), 'ok');
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(await response.text(), 'ok');
   });
 
-  await t.step('should handle HTTP errors with JSON response', async () => {
+  it('should handle HTTP errors with JSON response', async () => {
     const app = createApp(false, () => {
       throw new HTTPException(404, { message: 'Resource not found' });
     });
     const response = await app.request('/', { headers: { Accept: 'application/json' } });
 
-    assertEquals(response.status, 404);
-    assertEquals(response.headers.get('content-type')?.includes('application/json'), true);
+    assert.deepEqual(response.status, 404);
+    assert.deepEqual(response.headers.get('content-type')?.includes('application/json'), true);
     const body = (await response.json()) as ErrorResponseBody;
-    assertEquals(body.message, 'Resource not found');
-    assertEquals(body.status, 404);
-    assertEquals(body.stack, undefined);
+    assert.deepEqual(body.message, 'Resource not found');
+    assert.deepEqual(body.status, 404);
+    assert.deepEqual(body.stack, undefined);
   });
 
-  await t.step('should handle HTTP errors with JSON response in dev mode', async () => {
+  it('should handle HTTP errors with JSON response in dev mode', async () => {
     const app = createApp(true, () => {
       throw new HTTPException(500, { message: 'Server error' });
     });
     const response = await app.request('/', { headers: { Accept: 'application/json' } });
 
-    assertEquals(response.status, 500);
+    assert.deepEqual(response.status, 500);
     const body = (await response.json()) as ErrorResponseBody;
-    assertEquals(body.message, 'Server error');
-    assertEquals(body.status, 500);
-    assertEquals(typeof body.stack, 'string');
+    assert.deepEqual(body.message, 'Server error');
+    assert.deepEqual(body.status, 500);
+    assert.deepEqual(typeof body.stack, 'string');
   });
 
-  await t.step('should handle HTTP errors with text response', async () => {
+  it('should handle HTTP errors with text response', async () => {
     const app = createApp(false, () => {
       throw new HTTPException(403, { message: 'Forbidden' });
     });
     const response = await app.request('/');
 
-    assertEquals(response.status, 403);
-    assertEquals(response.headers.get('content-type')?.includes('text/plain'), true);
-    assertEquals(await response.text(), '403 Forbidden');
+    assert.deepEqual(response.status, 403);
+    assert.deepEqual(response.headers.get('content-type')?.includes('text/plain'), true);
+    assert.deepEqual(await response.text(), '403 Forbidden');
   });
 
-  await t.step('should handle HTTP errors with text response in dev mode', async () => {
+  it('should handle HTTP errors with text response in dev mode', async () => {
     const app = createApp(true, () => {
       throw new HTTPException(400, { message: 'Bad Request' });
     });
     const response = await app.request('/');
 
-    assertEquals(response.status, 400);
+    assert.deepEqual(response.status, 400);
     const text = await response.text();
-    assertEquals(text.includes('400 Bad Request'), true);
+    assert.deepEqual(text.includes('400 Bad Request'), true);
   });
 
-  await t.step('should handle Deno.errors.NotFound', async () => {
+  it('should handle ENOENT errors as 404', async () => {
     const app = createApp(false, () => {
-      throw new Deno.errors.NotFound('File not found');
+      throw Object.assign(new Error('File not found'), { code: 'ENOENT' });
     });
     const response = await app.request('/');
 
-    assertEquals(response.status, 404);
-    assertEquals(await response.text(), 'Not Found');
+    assert.deepEqual(response.status, 404);
+    assert.deepEqual(await response.text(), 'Not Found');
   });
 
-  await t.step('should handle generic errors in production', async () => {
+  it('should handle Deno-style NotFound errors as 404', async () => {
+    const app = createApp(false, () => {
+      throw Object.assign(new Error('File not found'), { name: 'NotFound' });
+    });
+    const response = await app.request('/');
+
+    assert.deepEqual(response.status, 404);
+  });
+
+  it('should handle generic errors in production', async () => {
+    mock.method(console, 'error', () => {});
     const app = createApp(false, () => {
       throw new Error('Something went wrong');
     });
     const response = await app.request('/');
 
-    assertEquals(response.status, 500);
-    assertEquals(await response.text(), 'Internal Server Error');
+    assert.deepEqual(response.status, 500);
+    assert.deepEqual(await response.text(), 'Internal Server Error');
   });
 
-  await t.step('should handle generic errors in dev mode', async () => {
+  it('should handle generic errors in dev mode', async () => {
+    mock.method(console, 'error', () => {});
     const app = createApp(true, () => {
       throw new Error('Something went wrong');
     });
     const response = await app.request('/');
 
-    assertEquals(response.status, 500);
+    assert.deepEqual(response.status, 500);
     const text = await response.text();
-    assertEquals(text.includes('Internal Server Error'), true);
-    assertEquals(text.includes('Something went wrong'), true);
+    assert.deepEqual(text.includes('Internal Server Error'), true);
+    assert.deepEqual(text.includes('Something went wrong'), true);
   });
 });

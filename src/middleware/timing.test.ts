@@ -1,4 +1,5 @@
-import { assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { Hono } from '@hono/hono';
 import { timing } from './timing.ts';
 
@@ -14,26 +15,26 @@ const createApp = (delayMs: number): Hono => {
   return app;
 };
 
-Deno.test('timing', async (t) => {
-  await t.step('should set X-Response-Time header', async () => {
+describe('timing', () => {
+  it('should set X-Response-Time header', async () => {
     const app = createApp(10);
     const response = await app.request('/');
 
     const responseTime = response.headers.get('X-Response-Time');
-    assertEquals(typeof responseTime, 'string');
-    assertEquals(responseTime?.endsWith('ms'), true);
+    assert.deepEqual(typeof responseTime, 'string');
+    assert.deepEqual(responseTime?.endsWith('ms'), true);
   });
 
-  await t.step('should set Server-Timing header', async () => {
+  it('should set Server-Timing header', async () => {
     const app = createApp(5);
     const response = await app.request('/');
 
     const serverTiming = response.headers.get('Server-Timing');
-    assertEquals(typeof serverTiming, 'string');
-    assertEquals(serverTiming?.startsWith('app;dur='), true);
+    assert.deepEqual(typeof serverTiming, 'string');
+    assert.deepEqual(serverTiming?.startsWith('app;dur='), true);
   });
 
-  await t.step('should measure time correctly', async () => {
+  it('should measure time correctly', async () => {
     const app = createApp(50);
     const response = await app.request('/');
 
@@ -41,6 +42,6 @@ Deno.test('timing', async (t) => {
     const timeValue = parseFloat(responseTime?.replace('ms', '') || '0');
 
     // Should be at least 50ms, but allow some variance
-    assertEquals(timeValue >= 50, true);
+    assert.deepEqual(timeValue >= 50, true);
   });
 });

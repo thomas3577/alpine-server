@@ -1,6 +1,5 @@
-import { assertEquals } from '@std/assert';
-import { restore, stub } from '@std/testing/mock';
-import { getLogger } from '@std/log';
+import { afterEach, describe, it, mock } from 'node:test';
+import assert from 'node:assert/strict';
 import { Hono } from '@hono/hono';
 import { logger, type LoggerState } from './logger.ts';
 
@@ -24,44 +23,40 @@ const createApp = (responseTime?: string, blocked?: boolean): Hono<{ Variables: 
   return app;
 };
 
-Deno.test('logger', async (t) => {
-  await t.step('should log request without errors', async () => {
-    const infoStub = stub(getLogger('default'), 'info');
-    try {
-      const app = createApp('10.5ms');
-      const response = await app.request('/');
+describe('logger', () => {
+  afterEach(() => mock.restoreAll());
 
-      assertEquals(response.headers.get('X-Response-Time'), '10.5ms');
-      assertEquals(infoStub.calls.length, 1);
-    } finally {
-      restore();
-    }
+  it('should log request without errors', async () => {
+    const info = mock.method(console, 'info', () => {});
+    const app = createApp('10.5ms');
+    const response = await app.request('/');
+
+    assert.deepEqual(response.headers.get('X-Response-Time'), '10.5ms');
+    assert.deepEqual(info.mock.callCount(), 1);
   });
 
-  await t.step('should handle POST requests', async () => {
+  it('should handle POST requests', async () => {
+    mock.method(console, 'info', () => {});
     const app = createApp('25.3ms');
     const response = await app.request('/api/data', { method: 'POST' });
 
-    assertEquals(response.status, 200);
+    assert.deepEqual(response.status, 200);
   });
 
-  await t.step('should skip logging for blocked requests', async () => {
-    const infoStub = stub(getLogger('default'), 'info');
-    try {
-      const app = createApp('1.0ms', true);
-      const response = await app.request('/test.js');
+  it('should skip logging for blocked requests', async () => {
+    const info = mock.method(console, 'info', () => {});
+    const app = createApp('1.0ms', true);
+    const response = await app.request('/test.js');
 
-      assertEquals(response.headers.get('X-Response-Time'), '1.0ms');
-      assertEquals(infoStub.calls.length, 0);
-    } finally {
-      restore();
-    }
+    assert.deepEqual(response.headers.get('X-Response-Time'), '1.0ms');
+    assert.deepEqual(info.mock.callCount(), 0);
   });
 
-  await t.step('should handle missing response time header', async () => {
+  it('should handle missing response time header', async () => {
+    mock.method(console, 'info', () => {});
     const app = createApp();
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('X-Response-Time'), null);
+    assert.deepEqual(response.headers.get('X-Response-Time'), null);
   });
 });

@@ -9,6 +9,6 @@
 // Copyright 2018-2026 the alpine-server authors. All rights reserved. MIT license.
 
 export { AlpineApp } from './src/app.ts';
-export type { AlpineAppConfig, AlpineAppRuntimeConfig, AlpineAppState, ServerModuleConfig } from './src/types.ts';
+export type { AlpineAppConfig, AlpineAppRuntimeConfig, AlpineAppState, ListenOptions, ServerModuleConfig } from './src/types.ts';
 export { Hono } from '@hono/hono';
 export type { Context, MiddlewareHandler as Middleware, Next } from '@hono/hono';

@@ -1,10 +1,12 @@
 /** Catch-all route serving index.html for directory-style requests. */
 import type { HTMLScriptElement } from 'linkedom';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { Hono } from '@hono/hono';
-import { join } from '@std/path';
 import { DOMParser } from 'linkedom';
 import type { AlpineAppState } from '../types.ts';
 import { UPDATER_FILENAME } from '../config.ts';
+import { isNotFoundError } from '../utils.ts';
 
 const router = new Hono<{ Variables: AlpineAppState }>();
 const domParser = new DOMParser();
@@ -52,12 +54,12 @@ router.get('/:site{.*}', async (c) => {
   const path: string = join(c.get('config').staticFilesPath, sitePath, 'index.html');
 
   try {
-    const text: string = await Deno.readTextFile(path);
+    const text: string = await readFile(path, 'utf8');
     const body: string = !c.get('config').dev ? text : injectUpdater(text);
 
     return c.html(body);
   } catch (err) {
-    if (err instanceof Deno.errors.NotFound) {
+    if (isNotFoundError(err)) {
       return c.text('', 404);
     }
 

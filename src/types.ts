@@ -1,9 +1,23 @@
 /**
- * Configuration options for the underlying Deno server.
+ * Listen options for the HTTP server, honored on Deno, Node.js, and Bun.
+ */
+export type ListenOptions = {
+  /** Port to listen on (default: 8000; 0 picks a free port) */
+  port?: number;
+  /** Hostname to bind to (default: '0.0.0.0') */
+  hostname?: string;
+  /** Aborting this signal shuts the server down and lets `run()` resolve */
+  signal?: AbortSignal;
+  /** Called once the server is listening, with the bound address */
+  onListen?: (addr: { hostname: string; port: number }) => void;
+};
+
+/**
+ * Configuration options for the underlying HTTP server.
  */
 export type ServerModuleConfig = {
-  /** Options for Deno.serve (port, hostname, etc.) */
-  listenOptions?: Deno.ServeTcpOptions;
+  /** Listen options (port, hostname, signal, onListen) */
+  listenOptions?: ListenOptions;
 };
 
 /**

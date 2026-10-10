@@ -1,4 +1,5 @@
-import { assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { Hono } from '@hono/hono';
 import { securityHeaders } from './security-headers.ts';
 import type { AlpineAppState } from '../types.ts';
@@ -28,71 +29,71 @@ const createApp = (dev: boolean, contentType?: string, presetCsp?: string, prese
   return app;
 };
 
-Deno.test('securityHeaders', async (t) => {
-  await t.step('should set basic security headers', async () => {
+describe('securityHeaders', () => {
+  it('should set basic security headers', async () => {
     const app = createApp(false);
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('X-Content-Type-Options'), 'nosniff');
-    assertEquals(response.headers.get('Referrer-Policy'), 'strict-origin-when-cross-origin');
-    assertEquals(response.headers.get('Permissions-Policy'), 'geolocation=(), microphone=(), camera=()');
-    assertEquals(response.headers.get('Cross-Origin-Resource-Policy'), 'same-origin');
-    assertEquals(response.headers.get('Cross-Origin-Opener-Policy'), 'same-origin');
+    assert.deepEqual(response.headers.get('X-Content-Type-Options'), 'nosniff');
+    assert.deepEqual(response.headers.get('Referrer-Policy'), 'strict-origin-when-cross-origin');
+    assert.deepEqual(response.headers.get('Permissions-Policy'), 'geolocation=(), microphone=(), camera=()');
+    assert.deepEqual(response.headers.get('Cross-Origin-Resource-Policy'), 'same-origin');
+    assert.deepEqual(response.headers.get('Cross-Origin-Opener-Policy'), 'same-origin');
   });
 
-  await t.step('should set HSTS in production', async () => {
+  it('should set HSTS in production', async () => {
     const app = createApp(false);
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('Strict-Transport-Security'), 'max-age=31536000');
+    assert.deepEqual(response.headers.get('Strict-Transport-Security'), 'max-age=31536000');
   });
 
-  await t.step('should not set HSTS in dev mode', async () => {
+  it('should not set HSTS in dev mode', async () => {
     const app = createApp(true);
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('Strict-Transport-Security'), null);
+    assert.deepEqual(response.headers.get('Strict-Transport-Security'), null);
   });
 
-  await t.step('should set CSP for HTML content', async () => {
+  it('should set CSP for HTML content', async () => {
     const app = createApp(false, 'text/html; charset=utf-8');
     const response = await app.request('/');
 
     const csp = response.headers.get('Content-Security-Policy');
-    assertEquals(typeof csp, 'string');
-    assertEquals(csp?.includes("default-src 'self'"), true);
-    assertEquals(csp?.includes("script-src 'self' 'unsafe-eval'"), true);
-    assertEquals(csp?.includes("object-src 'none'"), true);
-    assertEquals(csp?.includes("frame-ancestors 'none'"), true);
+    assert.deepEqual(typeof csp, 'string');
+    assert.deepEqual(csp?.includes("default-src 'self'"), true);
+    assert.deepEqual(csp?.includes("script-src 'self' 'unsafe-eval'"), true);
+    assert.deepEqual(csp?.includes("object-src 'none'"), true);
+    assert.deepEqual(csp?.includes("frame-ancestors 'none'"), true);
   });
 
-  await t.step('should not set CSP for non-HTML content', async () => {
+  it('should not set CSP for non-HTML content', async () => {
     const app = createApp(false, 'application/json');
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('Content-Security-Policy'), null);
+    assert.deepEqual(response.headers.get('Content-Security-Policy'), null);
   });
 
-  await t.step('should handle missing content-type', async () => {
+  it('should handle missing content-type', async () => {
     const app = createApp(false);
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('Content-Security-Policy'), null);
+    assert.deepEqual(response.headers.get('Content-Security-Policy'), null);
   });
 
-  await t.step('should handle case-insensitive content-type', async () => {
+  it('should handle case-insensitive content-type', async () => {
     const app = createApp(false, 'TEXT/HTML');
     const response = await app.request('/');
 
     const csp = response.headers.get('Content-Security-Policy');
-    assertEquals(typeof csp, 'string');
+    assert.deepEqual(typeof csp, 'string');
   });
 
-  await t.step('should not override existing CSP', async () => {
+  it('should not override existing CSP', async () => {
     const app = createApp(false, 'text/html', "default-src 'self' https://esm.sh");
     const response = await app.request('/');
 
-    assertEquals(response.headers.get('Content-Security-Policy'), "default-src 'self' https://esm.sh");
+    assert.deepEqual(response.headers.get('Content-Security-Policy'), "default-src 'self' https://esm.sh");
   });
 
   const presets: Record<string, string> = {
@@ -105,11 +106,11 @@ Deno.test('securityHeaders', async (t) => {
   };
 
   for (const [name, value] of Object.entries(presets)) {
-    await t.step(`should not override existing ${name}`, async () => {
+    it(`should not override existing ${name}`, async () => {
       const app = createApp(false, undefined, undefined, { [name]: value });
       const response = await app.request('/');
 
-      assertEquals(response.headers.get(name), value);
+      assert.deepEqual(response.headers.get(name), value);
     });
   }
 });

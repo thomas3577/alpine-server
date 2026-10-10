@@ -1,4 +1,5 @@
-import { assert, assertEquals } from '@std/assert';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { Hono } from '@hono/hono';
 import { router } from './sse.ts';
 import { errorHandler } from '../middleware/error-handler.ts';
@@ -19,30 +20,36 @@ const createApp = (): Hono<{ Variables: AlpineAppState }> => {
   return app;
 };
 
-Deno.test('sse route', async (t) => {
-  await t.step('returns 415 for unsupported media type', async () => {
+describe('sse route', () => {
+  it('returns 415 for unsupported media type', async () => {
     service.close();
     const app = createApp();
 
     const response = await app.request('/sse', { headers: { Accept: 'application/json' } });
 
-    assertEquals(response.status, 415);
-    assertEquals(service.clients.size, 0);
+    assert.deepEqual(response.status, 415);
+    assert.deepEqual(service.clients.size, 0);
   });
 
-  await t.step('opens an event-stream connection and registers a client', async () => {
+  it('opens an event-stream connection and registers a client', async () => {
     service.close();
     const app = createApp();
 
     const response = await app.request('/sse', { headers: { Accept: 'text/event-stream' } });
 
-    assertEquals(response.status, 200);
-    assert(response.headers.get('content-type')?.includes('text/event-stream'));
-    assertEquals(service.clients.size, 1);
+    assert.deepEqual(response.status, 200);
+    assert.ok(response.headers.get('content-type')?.includes('text/event-stream'));
+    assert.deepEqual(service.clients.size, 1);
+
+    // An initial comment flushes the headers right away (Bun holds them back until the first chunk).
+    const reader = response.body!.getReader();
+    const first = await reader.read();
+    assert.deepEqual(new TextDecoder().decode(first.value), ': connected\n\n');
+    reader.releaseLock();
 
     // Cancelling the body triggers stream.onAbort, which alone must clean up the client.
     await response.body?.cancel();
-    assertEquals(service.clients.size, 0);
+    assert.deepEqual(service.clients.size, 0);
 
     // Final cleanup in case anything was left registered.
     service.close();

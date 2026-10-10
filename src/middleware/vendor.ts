@@ -1,7 +1,6 @@
 /** Whitelisted reverse-proxy/cache for vendor CDN assets (e.g. Alpine.js). */
 import { Hono } from '@hono/hono';
 import { HTTPException } from '@hono/hono/http-exception';
-import { error } from '@std/log';
 import { vendorCache } from '../services/vendor.ts';
 import type { AlpineAppState } from '../types.ts';
 
@@ -48,7 +47,7 @@ export const createVendorRouter = (): Hono<{ Variables: AlpineAppState }> => {
 
       return c.body(entry.content as Uint8Array<ArrayBuffer>);
     } catch (err) {
-      error(`Failed to fetch vendor resource ${cdnPath}: ${err instanceof Error ? err.message : String(err)}`);
+      console.error(`Failed to fetch vendor resource ${cdnPath}: ${err instanceof Error ? err.message : String(err)}`);
 
       throw new HTTPException(502, { message: 'Failed to fetch vendor resource' });
     }

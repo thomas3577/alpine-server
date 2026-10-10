@@ -1,0 +1,19 @@
+{
+  "name": "@dx/alpine-server-dev",
+  "private": true,
+  "type": "module",
+  "description": "Node.js/Bun dev setup for running the test suite; the package itself is published to JSR from deno.json.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test \"src/**/*.test.ts\" \"cli/**/*.test.ts\" \"scripts/**/*.test.ts\"",
+    "test:bun": "bun test"
+  },
+  "dependencies": {
+    "@hono/hono": "npm:@jsr/hono__hono@^4.13.12",
+    "@hono/node-server": "^2.1.4",
+    "@std/fmt": "npm:@jsr/std__fmt@^1.0.10",
+    "linkedom": "^0.18.13"
+  }
+}

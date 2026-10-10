@@ -1,61 +1,63 @@
-import { assertEquals } from '@std/assert';
-import { join } from '@std/path';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import process from 'node:process';
+import { join } from 'node:path';
 import { ALPINE_VERSION, RuntimeConfig } from './config.ts';
 
-const cwd = Deno.cwd();
+const cwd = process.cwd();
 
-Deno.test('RuntimeConfig', async (t) => {
-  await t.step('should use default values when no input is provided', () => {
+describe('RuntimeConfig', () => {
+  it('should use default values when no input is provided', () => {
     const config = new RuntimeConfig(undefined);
-    assertEquals(config.dev, false);
-    assertEquals(config.production, true);
-    assertEquals(config.staticFilesPath, join(cwd, 'public'));
-    assertEquals(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
+    assert.deepEqual(config.dev, false);
+    assert.deepEqual(config.production, true);
+    assert.deepEqual(config.staticFilesPath, join(cwd, 'public'));
+    assert.deepEqual(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
   });
 
-  await t.step('should use default values for an empty input object', () => {
+  it('should use default values for an empty input object', () => {
     const config = new RuntimeConfig({});
-    assertEquals(config.dev, false);
-    assertEquals(config.production, true);
-    assertEquals(config.staticFilesPath, join(cwd, 'public'));
-    assertEquals(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
+    assert.deepEqual(config.dev, false);
+    assert.deepEqual(config.production, true);
+    assert.deepEqual(config.staticFilesPath, join(cwd, 'public'));
+    assert.deepEqual(config.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
   });
 
-  await t.step('should set dev and production flags correctly', () => {
+  it('should set dev and production flags correctly', () => {
     const config = new RuntimeConfig({ dev: true });
-    assertEquals(config.dev, true);
-    assertEquals(config.production, false);
+    assert.deepEqual(config.dev, true);
+    assert.deepEqual(config.production, false);
   });
 
-  await t.step('should resolve custom staticFilesPath', () => {
+  it('should resolve custom staticFilesPath', () => {
     const customPath = 'my-static-files';
     const config = new RuntimeConfig({ staticFilesPath: customPath });
-    assertEquals(config.staticFilesPath, join(cwd, customPath));
+    assert.deepEqual(config.staticFilesPath, join(cwd, customPath));
   });
 
-  await t.step('should use custom staticExtensions', () => {
+  it('should use custom staticExtensions', () => {
     const customExtensions = ['.html', '.js'];
     const config = new RuntimeConfig({ staticExtensions: customExtensions });
-    assertEquals(config.staticExtensions, customExtensions);
+    assert.deepEqual(config.staticExtensions, customExtensions);
   });
 
-  await t.step('should use default staticExtensions if provided value is not an array of strings', () => {
+  it('should use default staticExtensions if provided value is not an array of strings', () => {
     // deno-lint-ignore no-explicit-any
     const config1 = new RuntimeConfig({ staticExtensions: ['a', 1] as any });
-    assertEquals(config1.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
+    assert.deepEqual(config1.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
 
     // deno-lint-ignore no-explicit-any
     const config2 = new RuntimeConfig({ staticExtensions: 'not-an-array' as any });
-    assertEquals(config2.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
+    assert.deepEqual(config2.staticExtensions, ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf']);
   });
 
-  await t.step('should use default vendors when no vendors provided', () => {
+  it('should use default vendors when no vendors provided', () => {
     const config = new RuntimeConfig({});
-    assertEquals(config.vendors.map['alpinejs.mjs'], `https://esm.sh/alpinejs@${ALPINE_VERSION}/es2024/alpinejs.mjs`);
-    assertEquals(config.vendors.map['alpinejs-sort.mjs'], `https://esm.sh/@alpinejs/sort@${ALPINE_VERSION}/es2024/sort.mjs`);
+    assert.deepEqual(config.vendors.map['alpinejs.mjs'], `https://esm.sh/alpinejs@${ALPINE_VERSION}/es2024/alpinejs.mjs`);
+    assert.deepEqual(config.vendors.map['alpinejs-sort.mjs'], `https://esm.sh/@alpinejs/sort@${ALPINE_VERSION}/es2024/sort.mjs`);
   });
 
-  await t.step('should merge custom vendors with default vendors', () => {
+  it('should merge custom vendors with default vendors', () => {
     const config = new RuntimeConfig({
       vendors: {
         map: {
@@ -65,11 +67,11 @@ Deno.test('RuntimeConfig', async (t) => {
     });
 
     // Should have both default and custom vendors
-    assertEquals(config.vendors.map['alpinejs.mjs'], `https://esm.sh/alpinejs@${ALPINE_VERSION}/es2024/alpinejs.mjs`);
-    assertEquals(config.vendors.map['htmx.js'], 'https://unpkg.com/htmx.org@1.9.10');
+    assert.deepEqual(config.vendors.map['alpinejs.mjs'], `https://esm.sh/alpinejs@${ALPINE_VERSION}/es2024/alpinejs.mjs`);
+    assert.deepEqual(config.vendors.map['htmx.js'], 'https://unpkg.com/htmx.org@1.9.10');
   });
 
-  await t.step('should allow overriding default vendors', () => {
+  it('should allow overriding default vendors', () => {
     const config = new RuntimeConfig({
       vendors: {
         map: {
@@ -79,6 +81,6 @@ Deno.test('RuntimeConfig', async (t) => {
     });
 
     // Custom should override default
-    assertEquals(config.vendors.map['alpinejs.mjs'], 'https://custom.cdn.com/alpine.js');
+    assert.deepEqual(config.vendors.map['alpinejs.mjs'], 'https://custom.cdn.com/alpine.js');
   });
 });

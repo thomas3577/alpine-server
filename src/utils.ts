@@ -1,5 +1,6 @@
 /** Path resolution and validation helpers. */
-import { isAbsolute, relative, resolve } from '@std/path';
+import { isAbsolute, relative, resolve } from 'node:path';
+import process from 'node:process';
 
 const isPathInside = (root: string, candidate: string): boolean => {
   const rel = relative(root, candidate);
@@ -23,7 +24,7 @@ const isPathInside = (root: string, candidate: string): boolean => {
  * @throws {Error} If resolved path is outside cwd.
  */
 export const resolveStaticFilesPath = (value: unknown, defaultRoot: string): string => {
-  const cwd = Deno.cwd();
+  const cwd = process.cwd();
 
   const candidate = typeof value === 'string' ? value.trim() : '';
   if (!candidate) {
@@ -37,4 +38,22 @@ export const resolveStaticFilesPath = (value: unknown, defaultRoot: string): str
   }
 
   return resolved;
+};
+
+/**
+ * Whether an error means "file not found": Node-style `ENOENT`/`ENOTDIR` codes
+ * (all runtimes), or a Deno `NotFound` error thrown by user code.
+ *
+ * @param {unknown} err Caught error.
+ *
+ * @returns {boolean} True if the error signals a missing file.
+ */
+export const isNotFoundError = (err: unknown): boolean => {
+  if (!(err instanceof Error)) {
+    return false;
+  }
+
+  const code = (err as { code?: unknown }).code;
+
+  return code === 'ENOENT' || code === 'ENOTDIR' || err.name === 'NotFound';
 };

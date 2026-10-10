@@ -1,7 +1,6 @@
 /** Core AlpineApp class: wires Hono middleware, routes, and config into a runnable server. */
 import { Hono } from '@hono/hono';
 import type { MiddlewareHandler } from '@hono/hono';
-import { info } from '@std/log';
 import { staticFiles } from './middleware/static-files.ts';
 import { errorHandler } from './middleware/error-handler.ts';
 import { logger } from './middleware/logger.ts';
@@ -13,6 +12,7 @@ import { RuntimeConfig, UPDATER_FILENAME } from './config.ts';
 import { router as updater } from './routes/updater.ts';
 import { router as sse } from './routes/sse.ts';
 import { router as view } from './routes/views.ts';
+import { serve } from './serve.ts';
 import type { AlpineAppConfig, AlpineAppState } from './types.ts';
 
 type AppEnv = { Variables: AlpineAppState };
@@ -90,7 +90,8 @@ export class AlpineApp {
 
   /**
    * Starts the application server and registers all middlewares and routes.
-   * This method can only be called once per instance.
+   * Runs on Deno, Node.js, and Bun; resolves once the server shuts down
+   * (after `listenOptions.signal` aborts). This method can only be called once per instance.
    *
    * @throws {Error} If the application is already running
    *
@@ -143,12 +144,14 @@ export class AlpineApp {
 
     this.#app.route('/', view);
 
-    if (runtime.dev) {
-      staticFileWatch(runtime.staticFilesPath);
+    const watcher = runtime.dev ? staticFileWatch(runtime.staticFilesPath) : undefined;
+
+    console.info('Starting...');
+
+    try {
+      await serve(this.#app.fetch, this.#config.server?.listenOptions);
+    } finally {
+      watcher?.close();
     }
-
-    info('Starting...');
-
-    await Deno.serve(this.#config.server?.listenOptions ?? {}, this.#app.fetch).finished;
   }
 }

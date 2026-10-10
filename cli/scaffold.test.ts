@@ -1,7 +1,15 @@
-import { assert, assertEquals, assertRejects, assertStringIncludes, assertThrows } from '@std/assert';
-import { basename, join } from '@std/path';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import process from 'node:process';
+import { basename, join } from 'node:path';
 import { getVersion, parseCliArgs } from './parser.ts';
 import { addPage, buildPageFiles, buildScaffoldFiles, createProject } from './scaffold.ts';
+
+const assertIncludes = (actual: string, expected: string): void => {
+  assert.ok(actual.includes(expected), `Expected ${JSON.stringify(actual)} to include ${JSON.stringify(expected)}`);
+};
 
 const asTextContent = (content: string | Uint8Array): string => {
   if (typeof content !== 'string') {
@@ -10,138 +18,138 @@ const asTextContent = (content: string | Uint8Array): string => {
   return content;
 };
 
-Deno.test('parseCliArgs', async (t) => {
-  await t.step('returns help when no args are passed', () => {
+describe('parseCliArgs', () => {
+  it('returns help when no args are passed', () => {
     const parsed = parseCliArgs([]);
-    assertEquals(parsed.command, 'help');
+    assert.deepEqual(parsed.command, 'help');
   });
 
-  await t.step('parses new command with defaults', () => {
+  it('parses new command with defaults', () => {
     const parsed = parseCliArgs(['new', 'my-app']);
-    assert(parsed.command === 'new');
-    assertEquals(parsed.targetDir, 'my-app');
-    assertEquals(parsed.port, 8000);
-    assertEquals(parsed.force, false);
+    assert.ok(parsed.command === 'new');
+    assert.deepEqual(parsed.targetDir, 'my-app');
+    assert.deepEqual(parsed.port, 8000);
+    assert.deepEqual(parsed.force, false);
   });
 
-  await t.step('parses new command with options', () => {
+  it('parses new command with options', () => {
     const parsed = parseCliArgs(['new', 'my-app', '--port', '3000', '--force']);
-    assert(parsed.command === 'new');
-    assertEquals(parsed.port, 3000);
-    assertEquals(parsed.force, true);
+    assert.ok(parsed.command === 'new');
+    assert.deepEqual(parsed.port, 3000);
+    assert.deepEqual(parsed.force, true);
   });
 
-  await t.step('throws for unknown command', () => {
-    assertThrows(() => parseCliArgs(['init', 'my-app']), Error, 'Unknown command');
+  it('throws for unknown command', () => {
+    assert.throws(() => parseCliArgs(['init', 'my-app']), /Unknown command/);
   });
 
-  await t.step('throws for missing project name', () => {
-    assertThrows(() => parseCliArgs(['new']), Error, 'Missing required <project-name> argument for new command');
+  it('throws for missing project name', () => {
+    assert.throws(() => parseCliArgs(['new']), /Missing required <project-name> argument for new command/);
   });
 
-  await t.step('throws for invalid port', () => {
-    assertThrows(() => parseCliArgs(['new', 'my-app', '--port', 'abc']), Error, 'Invalid port');
+  it('throws for invalid port', () => {
+    assert.throws(() => parseCliArgs(['new', 'my-app', '--port', 'abc']), /Invalid port/);
   });
 
-  await t.step('parses add command', () => {
+  it('parses add command', () => {
     const parsed = parseCliArgs(['add', 'about']);
-    assert(parsed.command === 'add');
-    assertEquals(parsed.pageName, 'about');
-    assertEquals(parsed.force, false);
+    assert.ok(parsed.command === 'add');
+    assert.deepEqual(parsed.pageName, 'about');
+    assert.deepEqual(parsed.force, false);
   });
 
-  await t.step('parses add command with force', () => {
+  it('parses add command with force', () => {
     const parsed = parseCliArgs(['add', 'contact', '--force']);
-    assert(parsed.command === 'add');
-    assertEquals(parsed.pageName, 'contact');
-    assertEquals(parsed.force, true);
+    assert.ok(parsed.command === 'add');
+    assert.deepEqual(parsed.pageName, 'contact');
+    assert.deepEqual(parsed.force, true);
   });
 
-  await t.step('throws for missing page name', () => {
-    assertThrows(() => parseCliArgs(['add']), Error, 'Missing required <page-name> argument for add command');
+  it('throws for missing page name', () => {
+    assert.throws(() => parseCliArgs(['add']), /Missing required <page-name> argument for add command/);
   });
 
-  await t.step('throws for invalid page name with path traversal', () => {
-    assertThrows(() => parseCliArgs(['add', '../evil']), Error, 'Invalid page name');
+  it('throws for invalid page name with path traversal', () => {
+    assert.throws(() => parseCliArgs(['add', '../evil']), /Invalid page name/);
   });
 
-  await t.step('throws for invalid page name with uppercase', () => {
-    assertThrows(() => parseCliArgs(['add', 'About']), Error, 'Invalid page name');
+  it('throws for invalid page name with uppercase', () => {
+    assert.throws(() => parseCliArgs(['add', 'About']), /Invalid page name/);
   });
 
-  await t.step('throws for invalid page name with special chars', () => {
-    assertThrows(() => parseCliArgs(['add', 'my_page']), Error, 'Invalid page name');
+  it('throws for invalid page name with special chars', () => {
+    assert.throws(() => parseCliArgs(['add', 'my_page']), /Invalid page name/);
   });
 
-  await t.step('accepts hyphenated page names', () => {
+  it('accepts hyphenated page names', () => {
     const parsed = parseCliArgs(['add', 'about-us']);
-    assert(parsed.command === 'add');
-    assertEquals(parsed.pageName, 'about-us');
+    assert.ok(parsed.command === 'add');
+    assert.deepEqual(parsed.pageName, 'about-us');
   });
 
-  await t.step('returns version for -v flag', () => {
+  it('returns version for -v flag', () => {
     const parsed = parseCliArgs(['-v']);
-    assertEquals(parsed.command, 'version');
+    assert.deepEqual(parsed.command, 'version');
   });
 
-  await t.step('returns version for --version flag', () => {
+  it('returns version for --version flag', () => {
     const parsed = parseCliArgs(['--version']);
-    assertEquals(parsed.command, 'version');
+    assert.deepEqual(parsed.command, 'version');
   });
 });
 
-Deno.test('getVersion includes alpine-server, Hono, and Alpine.js versions', () => {
+it('getVersion includes alpine-server, Hono, and Alpine.js versions', () => {
   const version = getVersion();
-  assert(/^alpine-server \d+\.\d+\.\d+ \(Hono \S+, Alpine\.js \d+\.\d+\.\d+\)$/.test(version));
+  assert.ok(/^alpine-server \d+\.\d+\.\d+ \(Hono \S+, Alpine\.js \d+\.\d+\.\d+\)$/.test(version));
 });
 
-Deno.test('buildScaffoldFiles returns expected files', () => {
+it('buildScaffoldFiles returns expected files', () => {
   const files = buildScaffoldFiles('demo-app', 5000);
 
-  assert('app.ts' in files);
-  assert('deno.json' in files);
-  assert('README.md' in files);
-  assert(join('public', 'index.html') in files);
-  assert(join('public', 'favicon.png') in files);
-  assert(join('public', 'main.js') in files);
-  assert(join('public', 'style.css') in files);
-  assert(join('.vscode', 'settings.json') in files);
-  assert(join('.vscode', 'launch.json') in files);
+  assert.ok('app.ts' in files);
+  assert.ok('deno.json' in files);
+  assert.ok('README.md' in files);
+  assert.ok(join('public', 'index.html') in files);
+  assert.ok(join('public', 'favicon.png') in files);
+  assert.ok(join('public', 'main.js') in files);
+  assert.ok(join('public', 'style.css') in files);
+  assert.ok(join('.vscode', 'settings.json') in files);
+  assert.ok(join('.vscode', 'launch.json') in files);
 
-  assertStringIncludes(asTextContent(files['app.ts']), 'port: 5000');
-  assertStringIncludes(asTextContent(files['README.md']), '# demo-app');
-  assertStringIncludes(asTextContent(files[join('public', 'index.html')]), 'href="favicon.png"');
-  assert(files[join('public', 'favicon.png')] instanceof Uint8Array);
-  assertStringIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"type": "node"');
-  assertStringIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"runtimeExecutable": "deno"');
-  assertStringIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"url": "http://localhost:5000"');
+  assertIncludes(asTextContent(files['app.ts']), 'port: 5000');
+  assertIncludes(asTextContent(files['README.md']), '# demo-app');
+  assertIncludes(asTextContent(files[join('public', 'index.html')]), 'href="favicon.png"');
+  assert.ok(files[join('public', 'favicon.png')] instanceof Uint8Array);
+  assertIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"type": "node"');
+  assertIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"runtimeExecutable": "deno"');
+  assertIncludes(asTextContent(files[join('.vscode', 'launch.json')]), '"url": "http://localhost:5000"');
 });
 
-Deno.test('buildScaffoldFiles includes alp task in deno.json', () => {
+it('buildScaffoldFiles includes alp task in deno.json', () => {
   const files = buildScaffoldFiles('demo-app', 5000);
   const denoJson = asTextContent(files['deno.json']);
-  assertStringIncludes(denoJson, '"alp"');
-  assertStringIncludes(denoJson, 'jsr:@dx/alpine-server@');
-  assertStringIncludes(denoJson, '/cli');
+  assertIncludes(denoJson, '"alp"');
+  assertIncludes(denoJson, 'jsr:@dx/alpine-server@');
+  assertIncludes(denoJson, '/cli');
 });
 
-Deno.test('buildPageFiles returns index.html with correct content', () => {
+it('buildPageFiles returns index.html with correct content', () => {
   const files = buildPageFiles('about');
-  assert('index.html' in files);
-  assertStringIncludes(files['index.html'], '<title>About</title>');
-  assertStringIncludes(files['index.html'], 'x-data');
-  assertStringIncludes(files['index.html'], 'href="/style.css"');
-  assertStringIncludes(files['index.html'], 'src="/main.js"');
-  assertStringIncludes(files['index.html'], 'href="/">Home</a>');
+  assert.ok('index.html' in files);
+  assertIncludes(files['index.html'], '<title>About</title>');
+  assertIncludes(files['index.html'], 'x-data');
+  assertIncludes(files['index.html'], 'href="/style.css"');
+  assertIncludes(files['index.html'], 'src="/main.js"');
+  assertIncludes(files['index.html'], 'href="/">Home</a>');
 });
 
-Deno.test('buildPageFiles capitalizes hyphenated names', () => {
+it('buildPageFiles capitalizes hyphenated names', () => {
   const files = buildPageFiles('about-us');
-  assertStringIncludes(files['index.html'], '<title>About Us</title>');
+  assertIncludes(files['index.html'], '<title>About Us</title>');
 });
 
-Deno.test('createProject writes scaffold files', async () => {
-  const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
+it('createProject writes scaffold files', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'alpine-server-cli-'));
   try {
     const targetDir = join(tempRoot, 'new-app');
 
@@ -152,34 +160,34 @@ Deno.test('createProject writes scaffold files', async () => {
       force: false,
     });
 
-    assertEquals(written.length, 9);
+    assert.deepEqual(written.length, 9);
 
-    const main = await Deno.readTextFile(join(targetDir, 'app.ts'));
-    assertStringIncludes(main, 'port: 4100');
+    const main = await readFile(join(targetDir, 'app.ts'), 'utf8');
+    assertIncludes(main, 'port: 4100');
 
-    const html = await Deno.readTextFile(join(targetDir, 'public', 'index.html'));
-    assertStringIncludes(html, '<title>new-app</title>');
-    assertStringIncludes(html, 'href="favicon.png"');
+    const html = await readFile(join(targetDir, 'public', 'index.html'), 'utf8');
+    assertIncludes(html, '<title>new-app</title>');
+    assertIncludes(html, 'href="favicon.png"');
 
-    const favicon = await Deno.readFile(join(targetDir, 'public', 'favicon.png'));
-    assertEquals(favicon.length > 0, true);
+    const favicon = await readFile(join(targetDir, 'public', 'favicon.png'));
+    assert.deepEqual(favicon.length > 0, true);
 
-    const vscodeSettings = await Deno.readTextFile(join(targetDir, '.vscode', 'settings.json'));
-    assertStringIncludes(vscodeSettings, '"deno.enable": true');
+    const vscodeSettings = await readFile(join(targetDir, '.vscode', 'settings.json'), 'utf8');
+    assertIncludes(vscodeSettings, '"deno.enable": true');
   } finally {
-    await Deno.remove(tempRoot, { recursive: true });
+    await rm(tempRoot, { recursive: true, force: true });
   }
 });
 
-Deno.test('createProject rejects non-empty target without force', async () => {
-  const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
+it('createProject rejects non-empty target without force', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'alpine-server-cli-'));
   try {
     const targetDir = join(tempRoot, 'existing-app');
 
-    await Deno.mkdir(targetDir, { recursive: true });
-    await Deno.writeTextFile(join(targetDir, 'keep.txt'), 'keep');
+    await mkdir(targetDir, { recursive: true });
+    await writeFile(join(targetDir, 'keep.txt'), 'keep');
 
-    await assertRejects(
+    await assert.rejects(
       () =>
         createProject({
           targetDir,
@@ -187,85 +195,82 @@ Deno.test('createProject rejects non-empty target without force', async () => {
           port: 8000,
           force: false,
         }),
-      Error,
-      'Target directory is not empty',
+      /Target directory is not empty/,
     );
   } finally {
-    await Deno.remove(tempRoot, { recursive: true });
+    await rm(tempRoot, { recursive: true, force: true });
   }
 });
 
-Deno.test('addPage creates page in public directory', async () => {
-  const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
-  const originalDir = Deno.cwd();
+it('addPage creates page in public directory', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'alpine-server-cli-'));
+  const originalDir = process.cwd();
 
-  await Deno.mkdir(join(tempRoot, 'public'), { recursive: true });
-  Deno.chdir(tempRoot);
+  await mkdir(join(tempRoot, 'public'), { recursive: true });
+  process.chdir(tempRoot);
 
   try {
     const written = await addPage({ pageName: 'about', force: false });
-    assertEquals(written.length, 1);
+    assert.deepEqual(written.length, 1);
 
-    const html = await Deno.readTextFile(join(tempRoot, 'public', 'about', 'index.html'));
-    assertStringIncludes(html, '<title>About</title>');
-    assertStringIncludes(html, 'x-data');
+    const html = await readFile(join(tempRoot, 'public', 'about', 'index.html'), 'utf8');
+    assertIncludes(html, '<title>About</title>');
+    assertIncludes(html, 'x-data');
   } finally {
-    Deno.chdir(originalDir);
-    await Deno.remove(tempRoot, { recursive: true });
+    process.chdir(originalDir);
+    await rm(tempRoot, { recursive: true, force: true });
   }
 });
 
-Deno.test('addPage rejects when public/ does not exist', async () => {
-  const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
-  const originalDir = Deno.cwd();
+it('addPage rejects when public/ does not exist', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'alpine-server-cli-'));
+  const originalDir = process.cwd();
 
-  Deno.chdir(tempRoot);
+  process.chdir(tempRoot);
 
   try {
-    await assertRejects(
+    await assert.rejects(
       () => addPage({ pageName: 'about', force: false }),
-      Error,
-      'No public/ directory found',
+      /No public\/ directory found/,
     );
   } finally {
-    Deno.chdir(originalDir);
+    process.chdir(originalDir);
   }
 });
 
-Deno.test('addPage rejects existing page without force', async () => {
-  const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
-  const originalDir = Deno.cwd();
+it('addPage rejects existing page without force', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'alpine-server-cli-'));
+  const originalDir = process.cwd();
 
-  await Deno.mkdir(join(tempRoot, 'public', 'about'), { recursive: true });
-  await Deno.writeTextFile(join(tempRoot, 'public', 'about', 'index.html'), '<html></html>');
-  Deno.chdir(tempRoot);
+  await mkdir(join(tempRoot, 'public', 'about'), { recursive: true });
+  await writeFile(join(tempRoot, 'public', 'about', 'index.html'), '<html></html>');
+  process.chdir(tempRoot);
 
   try {
-    await assertRejects(
+    await assert.rejects(
       () => addPage({ pageName: 'about', force: false }),
-      Error,
-      'already exists',
+      /already exists/,
     );
   } finally {
-    Deno.chdir(originalDir);
+    process.chdir(originalDir);
   }
 });
 
-Deno.test('addPage overwrites existing page with force', async () => {
-  const tempRoot = await Deno.makeTempDir({ prefix: 'alpine-server-cli-' });
-  const originalDir = Deno.cwd();
+it('addPage overwrites existing page with force', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'alpine-server-cli-'));
+  const originalDir = process.cwd();
 
-  await Deno.mkdir(join(tempRoot, 'public', 'about'), { recursive: true });
-  await Deno.writeTextFile(join(tempRoot, 'public', 'about', 'index.html'), '<html>old</html>');
-  Deno.chdir(tempRoot);
+  await mkdir(join(tempRoot, 'public', 'about'), { recursive: true });
+  await writeFile(join(tempRoot, 'public', 'about', 'index.html'), '<html>old</html>');
+  process.chdir(tempRoot);
 
   try {
     const written = await addPage({ pageName: 'about', force: true });
-    assertEquals(written.length, 1);
+    assert.deepEqual(written.length, 1);
 
-    const html = await Deno.readTextFile(join(tempRoot, 'public', 'about', 'index.html'));
-    assertStringIncludes(html, '<title>About</title>');
+    const html = await readFile(join(tempRoot, 'public', 'about', 'index.html'), 'utf8');
+    assertIncludes(html, '<title>About</title>');
   } finally {
-    Deno.chdir(originalDir);
+    process.chdir(originalDir);
   }
 });

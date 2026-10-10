@@ -1,7 +1,6 @@
 /** Request logging middleware. */
 import type { Context, Next } from '@hono/hono';
 import { bold, cyan, green } from '@std/fmt/colors';
-import { info } from '@std/log';
 
 /**
  * Context variables optionally set by a shield/rate-limiting middleware
@@ -26,5 +25,5 @@ export const logger = async (c: Context<{ Variables: LoggerState }>, next: Next)
   const method: string = c.req.method;
   const path: string = c.req.path;
 
-  info(`${green(method)} ${cyan(path)} - ${bold(String(responseTime))}`);
+  console.info(`${green(method)} ${cyan(path)} - ${bold(String(responseTime))}`);
 };

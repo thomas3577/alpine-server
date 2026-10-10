@@ -1,5 +1,7 @@
 /** Creates new alpine-server projects and adds pages to existing ones. */
-import { basename, dirname, join, resolve } from '@std/path';
+import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, resolve } from 'node:path';
+import { isNotFoundError } from '../src/utils.ts';
 import { buildPageFiles, buildScaffoldFiles } from './templates.ts';
 import type { AddPageOptions, CreateProjectOptions } from './types.ts';
 
@@ -9,12 +11,9 @@ export { getHelpText, getVersion, parseCliArgs } from './parser.ts';
 
 const isDirectoryEmpty = async (directory: string): Promise<boolean> => {
   try {
-    for await (const _entry of Deno.readDir(directory)) {
-      return false;
-    }
-    return true;
+    return (await readdir(directory)).length === 0;
   } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
+    if (isNotFoundError(error)) {
       return true;
     }
     throw error;
@@ -28,13 +27,12 @@ const ensureTargetDir = async (targetDir: string, force: boolean): Promise<void>
     throw new Error('Target directory is not empty. Use --force to continue.');
   }
 
-  await Deno.mkdir(targetDir, { recursive: true });
+  await mkdir(targetDir, { recursive: true });
 };
 
 const directoryExists = async (path: string): Promise<boolean> => {
   try {
-    const stat = await Deno.stat(path);
-    return stat.isDirectory;
+    return (await stat(path)).isDirectory();
   } catch (_error) {
     return false;
   }
@@ -51,12 +49,8 @@ export const createProject = async (options: CreateProjectOptions): Promise<stri
 
   for (const [relativePath, content] of Object.entries(files)) {
     const absolutePath = join(targetDir, relativePath);
-    await Deno.mkdir(dirname(absolutePath), { recursive: true });
-    if (content instanceof Uint8Array) {
-      await Deno.writeFile(absolutePath, content);
-    } else {
-      await Deno.writeTextFile(absolutePath, content);
-    }
+    await mkdir(dirname(absolutePath), { recursive: true });
+    await writeFile(absolutePath, content);
     writtenFiles.push(absolutePath);
   }
 
@@ -80,14 +74,14 @@ export const addPage = async (options: AddPageOptions): Promise<string[]> => {
     throw new Error(`Page "${options.pageName}" already exists. Use --force to overwrite.`);
   }
 
-  await Deno.mkdir(pageDir, { recursive: true });
+  await mkdir(pageDir, { recursive: true });
 
   const files = buildPageFiles(options.pageName);
   const writtenFiles: string[] = [];
 
   for (const [relativePath, content] of Object.entries(files)) {
     const absolutePath = join(pageDir, relativePath);
-    await Deno.writeTextFile(absolutePath, content);
+    await writeFile(absolutePath, content);
     writtenFiles.push(absolutePath);
   }
 

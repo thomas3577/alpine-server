@@ -1,9 +1,8 @@
 /** Default runtime configuration, static file settings, and vendor CDN map. */
-import { join } from '@std/path';
+import { join } from 'node:path';
+import process from 'node:process';
 import { resolveStaticFilesPath } from './utils.ts';
 import type { AlpineAppRuntimeConfig, IRuntimeConfig, IVendors } from './types.ts';
-
-const defaultStaticFilesPath = join(Deno.cwd(), 'public');
 
 const defaultStaticExtensions: string[] = ['.html', '.css', '.js', '.ico', '.svg', '.jpg', '.png', '.mp4', '.json', '.ts', '.mjs', '.mjs.map', '.txt', '.woff2', '.woff', '.ttf'];
 
@@ -54,7 +53,7 @@ export class RuntimeConfig implements IRuntimeConfig {
       },
       route: raw.vendors?.route ?? '/',
     };
-    this.staticFilesPath = resolveStaticFilesPath(raw.staticFilesPath, defaultStaticFilesPath);
+    this.staticFilesPath = resolveStaticFilesPath(raw.staticFilesPath, join(process.cwd(), 'public'));
     this.staticExtensions = Array.isArray(raw.staticExtensions) && raw.staticExtensions.every((ext) => typeof ext === 'string') ? raw.staticExtensions : defaultStaticExtensions;
   }
 }

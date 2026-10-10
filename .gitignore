@@ -14,3 +14,4 @@
 ### Node.js / Bun
 node_modules/
 .test-*/
+bun.lock

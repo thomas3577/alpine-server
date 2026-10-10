@@ -1,19 +1,17 @@
-name: Publish
+name: CI
 
 on:
   push:
     branches:
       - main
-    tags:
-      - '*'
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  publish:
+  check:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
 
     steps:
       - name: Setup repo
@@ -30,9 +28,57 @@ jobs:
       - name: Run linter
         run: deno lint
 
-      - name: Run tests
-        run: deno run test
+      - name: Type-check
+        run: deno check mod.ts src/hono.ts cli/cli.ts cli/create.ts
 
-      - name: Publish package
-        if: startsWith(github.ref, 'refs/tags/')
-        run: deno publish
+      - name: Publish dry run
+        run: deno publish --dry-run
+
+  test:
+    name: test (${{ matrix.runtime }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows and macOS mainly cover the recursive fs.watch behind dev-mode live reload.
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        runtime: [deno, node-22, node-24, bun]
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Deno
+        if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2.0.5
+        with:
+          deno-version: v2.9.6
+
+      - name: Setup Node.js
+        if: startsWith(matrix.runtime, 'node')
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ matrix.runtime == 'node-22' && '22' || '24' }}
+
+      - name: Setup Bun
+        if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: 1.4.2
+
+      - name: Run tests (Deno)
+        if: matrix.runtime == 'deno'
+        run: deno task test
+
+      - name: Run tests (Node.js)
+        if: startsWith(matrix.runtime, 'node')
+        run: |
+          npm ci
+          npm test
+
+      - name: Run tests (Bun)
+        if: matrix.runtime == 'bun'
+        run: |
+          bun install --frozen-lockfile
+          bun test

@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    # OIDC: JSR authenticates the workflow via id-token; no token is stored in the repo.
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2.0.5
+        with:
+          deno-version: v2.9.6
+
+      - name: Verify formatting
+        run: deno fmt --check
+
+      - name: Run linter
+        run: deno lint
+
+      - name: Run tests
+        run: deno task test
+
+      - name: Publish dry run
+        run: deno publish --dry-run
+
+      - name: Publish package
+        run: deno publish

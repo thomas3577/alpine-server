@@ -10,7 +10,7 @@
     "update": "deno outdated --update --latest && deno run --allow-net --allow-read --allow-write ./scripts/update-alpine-version.ts"
   },
   "imports": {
-    "@hono/hono": "jsr:@hono/hono@^4.13.12",
+    "@hono/hono": "jsr:@hono/hono@^4.13.13",
     "@hono/node-server": "npm:@hono/node-server@^2.1.4",
     "@std/fmt": "jsr:@std/fmt@^1.0.10",
     "linkedom": "npm:linkedom@^0.18.13"

@@ -1,6 +1,6 @@
 {
   "name": "@dx/alpine-server",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "nodeModulesDir": "none",
   "tasks": {
@@ -13,7 +13,7 @@
     "@hono/hono": "jsr:@hono/hono@^4.13.13",
     "@hono/node-server": "npm:@hono/node-server@^2.1.5",
     "@std/fmt": "jsr:@std/fmt@^1.0.10",
-    "linkedom": "npm:linkedom@^0.18.13"
+    "linkedom": "npm:linkedom@^0.18.14"
   },
   "exports": {
     ".": "./mod.ts",

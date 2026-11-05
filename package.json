@@ -11,9 +11,9 @@
     "test:bun": "bun test"
   },
   "dependencies": {
-    "@hono/hono": "npm:@jsr/hono__hono@^4.13.13",
-    "@hono/node-server": "^2.1.5",
+    "@hono/hono": "npm:@jsr/hono__hono@^4.13.16",
+    "@hono/node-server": "^2.1.6",
     "@std/fmt": "npm:@jsr/std__fmt@^1.0.10",
-    "linkedom": "^0.18.14"
+    "linkedom": "^0.18.15"
   }
 }

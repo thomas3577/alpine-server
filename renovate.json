@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["deno", "npm"],
+  "minimumReleaseAge": "2 days",
+  "internalChecksFilter": "strict",
+  "rangeStrategy": "bump",
+  "constraints": {
+    "deno": "2.9.6"
+  },
+  "packageRules": [
+    {
+      "description": "deno.json and package.json mirror each other; update both (and deno.lock, package-lock.json) in one PR so they never drift apart. Keep constraints.deno in step with the Deno version used in the workflows.",
+      "matchManagers": ["deno", "npm"],
+      "groupName": "dependencies"
+    },
+    {
+      "description": "engines.node is the documented minimum supported Node.js version, not a dependency to bump.",
+      "matchDepTypes": ["engines"],
+      "enabled": false
+    }
+  ]
+}

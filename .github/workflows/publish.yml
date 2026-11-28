@@ -5,6 +5,11 @@ on:
     tags:
       - '*'
 
+# deno.lock must not depend on package.json (which only serves the Node.js/Bun test runs):
+# Dependabot regenerates deno.lock from deno.json alone. See CLAUDE.md.
+env:
+  DENO_NO_PACKAGE_JSON: '1'
+
 jobs:
   publish:
     runs-on: ubuntu-latest

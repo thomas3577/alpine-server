@@ -2,6 +2,9 @@
   "deno.enable": true,
   "deno.lint": true,
   "deno.config": "./deno.json",
+  "deno.env": {
+    "DENO_NO_PACKAGE_JSON": "1"
+  },
   "deno.internalDebug": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
   "npm.packageManager": "npm",

@@ -4,10 +4,10 @@
   "license": "MIT",
   "nodeModulesDir": "none",
   "tasks": {
-    "test": "deno test --allow-read --allow-write --allow-net --allow-env",
+    "test": "DENO_NO_PACKAGE_JSON=1 deno test --allow-read --allow-write --allow-net --allow-env",
     "check": "deno fmt --check && deno lint",
-    "example": "cd example && deno run --allow-net --allow-read --allow-run --allow-env app.ts",
-    "update": "deno outdated --update --latest && deno run --allow-net --allow-read --allow-write ./scripts/update-alpine-version.ts"
+    "example": "cd example && DENO_NO_PACKAGE_JSON=1 deno run --allow-net --allow-read --allow-run --allow-env app.ts",
+    "update": "DENO_NO_PACKAGE_JSON=1 deno outdated --update --latest && DENO_NO_PACKAGE_JSON=1 deno run --allow-net --allow-read --allow-write ./scripts/update-alpine-version.ts"
   },
   "imports": {
     "@hono/hono": "jsr:@hono/hono@^4.13.16",

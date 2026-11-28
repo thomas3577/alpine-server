@@ -5,6 +5,11 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+# deno.lock must not depend on package.json (which only serves the Node.js/Bun test runs):
+# Dependabot regenerates deno.lock from deno.json alone. See CLAUDE.md.
+env:
+  DENO_NO_PACKAGE_JSON: '1'
+
 jobs:
   check:
     runs-on: ubuntu-latest

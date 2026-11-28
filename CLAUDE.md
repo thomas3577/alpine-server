@@ -20,6 +20,8 @@ deno task update                         # deno outdated --update --latest
 
 Tests live next to the module they cover (`*.test.ts`), using `node:test` (`describe`/`it`) and `node:assert/strict` so the same files run under `deno test`, `node --test`, and `bun test`. Setup that must run before the tests goes in `before`/`after` hooks, not in a `describe` body (that runs at collection time). `package.json` + `.npmrc` exist only to install dependencies for Node/Bun test runs; `deno.json` remains the source of truth for publishing.
 
+**`deno.lock` must not depend on `package.json`.** Deno auto-discovers `package.json` next to `deno.json` and records its dependencies in a `workspace.packageJson` section of `deno.lock`. Dependabot's deno updater regenerates the lockfile from `deno.json` alone (dropping that section) and its npm updater never touches `deno.lock`, so with that section every Dependabot PR fails `deno publish --dry-run` on a dirty lockfile. Therefore all Deno invocations set `DENO_NO_PACKAGE_JSON=1`: the workflows (`env:`), the `test`/`example`/`update` tasks, and VS Code (`deno.env` in `.vscode/settings.json`). Set it in your shell too (`export DENO_NO_PACKAGE_JSON=1`) — without it, `deno task check` and direct `deno test`/`deno check`/`deno run` calls write the section back into `deno.lock`; don't commit that.
+
 ## Architecture
 
 ### Request pipeline (`src/app.ts`)

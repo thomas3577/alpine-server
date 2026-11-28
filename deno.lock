@@ -1,24 +1,25 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@hono/hono@^4.13.16": "4.13.16",
+    "jsr:@hono/hono@^4.13.22": "4.13.23",
     "jsr:@std/fmt@^1.0.10": "1.0.10",
-    "npm:@hono/node-server@^2.1.6": "2.1.6_hono@4.13.16",
+    "npm:@hono/node-server@^2.1.11": "2.1.11_hono@4.13.23",
+    "npm:@hono/node-server@^2.1.6": "2.1.11_hono@4.13.23",
     "npm:@jsr/hono__hono@^4.13.16": "4.13.16",
     "npm:@jsr/std__fmt@^1.0.10": "1.0.10",
     "npm:linkedom@~0.18.15": "0.18.15"
   },
   "jsr": {
-    "@hono/hono@4.13.16": {
-      "integrity": "e211ca7541bcbe3a835ec425cb428787f116b54fdc1fe8037077d4531f46c93e"
+    "@hono/hono@4.13.23": {
+      "integrity": "07b50af9a099d01bb8703d1f8c39793ab80952199d5b7c4477e95580efe2eb14"
     },
     "@std/fmt@1.0.10": {
       "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
     }
   },
   "npm": {
-    "@hono/node-server@2.1.6_hono@4.13.16": {
-      "integrity": "sha512-p/KH9MnfNcsm3sR6x4lNgm5j+QN4Et8srKredl9DZfXiyZ1UQ3aQ2YVpFLbqktYN5JI+DB+VZFKM2PqE5hLKjQ==",
+    "@hono/node-server@2.1.11_hono@4.13.23": {
+      "integrity": "sha512-KzKz9vl4vvr1vgLHamj+g5uonbrj5NwAdO3yzOS6cd2HjALVeOgTgeZOyAzNxejbkfOOPIcvuf/Tg8l1pEFLog==",
       "dependencies": [
         "hono"
       ]
@@ -109,8 +110,8 @@
     "entities@8.1.0": {
       "integrity": "sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA=="
     },
-    "hono@4.13.16": {
-      "integrity": "sha512-AOLOEhvrV+iH92xXCnFr/5+3KjPKcI3xP63XJtX5spAnkznPdHijlIsUTpi7/9EhWqrTCekw5c5zh1K+YsVw7A=="
+    "hono@4.13.23": {
+      "integrity": "sha512-OS90dj7dcsftEEWCOef8jRbnHE5lbrOq0hNRqjSyPsOnaGZvvfof1KS05hQNb4kUOCfDq1mG3PmHoX37DMnHQg=="
     },
     "html-escaper@3.0.3": {
       "integrity": "sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ=="
@@ -146,9 +147,9 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.13.16",
+      "jsr:@hono/hono@^4.13.22",
       "jsr:@std/fmt@^1.0.10",
-      "npm:@hono/node-server@^2.1.6",
+      "npm:@hono/node-server@^2.1.11",
       "npm:linkedom@~0.18.15"
     ],
     "packageJson": {
